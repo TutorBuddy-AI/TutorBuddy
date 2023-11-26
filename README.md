@@ -65,3 +65,4 @@ async def create_user(self):
 ```
 
 Do not use explicit `commit()`. `Transactional` class automatically do.
+
