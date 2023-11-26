@@ -65,3 +65,19 @@ async def create_user(self):
 ```
 
 Do not use explicit `commit()`. `Transactional` class automatically do.
+
+## Connect to Data Base
+```
+postgresql+asyncpg://postgres:123@localhost:5432/bot
+
+psql -h localhost -U postgres -d bot
+password: 123
+```
+
+## Bot Token
+
+```
+t.me/tutorbuddyai_bot - 6348419609:AAElinRGeTOxK8bhkJaRiD8xftFCqBM9MF8
+
+t.me/TutorBuddy_Andrizh_bot - 6707186501:AAFUPlkTeaq5uW82iBkCyktZEf3qL6q4R_s
+```
