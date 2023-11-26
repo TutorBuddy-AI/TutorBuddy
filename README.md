@@ -72,6 +72,7 @@ postgresql+asyncpg://postgres:123@localhost:5432/bot
 
 psql -h localhost -U postgres -d bot
 password: 123
+
 ```
 
 ## Bot Token
