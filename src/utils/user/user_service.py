@@ -1,6 +1,6 @@
-from src.database.models import User, UserLocation, MessageHistory
+from src.database.models import User, UserLocation, MessageHistory, MessageHistoryMistakes
 from src.database import Transactional, session
-from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
+from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory, GetUserMessageHistoryMistakes
 
 from typing import Optional, List
 
@@ -61,6 +61,22 @@ class UserService:
         result = result.scalars()
 
         results = [{'role': row.role, 'message': row.message} for row in result]
+
+        return results
+
+    async def get_user_message_history_mistakes(
+            self,
+            tg_id: str,
+            limit: int = 50
+    ) -> GetUserMessageHistoryMistakes:
+        query = select(MessageHistoryMistakes).where(MessageHistoryMistakes.tg_id == str(tg_id))
+
+        query = query.limit(limit)
+        result = await session.execute(query)
+
+        result = result.scalars()
+
+        results = [{'message': row.message} for row in result]
 
         return results
 
