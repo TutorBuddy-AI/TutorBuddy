@@ -48,7 +48,7 @@ class User(Base, TimestampMixin):
 
     call_name = Column(String, nullable=False)
     email = Column(String, nullable=True, unique=True)
-    # password = Column(String, nullable=True)
+    speaker = Column(String, nullable=True, default="Anastasia")
     phone_number = Column(String, nullable=True)
     tg_firstName = Column(String, nullable=True)
     tg_lastName = Column(String, nullable=True)

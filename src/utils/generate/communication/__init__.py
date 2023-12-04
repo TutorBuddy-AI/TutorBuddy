@@ -1,0 +1,1 @@
+from src.utils.generate.communication.communication import CommunicationGenerate

@@ -1,69 +1,39 @@
-import ast
-import random
-
-import aiohttp
-import io
-import asyncio
-
 from src.config import bot, config
+from src.utils.generate import GenerateAI
 
-EDEN_API = ast.literal_eval(config.EDEN_API)
+import ast
+
+from io import BytesIO
+from typing import Any
+from pydub import AudioSegment
+
+OPENAI_API = ast.literal_eval(config.OPENAI_API)
+
 
 class SpeechToText:
-    def __init__(self):
-        self.headers = {
-            "accept": "application/json",
-            "authorization": random.choice(EDEN_API)
-        }
-        self.request_url = "https://api.edenai.run/v2/audio/speech_to_text_async"
+    def __init__(
+            self,
+            file_id: str
+    ):
+        self.request_url = "https://api.openai.com/v1/audio/transcriptions"
 
-    async def get_text(self, file_id) -> str:
-        bytes_io = await self.download_file(file_id)
-        public_id = await self.transcribe_speech_to_text(bytes_io)
-        url = f"{self.request_url}/{public_id}"
+        self.file_id = file_id
 
-        async with aiohttp.ClientSession() as session:
-            while True:
-                async with session.get(url=url, headers=self.headers) as response:
-                    response_json = await response.json()
-                    status = response_json['status']
-                    if status == 'processing':
-                        await asyncio.sleep(7)
-                    elif status == 'finished':
-                        return await self.get_speech_to_text(public_id)
-                        break
+    async def get_text(self) -> str:
+        generated_text = await GenerateAI(request_url=self.request_url).send_request_speech_to_text(
+            audio_bytes=await self.download_file(), model="whisper-1")
 
-    async def download_file(self, file_id: str) -> io.BytesIO:
-        file_info = await bot.get_file(file_id)
-        file = await bot.download_file(file_info.file_path)
-        bytes_io = io.BytesIO(file.read())
-        return bytes_io
+        if generated_text is not None:
+            return generated_text
+        else:
+            return None
 
-    async def transcribe_speech_to_text(self, bytes_io: io.BytesIO) -> str:
-        async with aiohttp.ClientSession() as session:
-            url = self.request_url
+    async def download_file(self) -> BytesIO:
+        voice = await bot.get_file(self.file_id)
 
-            form_data = aiohttp.FormData()
-            form_data.add_field('show_original_response', 'False')
-            form_data.add_field('speakers', '1')
-            form_data.add_field('profanity_filter', 'False')
-            form_data.add_field('convert_to_wav', 'True')
-            form_data.add_field('providers', 'google')
-            form_data.add_field('language', 'en')
-            form_data.add_field('custom_vocabulary', '')
-            bytes_payload = aiohttp.payload.BytesPayload(bytes_io.getvalue())
-            form_data.add_field('file', bytes_payload, filename='audio_file.ogg', content_type='audio/ogg')
+        return await bot.download_file_by_id(voice.file_id)
 
-            async with session.post(url, data=form_data, headers=self.headers) as response:
-                response_json = await response.json()
-                public_id = response_json['public_id']
 
-            return public_id
 
-    async def get_speech_to_text(self, public_id: str) -> str:
-        url = f"{self.request_url}/{public_id}"
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url=url, headers=self.headers) as response:
-                data = await response.json()
-                return data['results']['google']['text']
+
