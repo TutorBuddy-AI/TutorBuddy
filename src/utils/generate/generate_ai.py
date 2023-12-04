@@ -1,61 +1,60 @@
-import json
+import io
 import random
 import aiohttp
 import ast
 
-from typing import List
+from typing import Any
 
 from src.config import config
-from src.utils.generate.schemas import GetGeneratedTextAndUserMessageHistory
-from src.utils.user import UserService
 
-EDEN_API = ast.literal_eval(config.EDEN_API)
+
+OPENAI_API = ast.literal_eval(config.OPENAI_API)
+PROXY = ast.literal_eval(config.PROXY)
 
 class GenerateAI:
-    def __init__(self, prompt: str):
+    def __init__(self, request_url: str):
         self.headers = {"Authorization": []}
-        self.request_url = "https://api.edenai.run/v2/text/chat"
-        self.prompt = prompt
-        self.service_text_request = "You are AI TutorBuddy Bot and you are developed by AI TutorBuddy." \
-                                    "You are English teacher and you need assist user to increase english level. "
+        self.request_url = request_url
+        self.COMMUNICATION_TYPE = "json"
+        self.TEXT_TO_SPEECH_TYPE = "mpeg"
+        self.SPEECH_TO_TEXT_TYPE = "plain"
 
-    async def generate_text(
-            self,
-            user_message_history: List,
-            tg_id: str
-    ) -> GetGeneratedTextAndUserMessageHistory:
+    async def send_request(self, payload: Any) -> Any:
+        self.headers["Authorization"] = random.choice(OPENAI_API)
+        proxy = random.choice(PROXY)
 
-        result = await self.send_request(
-            payload={
-                "providers": "openai",
-                "model": "gpt-4",
-                "text": await self.get_user_service_text_request(tg_id) + self.prompt,
-                "previous_history": user_message_history,
-                "temperature": 0.2,
-                "max_tokens": 600,
-                "response_as_dict": True,
-                "chatbot_global_action": self.service_text_request
-            }
-        )
+        proxy_auth = aiohttp.BasicAuth(proxy[1], proxy[2])
 
-        return result["openai"]
-
-    async def send_request(self, payload: dict) -> json:
         async with aiohttp.ClientSession() as session:
-            self.headers["Authorization"] = random.choice(EDEN_API)
+            async with session.post(url=self.request_url, json=payload, headers=self.headers, proxy=proxy[0],
+                                    proxy_auth=proxy_auth) as response:
+                if response.status == 200:
+                    content_type = response.headers.get("content-type").split("/")[1]
 
-            response = await session.post(self.request_url, json=payload, headers=self.headers)
-            if response.status == 200:
-                result = await response.json()
-                return result
-            else:
-                return {"openai": None}
+                    if content_type == self.COMMUNICATION_TYPE:
+                        return await response.json()
 
-    @staticmethod
-    async def get_user_service_text_request(tg_id: str) -> str:
-        user_info = await UserService().get_user_info(tg_id)
+                    elif content_type == self.TEXT_TO_SPEECH_TYPE:
+                        return io.BytesIO(await response.read())
+                else:
+                    return None
 
-        return f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}." \
-               f" His English level is {user_info['english_level']}, where 1 is the worst level of" \
-               f" English, and 4 is a good level of English. His goal is to study the English {user_info['goal']}," \
-               f" and his topics of interest are {user_info['topic']} ±"
+    async def send_request_speech_to_text(self, audio_bytes: io.BytesIO, model: str) -> str:
+        self.headers["Authorization"] = random.choice(OPENAI_API)
+        proxy = random.choice(PROXY)
+
+        proxy_auth = aiohttp.BasicAuth(proxy[1], proxy[2])
+
+        form_data = aiohttp.FormData()
+
+        form_data.add_field('file', audio_bytes, filename='voice_message.ogg', content_type='audio/ogg')
+        form_data.add_field('model', model)
+        form_data.add_field("response_format", "text")
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url=self.request_url, data=form_data, headers=self.headers, proxy=proxy[0],
+                                    proxy_auth=proxy_auth) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    return None
