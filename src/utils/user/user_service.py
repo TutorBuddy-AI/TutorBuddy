@@ -4,7 +4,7 @@ from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetU
 
 from typing import Optional, List
 
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 
 
 class UserService:
@@ -93,3 +93,27 @@ class UserService:
             "english_level": result.english_level,
             "speaker": result.speaker
         }
+
+    async def change_callname(self, tg_id, new_callname) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(call_name=new_callname)
+        await session.execute(query)
+
+    async def change_topic(self, tg_id, new_topic) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(topic=new_topic)
+        await session.execute(query)
+
+    async def change_native_language(self, tg_id, new_native_language) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(native_lang=new_native_language)
+        await session.execute(query)
+
+    async def change_english_level(self, tg_id, new_english_level) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(english_level=new_english_level)
+        await session.execute(query)
+
+    async def change_goal(self, tg_id, new_goal) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(goal=new_goal)
+        await session.execute(query)
+
+    async def change_speaker(self, tg_id, new_speaker) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(speaker=new_speaker)
+        await session.execute(query)
