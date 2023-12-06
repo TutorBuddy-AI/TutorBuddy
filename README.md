@@ -1,5 +1,5 @@
 # AI Tutor Buddy
-
+## ААААААА, это что, документация?
 ## Install dependencies
 
 ```
@@ -10,11 +10,12 @@ poetry shell && poetry install
 
 ```
 BOT_API_TOKEN=''
-DATABASE_URL='postgresql+asyncpg://user:password@127.0.0.1:5432/db_name'
-ADMIN_PASSWORD='123123'
+DATABASE_URL=''
+ADMIN_PASSWORD=''
 WEBHOOK_URL=''
 WEBHOOK_SECRET_TOKEN='' # auth token у ngrok
-EDEN_API = '["Bearer api_1", "Bearer api_2"]'
+OPENAI_API = '["Bearer token"]'
+PROXY = '[["http://131.108.17.251:9670", "7pxHP6", "pHY5rF"]]'    # HTTPS, Логин, Пароль. Если нету, пользуйтесь этим
 ```
 
 ## Run migrations
@@ -75,7 +76,7 @@ password: 123
 
 ```
 
-## Bot Token
+## Bot Token for prod
 
 ```
 t.me/tutorbuddyai_bot - 6348419609:AAElinRGeTOxK8bhkJaRiD8xftFCqBM9MF8

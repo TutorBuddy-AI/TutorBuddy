@@ -51,7 +51,7 @@ class UserService:
     async def get_user_message_history(
             self,
             tg_id: str,
-            limit: int = 50
+            limit: int = 20
     ) -> GetUserMessageHistory:
         query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
 
@@ -60,7 +60,11 @@ class UserService:
 
         result = result.scalars()
 
-        results = [{'role': row.role, 'message': row.message} for row in result]
+        results = [{'role': row.role, 'content': row.message} for row in result]
+
+        if not results:
+            for i in range(2):
+                results.append(0)
 
         return results
 
@@ -102,5 +106,6 @@ class UserService:
             "goal": result.goal,
             "native_lang": result.native_lang,
             "topic": result.topic,
-            "english_level": result.english_level
+            "english_level": result.english_level,
+            "speaker": result.speaker
         }

@@ -12,7 +12,8 @@ BOT_API_TOKEN = os.environ.get("BOT_API_TOKEN")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET_TOKEN")
-EDEN_API = os.environ.get('EDEN_API')
+OPENAI_API = os.environ.get('OPENAI_API')
+PROXY = os.environ.get('PROXY')
 
 
 class Config(BaseModel):
@@ -24,7 +25,8 @@ class Config(BaseModel):
     WEBHOOK_URL: str = WEBHOOK_URL
     WEBHOOK_SECRET_TOKEN: str = WEBHOOK_SECRET_TOKEN
     WEBHOOK_PATH: str = "/webhook"
-    EDEN_API: List = EDEN_API
+    OPENAI_API: List = OPENAI_API
+    PROXY: List = PROXY
     CELERY_BROKER_URL: str = "amqp://user:bitnami@localhost:5672/"
     CELERY_BACKEND_URL: str = "redis://:password123@localhost:6379/0"
     REDIS_HOST: str = "localhost"

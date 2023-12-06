@@ -7,3 +7,6 @@ class _History(BaseModel):
 
 class GetUserMessageHistory(BaseModel):
     user_message_history: List[_History] | None
+
+class GetNewUserMessageHistory(BaseModel):
+    user_message_history: List[_History] | None
