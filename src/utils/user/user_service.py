@@ -117,3 +117,10 @@ class UserService:
     async def change_speaker(self, tg_id, new_speaker) -> None:
         query = update(User).where(User.tg_id == tg_id).values(speaker=new_speaker)
         await session.execute(query)
+
+    @Transactional()
+    async def delete_user_info(self, tg_id) -> None:
+        messages = select(MessageHistory).where(MessageHistory.tg_id == tg_id)
+        await session.delete(messages)
+        user = select(User).where(User.tg_id == tg_id).first()
+        await session.delete(user)
