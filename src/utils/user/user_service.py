@@ -94,33 +94,37 @@ class UserService:
             "speaker": result.speaker
         }
 
+    @Transactional()
     async def change_callname(self, tg_id, new_callname) -> None:
         query = update(User).where(User.tg_id == tg_id).values(call_name=new_callname)
         await session.execute(query)
 
+    @Transactional()
     async def change_topic(self, tg_id, new_topic) -> None:
         query = update(User).where(User.tg_id == tg_id).values(topic=new_topic)
         await session.execute(query)
 
+    @Transactional()
     async def change_native_language(self, tg_id, new_native_language) -> None:
         query = update(User).where(User.tg_id == tg_id).values(native_lang=new_native_language)
         await session.execute(query)
 
+    @Transactional()
     async def change_english_level(self, tg_id, new_english_level) -> None:
         query = update(User).where(User.tg_id == tg_id).values(english_level=new_english_level)
         await session.execute(query)
 
+    @Transactional()
     async def change_goal(self, tg_id, new_goal) -> None:
         query = update(User).where(User.tg_id == tg_id).values(goal=new_goal)
         await session.execute(query)
 
+    @Transactional()
     async def change_speaker(self, tg_id, new_speaker) -> None:
         query = update(User).where(User.tg_id == tg_id).values(speaker=new_speaker)
         await session.execute(query)
 
     @Transactional()
-    async def delete_user_info(self, tg_id) -> None:
-        messages = select(MessageHistory).where(MessageHistory.tg_id == tg_id)
-        await session.delete(messages)
-        user = select(User).where(User.tg_id == tg_id).first()
-        await session.delete(user)
+    async def delete_user_info(self, tg_id: str) -> None:
+        await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
+        await session.execute(delete(User).where(User.tg_id == tg_id))
