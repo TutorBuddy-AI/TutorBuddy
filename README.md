@@ -45,14 +45,14 @@ Password: your password from `ADMIN_PASSWORD` .env variable
 ## Run Bot
 
 ```
-python3 set_webhooh_url.py
+python3 set_webhook_url.py
 ```
 Just start and turn it off once ⬆️
 ```
 python3 main.py
 ```
 
-If the bot stops working due to frequent server restarts, use ```python3 set_webhooh_url.py```
+If the bot stops working due to frequent server restarts, use ```python3 set_webhook_url.py```
 
 ## SQLAlchemy for asyncio context
 
