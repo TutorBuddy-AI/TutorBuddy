@@ -68,22 +68,6 @@ class UserService:
 
         return results
 
-    async def get_user_message_history_mistakes(
-            self,
-            tg_id: str,
-            limit: int = 50
-    ) -> GetUserMessageHistoryMistakes:
-        query = select(MessageHistoryMistakes).where(MessageHistoryMistakes.tg_id == str(tg_id))
-
-        query = query.limit(limit)
-        result = await session.execute(query)
-
-        result = result.scalars()
-
-        results = [{'message': row.message} for row in result]
-
-        return results
-
     async def is_exist(
             self,
             tg_id: str
