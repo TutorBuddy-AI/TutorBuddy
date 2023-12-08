@@ -1,6 +1,6 @@
-from src.database.models import User, UserLocation, MessageHistory, MessageHistoryMistakes
+from src.database.models import User, MessageHistory
 from src.database import Transactional, session
-from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory, GetUserMessageHistoryMistakes
+from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
 
 from typing import Optional, List
 

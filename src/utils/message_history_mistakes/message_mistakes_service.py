@@ -1,6 +1,6 @@
 from database import Transactional
 from database.models import MessageHistory, MessageMistakes
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import aliased
 from src.database import session
 from utils.message_history_mistakes.schemas import GetUserMessageHistoryMistakes, MessageMistakesInfo,\
@@ -50,7 +50,7 @@ class MessageMistakesService:
         bot_messages = aliased(MessageHistory)
         user_messages = aliased(MessageHistory)
         query = (
-            session.query(
+            select(
                 MessageMistakes.role,
                 MessageMistakes.message,
                 bot_messages.message.label('bot_message'),
@@ -64,12 +64,19 @@ class MessageMistakesService:
         query = query.limit(limit)
         result = await session.execute(query)
 
-        result = result.scalars()
-
+        query_result = result
         results = [{
             'role': row.role,
             'message': row.message,
             'bot_message': row.bot_message,
-            'user_message': row.user_message} for row in result]
+            'user_message': row.user_message} for row in query_result]
 
         return results
+
+    @Transactional()
+    async def delete_user_message_mistakes(self, tg_id: str) -> None:
+        await session.execute(delete(MessageMistakes).where(MessageMistakes.tg_id == tg_id))
+
+    @Transactional()
+    async def delete_message_mistakes(self, id: int) -> None:
+        await session.execute(delete(MessageMistakes).where(MessageMistakes.id == id))
