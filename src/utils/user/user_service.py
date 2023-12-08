@@ -5,6 +5,7 @@ from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetU
 from typing import Optional, List
 
 from sqlalchemy import select, update, delete
+from utils.message_history_mistakes.message_mistakes_service import MessageMistakesService
 
 
 class UserService:
@@ -126,5 +127,6 @@ class UserService:
 
     @Transactional()
     async def delete_user_info(self, tg_id: str) -> None:
+        await MessageMistakesService().delete_user_message_mistakes(tg_id)
         await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
         await session.execute(delete(User).where(User.tg_id == tg_id))
