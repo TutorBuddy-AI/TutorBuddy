@@ -6,7 +6,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.applications import Starlette
 from starlette_admin.contrib.sqla import Admin, ModelView
-from src.database.models import User, UserLocation, Role, MessageHistory, DailyNews
+from src.database.models import User, UserLocation, Role, MessageHistory, DailyNews, MessageMistakes
 from src.database.models.enums.daily_news import DailyNewsEnum
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -138,6 +138,7 @@ admin.add_view(UserView(User, label='Пользователи'))
 admin.add_view(ModelView(UserLocation))
 admin.add_view(ModelView(Role))
 admin.add_view(ModelView(MessageHistory))
+admin.add_view(ModelView(MessageMistakes))
 admin.add_view(DailyNewsView(DailyNews))
 
 
