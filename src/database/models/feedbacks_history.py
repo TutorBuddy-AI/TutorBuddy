@@ -10,6 +10,4 @@ class FeedbacksHistory(Base, TimestampMixin):
     tg_id = Column(String, ForeignKey('user.tg_id'))
 
     message = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    type = Column(String, nullable=False)
 

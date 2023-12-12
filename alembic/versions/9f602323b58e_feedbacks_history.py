@@ -1,8 +1,8 @@
 """Feedbacks history
 
-Revision ID: ad00b19f1ca2
+Revision ID: 9f602323b58e
 Revises: d7536514df91
-Create Date: 2023-12-07 16:23:22.778204
+Create Date: 2023-12-13 00:57:08.887910
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ad00b19f1ca2'
+revision = '9f602323b58e'
 down_revision = 'd7536514df91'
 branch_labels = None
 depends_on = None
@@ -22,8 +22,6 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('tg_id', sa.String(), nullable=True),
     sa.Column('message', sa.String(), nullable=False),
-    sa.Column('role', sa.String(), nullable=False),
-    sa.Column('type', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['tg_id'], ['user.tg_id'], ),
