@@ -78,5 +78,5 @@ class MessageMistakesService:
         await session.execute(delete(MessageMistakes).where(MessageMistakes.tg_id == tg_id))
 
     @Transactional()
-    async def delete_message_mistakes(self, id: int) -> None:
-        await session.execute(delete(MessageMistakes).where(MessageMistakes.id == id))
+    async def delete_message_mistakes(self, mistake_id: int) -> None:
+        await session.execute(delete(MessageMistakes).where(MessageMistakes.id == mistake_id))

@@ -9,8 +9,8 @@ class MessageMistakes(Base, TimestampMixin):
     id = Column(Integer, primary_key=True, autoincrement=True)
     tg_id = Column(String, ForeignKey('user.tg_id'))
 
-    user_message_id = Column(Integer, ForeignKey("message_history.id"))
-    bot_message_id = Column(Integer, ForeignKey("message_history.id"))
+    user_message_id = Column(Integer, ForeignKey("message_history.id"), nullable=True)
+    bot_message_id = Column(Integer, ForeignKey("message_history.id"), nullable=True)
 
     message = Column(String, nullable=False)
     role = Column(String, nullable=False)
