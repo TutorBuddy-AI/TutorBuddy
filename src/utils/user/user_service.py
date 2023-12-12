@@ -1,11 +1,11 @@
 from src.database.models import User, MessageHistory
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
+from utils.message_history_mistakes.message_mistakes_service import MessageMistakesService
 
 from typing import Optional, List
 
 from sqlalchemy import select, update, delete
-from utils.message_history_mistakes.message_mistakes_service import MessageMistakesService
 
 
 class UserService:
