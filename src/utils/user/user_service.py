@@ -1,6 +1,7 @@
 from src.database.models import User, MessageHistory
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
+from utils.message_history_mistakes.message_mistakes_service import MessageMistakesService
 
 from typing import Optional, List
 
@@ -95,36 +96,37 @@ class UserService:
         }
 
     @Transactional()
-    async def change_callname(self, tg_id, new_callname) -> None:
+    async def change_callname(self, tg_id: str, new_callname: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(call_name=new_callname)
         await session.execute(query)
 
     @Transactional()
-    async def change_topic(self, tg_id, new_topic) -> None:
+    async def change_topic(self, tg_id: str, new_topic: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(topic=new_topic)
         await session.execute(query)
 
     @Transactional()
-    async def change_native_language(self, tg_id, new_native_language) -> None:
+    async def change_native_language(self, tg_id: str, new_native_language: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(native_lang=new_native_language)
         await session.execute(query)
 
     @Transactional()
-    async def change_english_level(self, tg_id, new_english_level) -> None:
+    async def change_english_level(self, tg_id: str, new_english_level: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(english_level=new_english_level)
         await session.execute(query)
 
     @Transactional()
-    async def change_goal(self, tg_id, new_goal) -> None:
+    async def change_goal(self, tg_id: str, new_goal: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(goal=new_goal)
         await session.execute(query)
 
     @Transactional()
-    async def change_speaker(self, tg_id, new_speaker) -> None:
+    async def change_speaker(self, tg_id: str, new_speaker: str) -> None:
         query = update(User).where(User.tg_id == tg_id).values(speaker=new_speaker)
         await session.execute(query)
 
     @Transactional()
     async def delete_user_info(self, tg_id: str) -> None:
+        await MessageMistakesService().delete_user_message_mistakes(tg_id)
         await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
         await session.execute(delete(User).where(User.tg_id == tg_id))
