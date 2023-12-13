@@ -1,0 +1,12 @@
+from src.database import Base
+from src.database.mixins import TimestampMixin
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Unicode
+
+
+class QuestionsHistory(Base, TimestampMixin):
+    __tablename__ = "questions_history"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tg_id = Column(String, ForeignKey('user.tg_id'))
+
+    message = Column(String, nullable=False)
