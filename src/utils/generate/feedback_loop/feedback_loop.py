@@ -2,6 +2,8 @@ import asyncio
 from src.database.models import FeedbacksHistory
 from sqlalchemy import select, delete
 from src.database import session, Transactional
+from utils.generate.feedback_loop.user_feedbacks_history import GetUserFeedbacksHistory
+
 
 class FeedbackHistory:
     def __init__(self):
@@ -20,7 +22,7 @@ class FeedbackHistory:
             self,
             tg_id: str,
             limit: int = 20
-    ) -> list[dict[str, str]]:
+    ) -> GetUserFeedbacksHistory:
         query = select(FeedbacksHistory).where(FeedbacksHistory.tg_id == str(tg_id)).limit(limit)
         result = await session.execute(query)
 
