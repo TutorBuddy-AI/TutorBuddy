@@ -3,3 +3,5 @@ from src.database.models.message_history import MessageHistory
 from src.database.models.daily_news import DailyNews
 from src.database.models.message_mistakes import MessageMistakes
 from src.database import Base
+from src.database.models.feedbacks_history import FeedbacksHistory
+from src.database.models.questions_history import QuestionsHistory
