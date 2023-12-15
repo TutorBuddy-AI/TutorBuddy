@@ -19,7 +19,7 @@
 ```python
 await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").send_request(payload={"prompt": "Hello"})
 ```
-**Возвращаемое значение:** `JSON`
+**Возвращаемое значение:** Любой
 
 
 ### `send_request_speech_to_text(audio_bytes: io.BytesIO, model: str) -> str` 
