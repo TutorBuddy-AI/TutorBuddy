@@ -23,10 +23,13 @@ class TranslateGenerate:
         else:
             return None
 
-    async def get_combine_data(self) -> json:
+    async def user_native_lang(self) -> str:
         user_info = await UserService().get_user_info(self.tg_id)
+        return user_info['native_lang']
+
+    async def get_combine_data(self) -> json:
         return {
             "model": "gpt-3.5-turbo",
-            "messages": f"Translate it '{self.eng_string}' on {user_info['native_lang']}",
+            "messages": f"Translate it '{self.eng_string}' on {await self.user_native_lang()}",
             "max_tokens": 400
         }
