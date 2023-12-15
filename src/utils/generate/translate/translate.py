@@ -16,7 +16,7 @@ class TranslateGenerate:
 
     async def translate(self) -> str:
         payload = await self.get_combined_data()
-        generated_text = await GenerateAI(request_url=self.request_url).send_request(payload)
+        generated_text = await GenerateAI(request_url=self.request_url).send_request(payload=payload)
 
         if generated_text:
             return generated_text["choices"][0]["message"]["content"]
