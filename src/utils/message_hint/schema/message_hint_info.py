@@ -6,5 +6,3 @@ class MessageHintInfo(BaseModel):
     user_message_id: int | None
     bot_message_id: int | None
     message: str | None
-    role: str | None
-    type: str | None

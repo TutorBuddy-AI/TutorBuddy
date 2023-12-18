@@ -1,8 +1,8 @@
 """Added hint table
 
-Revision ID: 1e96b095c23b
+Revision ID: 0f2a0514f4ea
 Revises: c71b956d516b
-Create Date: 2023-12-17 01:45:17.618880
+Create Date: 2023-12-18 17:03:51.938034
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1e96b095c23b'
+revision = '0f2a0514f4ea'
 down_revision = 'c71b956d516b'
 branch_labels = None
 depends_on = None
@@ -24,8 +24,6 @@ def upgrade() -> None:
     sa.Column('user_message_id', sa.Integer(), nullable=True),
     sa.Column('bot_message_id', sa.Integer(), nullable=True),
     sa.Column('message', sa.String(), nullable=False),
-    sa.Column('role', sa.String(), nullable=False),
-    sa.Column('type', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['bot_message_id'], ['message_history.id'], ),

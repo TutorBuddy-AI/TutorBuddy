@@ -13,5 +13,3 @@ class MessageHint(Base, TimestampMixin):
     bot_message_id = Column(Integer, ForeignKey("message_history.id"), nullable=True)
 
     message = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    type = Column(String, nullable=False)

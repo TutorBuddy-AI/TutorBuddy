@@ -14,9 +14,7 @@ class MessageHintService:
             tg_id=new_message_hint["tg_id"],
             user_message_id=new_message_hint["user_message_id"],
             bot_message_id=new_message_hint["bot_message_id"],
-            message=new_message_hint["message"],
-            role=new_message_hint["role"],
-            type=new_message_hint["type"],
+            message=new_message_hint["message"]
         )
 
         session.add(mistakes)
