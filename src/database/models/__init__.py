@@ -5,3 +5,4 @@ from src.database.models.message_mistakes import MessageMistakes
 from src.database import Base
 from src.database.models.feedbacks_history import FeedbacksHistory
 from src.database.models.questions_history import QuestionsHistory
+from src.database.models.message_hint import MessageHint

@@ -54,19 +54,17 @@ class UserService:
             tg_id: str,
             limit: int = 20
     ) -> GetUserMessageHistory:
-        query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
+        query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id)).order_by(MessageHistory.id.desc())
 
         query = query.limit(limit)
         result = await session.execute(query)
 
         result = result.scalars()
 
-        results = [{'role': row.role, 'content': row.message} for row in result]
+        results = list(reversed([{'role': row.role, 'content': row.message} for row in result]))
 
         if not results:
-            for i in range(2):
-                results.append(0)
-
+            results.append({})
         return results
 
     async def is_exist(

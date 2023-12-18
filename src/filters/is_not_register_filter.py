@@ -1,5 +1,5 @@
 from src.database.models import User
-from src.utils import UserService
+from src.utils.user import UserService
 
 from aiogram import types
 from aiogram.dispatcher.filters import Filter
