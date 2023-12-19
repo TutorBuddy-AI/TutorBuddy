@@ -2,6 +2,8 @@ from src.database.models import User, MessageHistory
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
 from utils.message_history_mistakes.message_mistakes_service import MessageMistakesService
+from src.utils.generate.question_history import SupportHistory
+from src.utils.generate.feedback_loop import FeedbackHistory
 
 from typing import Optional, List
 
@@ -126,5 +128,7 @@ class UserService:
     @Transactional()
     async def delete_user_info(self, tg_id: str) -> None:
         await MessageMistakesService().delete_user_message_mistakes(tg_id)
+        await SupportHistory().delete_user_questions_history(tg_id)
+        await FeedbackHistory().delete_user_feedbacks_history(tg_id)
         await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
         await session.execute(delete(User).where(User.tg_id == tg_id))

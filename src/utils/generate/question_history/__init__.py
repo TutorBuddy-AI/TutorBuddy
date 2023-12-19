@@ -1,1 +1,1 @@
-from src.utils.generate.question_history.question_history import QuestionsHistory
+from src.utils.generate.question_history.question_history import SupportHistory
