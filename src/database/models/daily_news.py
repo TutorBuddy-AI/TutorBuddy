@@ -19,7 +19,7 @@ class DailyNews(Base, TimestampMixin):
     image = Column(
         ImageField(
             multiple=True,
-            upload_storage=Path("C:/Users/Administrator/PycharmProjects/AI-TutorBuddy-bot/src/daily_data"),
+            upload_storage="images",
             validators=[SizeValidator("100k")],
         )
     )
@@ -27,7 +27,7 @@ class DailyNews(Base, TimestampMixin):
     file = Column(
         FileField(
             multiple=True,
-            upload_storage=Path("C:/Users/Administrator/PycharmProjects/AI-TutorBuddy-bot/src/daily_data"),
+            upload_storage="other_files",
             validators=[SizeValidator("100k")],
         )
     )

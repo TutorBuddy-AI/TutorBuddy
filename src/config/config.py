@@ -14,6 +14,7 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET_TOKEN")
 OPENAI_API = os.environ.get('OPENAI_API')
 PROXY = os.environ.get('PROXY')
+UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', "../files")
 
 
 class Config(BaseModel):
@@ -31,6 +32,7 @@ class Config(BaseModel):
     CELERY_BACKEND_URL: str = "redis://:password123@localhost:6379/0"
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
+    UPLOAD_FOLDER: str = UPLOAD_FOLDER
 
 
 config = Config()

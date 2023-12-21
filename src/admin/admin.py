@@ -19,6 +19,8 @@ from starlette_admin import EnumField, TinyMCEEditorField, FileField
 from starlette_admin.exceptions import FormValidationError, LoginFailed
 import logging
 
+from storage.storage import configure_storage
+
 Base = declarative_base()
 DATABASE_URL = os.getenv('DATABASE_URL')
 engine = create_async_engine(DATABASE_URL, future=True)
@@ -40,7 +42,7 @@ app = Starlette(routes=[
     Mount(
         "/static", app=StaticFiles(directory="static"), name="static"
     ),
-], )  # FastAPI()
+], on_startup=[configure_storage])  # FastAPI()
 
 
 class MyAuthProvider(AuthProvider):
