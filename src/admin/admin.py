@@ -1,9 +1,7 @@
 import shutil
-
 import aiofiles
 import uvicorn
 import os
-from fastapi import Form
 from starlette.middleware import Middleware
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
@@ -20,10 +18,6 @@ from starlette_admin.auth import AdminUser, AuthProvider
 from starlette_admin import EnumField, TinyMCEEditorField, FileField
 from starlette_admin.exceptions import FormValidationError, LoginFailed
 import logging
-from starlette.datastructures import UploadFile
-from starlette.responses import FileResponse
-import shutil
-from starlette.responses import JSONResponse
 
 Base = declarative_base()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -128,7 +122,7 @@ class DailyNewsView(ModelView):
         DailyNews.id,
         DailyNews.topic,
         TinyMCEEditorField("message"),
-        FileField("file_upload"),  # Добавляем поле загрузки файла
+        DailyNews.file,
         EnumField(
             "type",
             choices=[
@@ -139,40 +133,6 @@ class DailyNewsView(ModelView):
             ],
         ),
     ]
-
-
-class DailyNewsView(ModelView):
-    fields = [
-        DailyNews.id,
-        DailyNews.topic,
-        TinyMCEEditorField("message"),
-        FileField("file_upload"),
-        EnumField(
-            "type",
-            choices=[
-                (DailyNewsEnum.NEWS_TYPE__TEXT.value, "Текст"),
-                (DailyNewsEnum.NEWS_TYPE__IMAGE.value, "Изображение"),
-                (DailyNewsEnum.NEWS_TYPE__FILE.value, "Файл"),
-                (DailyNewsEnum.NEWS_TYPE__VIDEO.value, "Видео"),
-            ],
-        ),
-    ]
-
-    async def on_file_upload(self, request: Request):
-        form = await request.form()
-        upload_file = form["file_upload"]
-        SAVE_DIR = "src/daily_data"
-        if not os.path.exists(SAVE_DIR):
-            os.makedirs(SAVE_DIR)
-        file_path = os.path.join(SAVE_DIR, upload_file.filename)
-        async with aiofiles.open(file_path, "wb") as dest:
-            contents = await upload_file.read()
-            await dest.write(contents)
-        logging.info("Файл успешно загружен")
-
-
-
-
 
 exclude_fields_from_list = [DailyNews.created_at, DailyNews.updated_at]
 exclude_fields_from_edit = [DailyNews.created_at, DailyNews.updated_at]
