@@ -1,13 +1,13 @@
 from aiogram.dispatcher import FSMContext
 from src.config import dp, bot
 from src.utils.user import UserCreateMessage
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Message, \
-    CallbackQuery
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from utils.generate.communication import CommunicationGenerate
 from utils.message import MessageHelper
-from utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper, MessageMistakesCreator
-from utils.message_hint import MessageHintCreator, MessageHintService, MessageHintHelper
-from utils.message_translation import MessageTranslationService, MessageTranslationHelper, MessageTranslationCreator
-from utils.paraphrasing import MessageParaphraseCreator, MessageParaphraseService
+from utils.message_history_mistakes import MessageMistakesService, MessageMistakesCreator, MessageMistakesHelper
+from utils.message_hint import MessageHintCreator, MessageHintService
+from utils.message_translation import MessageTranslationService, MessageTranslationCreator
+from utils.paraphrasing import MessageParaphraseService, MessageParaphraseCreator
 
 from aiogram import types, md
 
@@ -15,14 +15,26 @@ from aiogram import types, md
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
-
-    generated_text = await UserCreateMessage(
+    user_service = UserCreateMessage(
         tg_id=str(message.from_user.id),
         prompt=message.text,
-        type_message="text"
-    ).create_communication_message_text()
+        type_message="text")
+    generated_text = await CommunicationGenerate(
+        tg_id=str(message.from_user.id),
+        prompt=message.text,
+        user_message_history=await user_service.get_user_message_history()).generate_message()
 
-    await set_message_menu(message, generated_text)
+    if generated_text is not None:
+        written_messages = await UserCreateMessage(
+            tg_id=str(message.from_user.id),
+            prompt=message.text,
+            type_message="text"
+        ).create_communication_message_text(generated_text)
+        await MessageHelper().group_conversation_info_to_state(state, written_messages)
+        await set_message_menu(message, generated_text)
+    else:
+        generated_text = "Oooops, something wrong. Try request again later..."
+        await bot.send_message(message.from_user.id, md.escape_md(generated_text))
 
 
 async def set_message_menu(message: types.Message, generated_text: str):
@@ -62,7 +74,7 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     helper_info = await MessageHelper().group_message_helper_info(state_data, message, generated_text)
     await MessageHintService().create_message_hint(helper_info)
     await bot.send_message(message.from_user.id, md.escape_md(generated_text))
-    await set_message_menu(message, bot_answer_text)
+    await set_message_menu(message, state_data["bot_message_text"])
 
 
 @dp.callback_query_handler(text="get_mistakes")
@@ -75,11 +87,11 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     generated_text = await MessageMistakesCreator(
         tg_id=str(message.from_user.id)
     ).create_communication_message_text()
-    mistakes_info = await MessageHelper().group_message_helper_info(
+    mistakes_info = await MessageMistakesHelper().group_message_mistakes_info(
         state_data, message, generated_text)
     await MessageMistakesService().create_mistakes(mistakes_info)
     await bot.send_message(message.from_user.id, md.escape_md(generated_text))
-    await set_message_menu(message, bot_answer_text)
+    await set_message_menu(message, state_data["bot_message_text"])
 
 
 @dp.callback_query_handler(text="get_translation")
@@ -114,4 +126,4 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     helper_info = await MessageHelper().group_message_helper_info(state_data, message, generated_text)
     await MessageParaphraseService().create_message_paraphrase(helper_info)
     await bot.send_message(message.from_user.id, md.escape_md(generated_text))
-    await set_message_menu(message, bot_answer_text)
+    await set_message_menu(message, state_data["bot_message_text"])
