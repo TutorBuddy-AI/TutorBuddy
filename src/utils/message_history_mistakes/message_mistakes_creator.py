@@ -1,7 +1,6 @@
 from src.utils.user.schemas import GetUserMessageHistory
-from src.utils.user import UserService
-from utils.generate.mistakes_checker import MistakesChecker
-from utils.generate.paraphraser import Paraphraser
+from src.utils.user.user_service import UserService
+from src.utils.generate.mistakes_checker import MistakesChecker
 
 
 class MessageMistakesCreator:

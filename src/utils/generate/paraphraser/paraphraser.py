@@ -51,5 +51,4 @@ class Paraphraser:
         }
         self.user_message_history[0] = service_request
         self.user_message_history.append(paraphrase_request)
-        print(paraphrase_request)
         return self.user_message_history

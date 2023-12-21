@@ -15,7 +15,7 @@ class MistakesChecker:
         self.request_url = "https://api.openai.com/v1/chat/completions"
         self.user_message_history = user_message_history
 
-    async def generate_hint(self) -> str:
+    async def generate_mistakes(self) -> str:
         generated_text = await GenerateAI(request_url=self.request_url).send_request(
             payload=await self.get_combine_data())
 

@@ -14,8 +14,8 @@ class MessageHelper:
             self, state_message_info: ConversationStateInfo, message: Message, hint: str) -> MessageHelperInfo:
         helper_info = {
             "tg_id": str(message.chat.id),
-            "user_message_id": state_message_info.user_message_id,
-            "bot_message_id": state_message_info.bot_message_id,
+            "user_message_id": state_message_info["user_message_id"],
+            "bot_message_id": state_message_info["bot_message_id"],
             "message": hint,
         }
         return helper_info
