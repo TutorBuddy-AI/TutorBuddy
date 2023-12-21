@@ -1,5 +1,9 @@
+import shutil
+
+import aiofiles
 import uvicorn
 import os
+from fastapi import Form
 from starlette.middleware import Middleware
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
@@ -13,10 +17,13 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette_admin.auth import AdminUser, AuthProvider
-from starlette_admin import EnumField, TinyMCEEditorField
+from starlette_admin import EnumField, TinyMCEEditorField, FileField
 from starlette_admin.exceptions import FormValidationError, LoginFailed
 import logging
-
+from starlette.datastructures import UploadFile
+from starlette.responses import FileResponse
+import shutil
+from starlette.responses import JSONResponse
 
 Base = declarative_base()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -27,7 +34,6 @@ logging.basicConfig(level=logging.INFO)
 # create static directory if not exist
 os.makedirs("./static", 0o777, exist_ok=True)
 
-
 users = {
     "admin": {
         "name": "admin",
@@ -36,22 +42,21 @@ users = {
     },
 }
 
-
 app = Starlette(routes=[
     Mount(
         "/static", app=StaticFiles(directory="static"), name="static"
     ),
-],)  # FastAPI()
+], )  # FastAPI()
 
 
 class MyAuthProvider(AuthProvider):
     async def login(
-        self,
-        username: str,
-        password: str,
-        remember_me: bool,
-        request: Request,
-        response: Response,
+            self,
+            username: str,
+            password: str,
+            remember_me: bool,
+            request: Request,
+            response: Response,
     ) -> Response:
         if len(username) < 3:
             """Form data validation"""
@@ -98,7 +103,7 @@ class MyAuthProvider(AuthProvider):
 # Create admin
 admin = Admin(engine, title="AI Tutor Buddy Admin",
               auth_provider=MyAuthProvider(allow_paths=["/static/logo.svg"]),
-              middlewares=[Middleware(SessionMiddleware, secret_key=os.getenv("SECRET"))],)
+              middlewares=[Middleware(SessionMiddleware, secret_key=os.getenv("SECRET"))], )
 
 
 # example how to work with fields and access
@@ -119,19 +124,61 @@ class UserView(ModelView):
 
 
 class DailyNewsView(ModelView):
-    fields = [DailyNews.id, TinyMCEEditorField("message"), DailyNews.instruction, EnumField(
-        "type",
-        choices=[(DailyNewsEnum.NEWS_TYPE__TEXT, "Текст"),
-                 (DailyNewsEnum.NEWS_TYPE__IMAGE, "Изображение"),
-                 (DailyNewsEnum.NEWS_TYPE__FILE, "Файл"),
-                 (DailyNewsEnum.NEWS_TYPE__VIDEO, "Видео"),],
-    )]
-    exclude_fields_from_list = [DailyNews.created_at, DailyNews.updated_at]
-    exclude_fields_from_edit = [DailyNews.created_at, DailyNews.updated_at]
-    exclude_fields_from_create = [User.created_at, User.updated_at]
-    page_size_options = [10, 25, 50, 100, -1]
-    save_state = True
+    fields = [
+        DailyNews.id,
+        DailyNews.topic,
+        TinyMCEEditorField("message"),
+        FileField("file_upload"),  # Добавляем поле загрузки файла
+        EnumField(
+            "type",
+            choices=[
+                (DailyNewsEnum.NEWS_TYPE__TEXT.value, "Текст"),
+                (DailyNewsEnum.NEWS_TYPE__IMAGE.value, "Изображение"),
+                (DailyNewsEnum.NEWS_TYPE__FILE.value, "Файл"),
+                (DailyNewsEnum.NEWS_TYPE__VIDEO.value, "Видео"),
+            ],
+        ),
+    ]
 
+
+class DailyNewsView(ModelView):
+    fields = [
+        DailyNews.id,
+        DailyNews.topic,
+        TinyMCEEditorField("message"),
+        FileField("file_upload"),
+        EnumField(
+            "type",
+            choices=[
+                (DailyNewsEnum.NEWS_TYPE__TEXT.value, "Текст"),
+                (DailyNewsEnum.NEWS_TYPE__IMAGE.value, "Изображение"),
+                (DailyNewsEnum.NEWS_TYPE__FILE.value, "Файл"),
+                (DailyNewsEnum.NEWS_TYPE__VIDEO.value, "Видео"),
+            ],
+        ),
+    ]
+
+    async def on_file_upload(self, request: Request):
+        form = await request.form()
+        upload_file = form["file_upload"]
+        SAVE_DIR = "src/daily_data"
+        if not os.path.exists(SAVE_DIR):
+            os.makedirs(SAVE_DIR)
+        file_path = os.path.join(SAVE_DIR, upload_file.filename)
+        async with aiofiles.open(file_path, "wb") as dest:
+            contents = await upload_file.read()
+            await dest.write(contents)
+        logging.info("Файл успешно загружен")
+
+
+
+
+
+exclude_fields_from_list = [DailyNews.created_at, DailyNews.updated_at]
+exclude_fields_from_edit = [DailyNews.created_at, DailyNews.updated_at]
+exclude_fields_from_create = [User.created_at, User.updated_at]
+page_size_options = [10, 25, 50, 100, -1]
+save_state = True
 
 # Add view
 admin.add_view(UserView(User, label='Пользователи'))
@@ -140,7 +187,6 @@ admin.add_view(ModelView(Role))
 admin.add_view(ModelView(MessageHistory))
 admin.add_view(ModelView(MessageMistakes))
 admin.add_view(DailyNewsView(DailyNews))
-
 
 # Mount admin to your app
 admin.mount_to(app)
