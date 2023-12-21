@@ -1,5 +1,6 @@
 from database import Transactional
 from database.models import MessageHint
+from sqlalchemy import delete
 from src.database import session
 from utils.message.schema import MessageHelperInfo
 
@@ -18,3 +19,6 @@ class MessageHintService:
         )
 
         session.add(hint)
+
+    def delete_user_message_hints(self, tg_id: str) -> None:
+        await session.execute(delete(MessageHint).where(MessageHint.tg_id == tg_id))
