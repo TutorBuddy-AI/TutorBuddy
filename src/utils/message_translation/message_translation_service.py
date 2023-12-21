@@ -17,8 +17,6 @@ class MessageTranslationService:
             user_message_id=user_translation_info["user_message_id"],
             bot_message_id=user_translation_info["bot_message_id"],
             message=user_translation_info["message"],
-            role=user_translation_info["role"],
-            type=user_translation_info["type"],
         )
 
         session.add(mistakes)
