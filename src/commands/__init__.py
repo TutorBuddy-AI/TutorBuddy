@@ -1,7 +1,6 @@
 from src.commands.menu.go_back_to_chat import dp
 
 from src.commands.form_states import dp
-from src.commands.hint import dp
 
 from src.commands.choose_speaker import dp
 
