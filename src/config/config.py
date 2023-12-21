@@ -14,6 +14,7 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET_TOKEN")
 OPENAI_API = os.environ.get('OPENAI_API')
 PROXY = os.environ.get('PROXY')
+ELEVENLABS_API = os.environ.get('ELEVENLABS_API')
 
 
 class Config(BaseModel):
@@ -26,6 +27,7 @@ class Config(BaseModel):
     WEBHOOK_SECRET_TOKEN: str = WEBHOOK_SECRET_TOKEN
     WEBHOOK_PATH: str = "/webhook"
     OPENAI_API: List = OPENAI_API
+    ELEVENLABS_API: str = ELEVENLABS_API
     PROXY: List = PROXY
     CELERY_BROKER_URL: str = "amqp://user:bitnami@localhost:5672/"
     CELERY_BACKEND_URL: str = "redis://:password123@localhost:6379/0"

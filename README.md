@@ -16,6 +16,7 @@ WEBHOOK_URL=''
 WEBHOOK_SECRET_TOKEN='' # auth token у ngrok
 OPENAI_API = '["Bearer token"]'
 PROXY = '[["http://131.108.17.251:9670", "7pxHP6", "pHY5rF"]]'    # HTTPS, Логин, Пароль. Если нету, пользуйтесь этим
+ELEVENLABS_API = 'c207730cb78101ce98761b628554b3a2'
 ```
 
 ## Run migrations
