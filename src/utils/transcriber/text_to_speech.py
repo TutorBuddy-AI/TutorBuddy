@@ -1,11 +1,12 @@
+from typing import Union, Iterator
+
+import aiohttp
+
 from src.utils.user import UserService
-from src.utils.generate import GenerateAI
 from src.config import config
 
 import ast
 import json
-
-from io import BytesIO
 
 
 OPENAI_API = ast.literal_eval(config.OPENAI_API)
@@ -17,36 +18,43 @@ class TextToSpeech:
             prompt: str,
             tg_id: str
     ):
-        self.request_url = "https://api.openai.com/v1/audio/speech"
-        self.man_providers = "echo"
-        self.girl_providers = "nova"
+        self.id_bot_voice = "8jLmaTrLPyjjGe8C89W7"
+        self.id_nastya_voice = "cCglcvSMLdXuPYb9kXDB"
+        self.model = "eleven_multilingual_v2"
+        self.request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
+
+        self.headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": config.ELEVENLABS_API
+        }
 
         self.prompt = prompt
         self.tg_id = tg_id
 
-    async def get_speech(self) -> BytesIO:
-        generated_audio = await GenerateAI(request_url=self.request_url).send_request(
-            payload=await self.get_combine_data())
-
-        if generated_audio is not None:
-            return generated_audio
-        else:
-            return None
+    async def get_speech(self) -> Union[bytes, Iterator[bytes]]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                    url=f"{self.request_url}{await self.get_id_voice()}",
+                    json=await self.get_combine_data(),
+                    headers=self.headers) as response:
+                if response.status == 200:
+                    return await response.read()
+                else:
+                    return None
 
     async def get_combine_data(self) -> json:
-        user_info = await self.get_user_speaker_and_english_level()
-
-        provider = self.girl_providers if user_info[0] == "Anastasia" else self.man_providers
-        speed = 0.8 if 1 <= int(user_info[1]) <= 2 else 1.0
-
         return {
-            "model": "tts-1-hd",
-            "voice": provider,
-            "input": self.prompt,
-            "speed": speed
+            "text": self.prompt,
+            "model_id": self.model,
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.1,
+                "use_speaker_boost": True,
+            },
         }
 
-    async def get_user_speaker_and_english_level(self) -> str:
+    async def get_id_voice(self) -> str:
         user_info = await UserService().get_user_info(self.tg_id)
 
-        return user_info["speaker"], user_info["english_level"]
+        return self.id_nastya_voice if user_info["speaker"] == "Anastasia" else self.id_bot_voice
