@@ -10,6 +10,7 @@ from src.keyboards import get_keyboard_remove
 @dp.message_handler(Text(equals="cancel", ignore_case=True), state="*")
 async def process_cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
+
     if current_state is None:
         return
 
