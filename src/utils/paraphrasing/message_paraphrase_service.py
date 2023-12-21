@@ -1,0 +1,20 @@
+from database import Transactional
+from database.models import MessageParaphrase
+from src.database import session
+from utils.message.schema import MessageHelperInfo
+
+
+class MessageParaphraseService:
+    @Transactional()
+    async def create_message_paraphrase(
+            self,
+            new_message_hint: MessageHelperInfo
+    ) -> None:
+        mistakes = MessageParaphrase(
+            tg_id=new_message_hint["tg_id"],
+            user_message_id=new_message_hint["user_message_id"],
+            bot_message_id=new_message_hint["bot_message_id"],
+            message=new_message_hint["message"]
+        )
+
+        session.add(mistakes)
