@@ -4,13 +4,16 @@ from src.utils.user import UserCreateMessage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from utils.generate.communication import CommunicationGenerate
 from utils.message import MessageHelper
+from utils.message_hint.message_hint_creator import MessageHintCreator
 from utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper
-from utils.message_hint import MessageHintCreator, MessageHintService
+from utils.message_hint.message_hint_service import MessageHintService
 from utils.message_history_mistakes.message_mistakes_creator import MessageMistakesCreator
-from utils.message_translation import MessageTranslationService, MessageTranslationCreator
-from utils.paraphrasing import MessageParaphraseService, MessageParaphraseCreator
+from utils.message_translation import MessageTranslationService
+from utils.message_translation.message_translation_creator import MessageTranslationCreator
+from utils.paraphrasing import MessageParaphraseService
 
 from aiogram import types, md
+from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)

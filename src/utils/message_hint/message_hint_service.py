@@ -20,5 +20,6 @@ class MessageHintService:
 
         session.add(hint)
 
-    def delete_user_message_hints(self, tg_id: str) -> None:
+    @Transactional()
+    async def delete_user_message_hints(self, tg_id: str) -> None:
         await session.execute(delete(MessageHint).where(MessageHint.tg_id == tg_id))

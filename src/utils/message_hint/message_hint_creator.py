@@ -1,5 +1,5 @@
 from src.utils.user.schemas import GetUserMessageHistory
-from src.utils.user import UserService
+from src.utils.user.user_service import UserService
 from utils.generate.hint_generator.hint_generator import HintGenerator
 
 
