@@ -3,8 +3,7 @@ from typing import List
 from src.database.models import MessageHistory
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserMessageHistory, GetNewUserMessageHistory
-from src.utils.user import UserService
-from src.utils.generate.communication import CommunicationGenerate
+from src.utils.user.user_service import UserService
 
 
 class UserCreateMessage:
@@ -25,8 +24,6 @@ class UserCreateMessage:
                 {"role": "assistant", "content": generated_text}
             ]
         )
-
-
 
     @Transactional()
     async def save_to_database_message_history(
