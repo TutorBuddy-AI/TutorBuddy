@@ -1,18 +1,18 @@
-"""Daily news upgrade
+"""Added images in news
 
-Revision ID: 502d0b325b66
-Revises: 4566b4ad19fa
-Create Date: 2023-12-21 21:43:12.461266
+Revision ID: c33d27b005b2
+Revises: ca19cb9abd06
+Create Date: 2023-12-21 20:35:56.427568
 
 """
-import sqlalchemy_file
 from alembic import op
 import sqlalchemy as sa
+import sqlalchemy_file
 
 
 # revision identifiers, used by Alembic.
-revision = '502d0b325b66'
-down_revision = '4566b4ad19fa'
+revision = 'c33d27b005b2'
+down_revision = 'ca19cb9abd06'
 branch_labels = None
 depends_on = None
 

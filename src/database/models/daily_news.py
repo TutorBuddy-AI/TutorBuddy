@@ -2,9 +2,8 @@ from sqlalchemy import Column, Integer, String, Unicode
 from src.database import Base
 from src.database.mixins import TimestampMixin
 from sqlalchemy_file import FileField, ImageField
-from sqlalchemy_file.validators import ContentTypeValidator, SizeValidator
+from sqlalchemy_file.validators import SizeValidator
 from src.database.models.enums.daily_news import DailyNewsEnum
-from pathlib import Path
 
 
 class DailyNews(Base, TimestampMixin):

@@ -124,7 +124,7 @@ class DailyNewsView(ModelView):
         DailyNews.id,
         DailyNews.topic,
         TinyMCEEditorField("message"),
-        DailyNews.file,
+        DailyNews.image,
         EnumField(
             "type",
             choices=[
