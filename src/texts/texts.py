@@ -16,7 +16,6 @@ async def get_choose_bot_text():
         "You can continue talking to me or choose one of the other speaking partners. They are Tutor Buddy co-founder's"
         " digital twins, so you can get to know them through voice and visuals and discuss anything with them.\n\n"
         "👩🏻‍🚀 Anastasia is keen on entrepreneurship, fashion, movies and science\n\n"
-        "👨🏻‍💻 Nikita is into music, innovations, sports and games\n\n"
         "Please notice that if you choose this option, another chat with a person will pop up."
     )
 
