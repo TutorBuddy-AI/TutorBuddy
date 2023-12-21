@@ -1,11 +1,10 @@
-from src.utils.user.user_service import UserService
-from src.utils.generate import GenerateAI
+from utils.user import UserService
+from utils.generate import GenerateAI
+from utils.user.schemas import GetUserMessageHistory
 import json
 
-from utils.user.schemas import GetUserMessageHistory
 
-
-class TranslateGenerate:
+class Paraphraser:
     def __init__(
             self,
             tg_id: str,
@@ -15,18 +14,14 @@ class TranslateGenerate:
         self.request_url = "https://api.openai.com/v1/chat/completions"
         self.user_message_history = user_message_history
 
-    async def translate(self) -> str:
-        payload = await self.get_combine_data()
-        generated_text = await GenerateAI(request_url=self.request_url).send_request(payload=payload)
+    async def generate_better_phrase(self) -> str:
+        generated_text = await GenerateAI(request_url=self.request_url).send_request(
+            payload=await self.get_combine_data())
 
-        if generated_text:
+        if generated_text is not None:
             return generated_text["choices"][0]["message"]["content"]
         else:
             return None
-
-    async def user_native_lang(self) -> str:
-        user_info = await UserService().get_user_info(self.tg_id)
-        return user_info['native_lang']
 
     async def get_combine_data(self) -> json:
         return {
@@ -47,12 +42,13 @@ class TranslateGenerate:
                        f"You are English teacher and you need assist user to increase english level. "
         }
 
-        translate_request = {
+        paraphrase_request = {
             "role": "system",
             "content":
-                f"User didn't understand your last message, "
-                f"Please translate it into {await self.user_native_lang()}. "
+                "User asked you to rephrase his last message "
+                "so it could be grammatically correct, polite and short and used a slightly more advanced vocabulary."
+                "Provide more than one option if it's possible."
         }
         self.user_message_history[0] = service_request
-        self.user_message_history.append(translate_request)
+        self.user_message_history.append(paraphrase_request)
         return self.user_message_history

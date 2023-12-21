@@ -1,6 +1,6 @@
 from src.database import Base
 from src.database.mixins import TimestampMixin
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Unicode
+from sqlalchemy import Column, String, Integer, ForeignKey
 
 
 class MessageHistory(Base, TimestampMixin):
