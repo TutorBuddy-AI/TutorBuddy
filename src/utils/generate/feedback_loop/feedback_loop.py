@@ -2,7 +2,7 @@ import asyncio
 from src.database.models import FeedbacksHistory
 from sqlalchemy import select, delete
 from src.database import session, Transactional
-from utils.generate.feedback_loop.user_feedbacks_history import GetUserFeedbacksHistory
+from src.utils.generate.feedback_loop.user_feedbacks_history import GetUserFeedbacksHistory
 
 
 class FeedbackHistory:

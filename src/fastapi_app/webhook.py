@@ -15,14 +15,13 @@ app = FastAPI()
 async def receive_update(update: Dict, request: Request):
     update_obj = types.Update(**update)
     try:
-        if update_obj.message.text.startswith("/start"):
-            source = update_obj.message.get_args()
-            context = dp.current_state(chat=update_obj.message.chat.id, user=update_obj.message.chat.id)
-            await context.set_data({
-                "ip_address": None,
-                "source": source if source is not None else None,
-                "tg_language": update_obj.message.from_user.language_code
-            })
+        source = update_obj.message.get_args()
+        context = dp.current_state(chat=update_obj.message.chat.id, user=update_obj.message.chat.id)
+        await context.set_data({
+            "ip_address": None,
+            "source": source if source is not None else None,
+            "tg_language": update_obj.message.from_user.language_code
+        })
     except:
         pass
     finally:

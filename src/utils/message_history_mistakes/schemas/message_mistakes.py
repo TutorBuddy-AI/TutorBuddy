@@ -1,12 +1,6 @@
 from pydantic import BaseModel
 
 
-class MessageStateInfo(BaseModel):
-    user_message_id: int | None
-    bot_message_id: int | None
-    type_message: str | None
-
-
 class MessageMistakesInfo(BaseModel):
     tg_id: str
     user_message_id: int | None

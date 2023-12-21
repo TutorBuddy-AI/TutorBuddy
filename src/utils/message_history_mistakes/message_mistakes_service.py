@@ -3,7 +3,7 @@ from database.models import MessageHistory, MessageMistakes
 from sqlalchemy import select, delete
 from sqlalchemy.orm import aliased
 from src.database import session
-from utils.message_history_mistakes.schemas import GetUserMessageHistoryMistakes, MessageMistakesInfo,\
+from src.utils.message_history_mistakes.schemas import GetUserMessageHistoryMistakes, MessageMistakesInfo,\
     GetUserMessageHistoryMistakesWithContext
 
 

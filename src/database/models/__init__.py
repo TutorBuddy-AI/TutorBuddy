@@ -1,3 +1,4 @@
+from database.models.message_translation import MessageTranslation
 from src.database.models.user import User, UserLocation, Role, user_roles
 from src.database.models.message_history import MessageHistory
 from src.database.models.daily_news import DailyNews
@@ -6,3 +7,4 @@ from src.database import Base
 from src.database.models.feedbacks_history import FeedbacksHistory
 from src.database.models.questions_history import QuestionsHistory
 from src.database.models.message_hint import MessageHint
+from src.database.models.message_paraphrase import MessageParaphrase
