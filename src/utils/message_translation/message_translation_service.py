@@ -1,4 +1,5 @@
 from database import Transactional
+from database.models import MessageTranslation
 from src.database import session
 from utils.message.schema import MessageHelperInfo
 

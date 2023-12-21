@@ -1,3 +1,4 @@
+from database.models.message_translation import MessageTranslation
 from src.database.models.user import User, UserLocation, Role, user_roles
 from src.database.models.message_history import MessageHistory
 from src.database.models.daily_news import DailyNews
