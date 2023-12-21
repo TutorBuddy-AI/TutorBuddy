@@ -4,8 +4,7 @@ from src.utils.generate import GenerateAI
 import ast
 
 from io import BytesIO
-from typing import Any
-from pydub import AudioSegment
+
 
 OPENAI_API = ast.literal_eval(config.OPENAI_API)
 

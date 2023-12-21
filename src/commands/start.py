@@ -7,5 +7,3 @@ from aiogram import types, md
 async def menu_handler(message: types.Message):
     await bot.send_message(message.chat.id, md.escape_md("Let's go!\n"
                                                          "Send me message below ⬇️"))
-
-    # Может в будущем тут будет меню пользователя

@@ -40,8 +40,11 @@ async def change_name_query_handler(query: CallbackQuery, state: FSMContext):
     user_info = await UserService().get_user_info(tg_id=str(query.message.chat.id))
     await state.set_state(FormName.new_name)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, f"Current name: {user_info['name']}\n\n"
                                                   f"Write a new name ⬇",
@@ -74,10 +77,14 @@ async def changed_name_query_handler(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda query: query.data == "change_native_language")
 async def change_native_language_query_handler(query: CallbackQuery, state: FSMContext):
     user_info = await UserService().get_user_info(tg_id=str(query.message.chat.id))
+
     await state.set_state(FormNativeLanguage.new_native_language)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, f"Current native language: {user_info['native_lang']}\n\n"
                                                   f"Choose the new native language",
@@ -110,10 +117,14 @@ async def changed_native_language_query_handler(query: CallbackQuery, state: FSM
 @dp.callback_query_handler(lambda query: query.data == "change_english_level")
 async def change_english_level_query_handler(query: CallbackQuery, state: FSMContext):
     user_info = await UserService().get_user_info(tg_id=str(query.message.chat.id))
+
     await state.set_state(FormEnglishLevel.new_english_level)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, md.escape_md(f"Current english level (where 1 is the worst level of"
                                                                f" English, and 4 is a good level of English):"
@@ -150,9 +161,11 @@ async def changed_english_level_query_handler(query: CallbackQuery, state: FSMCo
 @dp.callback_query_handler(lambda query: query.data == "get_user_topic")
 async def change_get_user_topic_query_handler(query: CallbackQuery):
     user_info = await UserService().get_user_info(tg_id=str(query.message.chat.id))
-
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    except:
+        pass
 
     user_topic = ""
 

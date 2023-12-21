@@ -33,8 +33,11 @@ async def process_get_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(Form.native_language)
 
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    try:
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    except:
+        pass
 
     await bot.send_message(message.chat.id, md.escape_md("What is your native language?"),
                            reply_markup=await get_choose_native_language_keyboard())
@@ -44,7 +47,10 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(native_language=query.data.split("_")[1])
     await state.set_state(Form.goal)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, md.escape_md("Why are you practicing English?"),
                            reply_markup=await get_choose_goal_keyboard())
@@ -54,7 +60,10 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(goal=query.data.split("_")[1])
     await state.set_state(Form.english_level)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, md.escape_md(f"What is your English level?"),
                            reply_markup=await get_choose_english_level_keyboard())
@@ -64,7 +73,10 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(english_level=query.data.split("_")[1])
     await state.set_state(Form.topic)
 
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except:
+        pass
 
     await bot.send_message(query.message.chat.id, md.escape_md("Choose some interesting topics!"),
                            reply_markup=await get_choose_topic_keyboard())
@@ -110,10 +122,9 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
 
     await bot.send_message(query.message.chat.id, await get_choose_bot_text(),
                            reply_markup=await get_choose_bot_keyboard())
-
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 6)
     try:
         await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 6)
     except:
         pass
 

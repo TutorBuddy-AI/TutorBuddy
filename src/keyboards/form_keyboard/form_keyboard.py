@@ -86,11 +86,10 @@ async def get_choose_topic_keyboard() -> InlineKeyboardMarkup:
 async def get_choose_bot_keyboard() -> InlineKeyboardMarkup:
     choose_bot_inline_kb = InlineKeyboardMarkup(row_width=2)
 
-    anastasia = InlineKeyboardButton(text='👩🏻‍🚀 Choose Anastasia', callback_data='soon....')
-    nikita = InlineKeyboardButton(text='👨🏻‍💻 Choose Nikita', callback_data='soon....')
+    anastasia = InlineKeyboardButton(text='👩🏻‍🚀 Choose Anastasia', callback_data='continue_nastya')
 
     tutor_buddy = InlineKeyboardButton(text='🤖 Proceed with TutorBuddy', callback_data='continue_bot')
 
-    choose_bot_inline_kb.row(anastasia, nikita).row(tutor_buddy)
+    choose_bot_inline_kb.row(anastasia, tutor_buddy)
 
     return choose_bot_inline_kb
