@@ -2,15 +2,15 @@ import asyncio
 from src.database.models import QuestionsHistory
 from sqlalchemy import select, delete
 from src.database import session, Transactional
-from utils.generate.question_history.user_questions_history import GetUserQuestionsHistory
+from src.utils.generate.question_history.user_questions_history import GetUserQuestionsHistory
 
 
-class QuestionsHistory:
+class SupportHistory:
     def __init__(self):
         ...
 
     @Transactional()
-    async def add_questions(self, tg_id: str, message: str)-> None:
+    async def add_questions(self, tg_id: str, message: str) -> None:
         questions_history = QuestionsHistory(
             tg_id=tg_id,
             message=message
