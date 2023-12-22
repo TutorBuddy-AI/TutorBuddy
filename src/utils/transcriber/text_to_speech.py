@@ -19,7 +19,7 @@ class TextToSpeech:
             tg_id: str
     ):
         self.id_bot_voice = "8jLmaTrLPyjjGe8C89W7"
-        self.id_nastya_voice = "cCglcvSMLdXuPYb9kXDB"
+        self.id_nastya_voice = "gR8zQPSPbsxO3VIZlVZs"
         self.model = "eleven_multilingual_v2"
         self.request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
 
