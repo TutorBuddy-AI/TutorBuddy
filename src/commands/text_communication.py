@@ -20,6 +20,7 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
         tg_id=str(message.chat.id),
         prompt=message.text,
         type_message="text")
+
     generated_text = await CommunicationGenerate(
         tg_id=str(message.chat.id),
         prompt=message.text,
@@ -31,8 +32,10 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
             prompt=message.text,
             type_message="text"
         ).create_communication_message_text(generated_text)
+
         await MessageHelper().group_conversation_info_to_state(state, written_messages)
         await set_message_menu(message, generated_text)
+
     else:
         generated_text = "Oooops, something wrong. Try request again later..."
         await bot.send_message(message.chat.id, md.escape_md(generated_text))
@@ -71,9 +74,13 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     generated_text = await MessageHintCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text()
+
     helper_info = await MessageHelper().group_message_helper_info(state_data, message, generated_text)
+
     await MessageHintService().create_message_hint(helper_info)
+
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await set_message_menu(message, state_data["bot_message_text"])
 
 
@@ -87,10 +94,14 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     generated_text = await MessageMistakesCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text()
+
     mistakes_info = await MessageMistakesHelper().group_message_mistakes_info(
         state_data, message, generated_text)
+
     await MessageMistakesService().create_mistakes(mistakes_info)
+
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await set_message_menu(message, state_data["bot_message_text"])
 
 
@@ -103,10 +114,14 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id),
     ).create_communication_message_text()
+
     helper_info = await MessageHelper().group_message_helper_info(
         state_data, message, generated_text)
+
     await MessageTranslationService().create_translation(helper_info)
+
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await set_message_menu(message, state_data["bot_message_text"])
 
 
@@ -120,7 +135,11 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     generated_text = await MessageParaphraseCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text()
+
     helper_info = await MessageHelper().group_message_helper_info(state_data, message, generated_text)
+
     await MessageParaphraseService().create_message_paraphrase(helper_info)
+
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await set_message_menu(message, state_data["bot_message_text"])

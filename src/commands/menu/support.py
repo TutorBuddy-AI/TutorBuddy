@@ -25,13 +25,15 @@ async def support_handler(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FormSupport.message)
 async def support_query_handler(message: types.Message, state: FSMContext):
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    try:
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
+    except:
+        pass
 
     await state.update_data(new_value=message.text)
 
     state_data = await state.get_data()
-
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
 
     await SupportHistory().add_questions(tg_id=str(message.chat.id), message=state_data['new_value'])
 

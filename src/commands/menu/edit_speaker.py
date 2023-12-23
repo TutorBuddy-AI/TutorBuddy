@@ -29,8 +29,11 @@ async def edit_speaker_handler(message: types.Message):
 
 @dp.callback_query_handler(lambda query: query.data.startswith("speaker"))
 async def change_speaker_query_handler(query: CallbackQuery):
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+    except:
+        pass
 
     await UserService().change_speaker(tg_id=str(query.message.chat.id), new_speaker=query.data.split('_')[1])
     await bot.send_message(query.message.chat.id, md.escape_md(f"Great! Your current person is"
