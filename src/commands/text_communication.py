@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram.dispatcher import FSMContext
 from src.config import dp, bot
 from src.utils.user import UserCreateMessage
@@ -38,7 +40,6 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
 
         await MessageHelper().group_conversation_info_to_state(state, written_messages)
         await set_message_menu(message, generated_text)
-
     else:
         generated_text = "Oooops, something wrong. Try request again later..."
         await bot.send_message(message.chat.id, md.escape_md(generated_text))
@@ -47,13 +48,13 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
 async def set_message_menu(message: types.Message, generated_text: str):
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
-    markup = InlineKeyboardMarkup(row_width=2)
+    markup = InlineKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
 
     get_mistakes_btn = InlineKeyboardButton(
         "🔴 My mistakes",
         callback_data="get_mistakes")
     get_paraphrase_btn = InlineKeyboardButton(
-        '📈 Make my text better',
+        '📈 Say it better',
         callback_data="get_paraphrase")
     get_hint_btn = InlineKeyboardButton(
         '💡 Hint',
@@ -70,6 +71,8 @@ async def set_message_menu(message: types.Message, generated_text: str):
 @dp.callback_query_handler(text="get_hint")
 async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     message = query.message
+
+    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id, reply_markup=None)
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     state_data = await state.get_data()
@@ -83,6 +86,7 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     await MessageHintService().create_message_hint(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await asyncio.sleep(3)
 
     await set_message_menu(message, state_data["bot_message_text"])
 
@@ -90,6 +94,8 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text="get_mistakes")
 async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     message = query.message
+
+    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id, reply_markup=None)
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     state_data = await state.get_data()
@@ -104,6 +110,7 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     await MessageMistakesService().create_mistakes(mistakes_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await asyncio.sleep(3)
 
     await set_message_menu(message, state_data["bot_message_text"])
 
@@ -112,6 +119,8 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
 async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     message = query.message
+
+    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id, reply_markup=None)
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     generated_text = await MessageTranslationCreator(
@@ -124,6 +133,7 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     await MessageTranslationService().create_translation(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await asyncio.sleep(3)
 
     await set_message_menu(message, state_data["bot_message_text"])
 
@@ -131,6 +141,8 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(text=["get_paraphrase"])
 async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
+
+    await bot.edit_message_reply_markup(chat_id=message.chat.id, message_id=message.message_id, reply_markup=None)
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     state_data = await state.get_data()
@@ -144,5 +156,6 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     await MessageParaphraseService().create_message_paraphrase(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await asyncio.sleep(3)
 
     await set_message_menu(message, state_data["bot_message_text"])
