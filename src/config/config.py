@@ -14,7 +14,7 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 WEBHOOK_SECRET_TOKEN = os.environ.get("WEBHOOK_SECRET_TOKEN")
 OPENAI_API = os.environ.get('OPENAI_API')
 PROXY = os.environ.get('PROXY')
-UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', "src/daily_data")
+UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', "files")
 
 
 class Config(BaseModel):
