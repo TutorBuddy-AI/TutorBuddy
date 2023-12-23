@@ -53,6 +53,9 @@ class TranslateGenerate:
                 f"User didn't understand your last message, "
                 f"Please translate it into {await self.user_native_lang()}. "
         }
-        self.user_message_history[0] = service_request
-        self.user_message_history.append(translate_request)
-        return self.user_message_history
+
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append(translate_request)
+
+        return extended_history

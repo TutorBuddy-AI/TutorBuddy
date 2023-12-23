@@ -49,6 +49,9 @@ class Paraphraser:
                 "so it could be grammatically correct, polite and short and used a slightly more advanced vocabulary."
                 "Provide more than one option if it's possible."
         }
-        self.user_message_history[0] = service_request
-        self.user_message_history.append(paraphrase_request)
-        return self.user_message_history
+
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append(paraphrase_request)
+
+        return extended_history

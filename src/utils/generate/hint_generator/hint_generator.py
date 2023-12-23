@@ -50,7 +50,9 @@ class HintGenerator:
                 "Please explain it to him and give him some hints so he could understand and respond. "
                 "Use simple words and phrases."
         }
-        self.user_message_history[0] = service_request
-        self.user_message_history.append(hint_request)
 
-        return self.user_message_history
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append(hint_request)
+
+        return extended_history

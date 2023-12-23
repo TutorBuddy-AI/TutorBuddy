@@ -1,5 +1,6 @@
 from database import Transactional
 from database.models import MessageTranslation
+from sqlalchemy import delete
 from src.database import session
 from utils.message.schema import MessageHelperInfo
 
@@ -20,3 +21,7 @@ class MessageTranslationService:
         )
 
         session.add(mistakes)
+
+    @Transactional()
+    async def delete_user_message_translations(self, tg_id: str) -> None:
+        await session.execute(delete(MessageTranslation).where(MessageTranslation.tg_id == tg_id))

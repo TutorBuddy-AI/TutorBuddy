@@ -1,5 +1,6 @@
 from database import Transactional
 from database.models import MessageParaphrase
+from sqlalchemy import delete
 from src.database import session
 from utils.message.schema import MessageHelperInfo
 
@@ -18,3 +19,7 @@ class MessageParaphraseService:
         )
 
         session.add(mistakes)
+
+    @Transactional()
+    async def delete_user_message_paraphrases(self, tg_id: str) -> None:
+        await session.execute(delete(MessageParaphrase).where(MessageParaphrase.tg_id == tg_id))

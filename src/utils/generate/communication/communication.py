@@ -46,6 +46,8 @@ class CommunicationGenerate:
                        f"You are English teacher and you need assist user to increase english level. "
         }
 
-        self.user_message_history[0] = service_request
-        self.user_message_history.append({"role": "user", "content": self.prompt})
-        return self.user_message_history
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append({"role": "user", "content": self.prompt})
+
+        return extended_history

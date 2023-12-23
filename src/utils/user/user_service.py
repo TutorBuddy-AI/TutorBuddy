@@ -6,6 +6,9 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 
 from src.utils.message_history_mistakes import MessageMistakesService
 from sqlalchemy import select, update, delete
+from utils.message_hint import MessageHintService
+from utils.message_translation import MessageTranslationService
+from utils.paraphrasing import MessageParaphraseService
 
 
 class UserService:
@@ -63,8 +66,6 @@ class UserService:
 
         results = list(reversed([{'role': row.role, 'content': row.message} for row in result]))
 
-        if not results:
-            results.append({})
         return results
 
     async def is_exist(
@@ -126,6 +127,9 @@ class UserService:
     @Transactional()
     async def delete_user_info(self, tg_id: str) -> None:
         await MessageMistakesService().delete_user_message_mistakes(tg_id)
+        await MessageHintService().delete_user_message_hints(tg_id)
+        await MessageTranslationService().delete_user_message_translations(tg_id)
+        await MessageParaphraseService().delete_user_message_paraphrases(tg_id)
         await SupportHistory().delete_user_questions_history(tg_id)
         await FeedbackHistory().delete_user_feedbacks_history(tg_id)
         await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
