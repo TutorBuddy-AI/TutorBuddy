@@ -43,13 +43,15 @@ class MistakesChecker:
                        f"You are English teacher and you need assist user to increase english level. "
         }
 
-        hint_request = {
+        mistakes_request = {
             "role": "system",
             "content":
                 "The user would like to know if there are any mistakes in his last message. "
                 "Please list his mistakes and suggest options to correct them."
         }
-        self.user_message_history[0] = service_request
-        self.user_message_history.append(hint_request)
 
-        return self.user_message_history
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append(mistakes_request)
+
+        return extended_history

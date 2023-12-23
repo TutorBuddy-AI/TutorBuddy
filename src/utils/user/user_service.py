@@ -66,8 +66,6 @@ class UserService:
 
         results = list(reversed([{'role': row.role, 'content': row.message} for row in result]))
 
-        if not results:
-            results.append({})
         return results
 
     async def is_exist(
