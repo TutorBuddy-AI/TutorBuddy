@@ -26,5 +26,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery):
         pass
 
     await UserService().change_speaker(tg_id=str(query.message.chat.id), new_speaker="Anastasia")
+    await bot.send_sticker(query.message.chat.id,
+                           "CAACAgIAAxkBAAELBollhzvGQUHW5zqXIk8i-FCo0KcvvgACiTwAAj2PgUvXNnwncAPTwjME")
     await bot.send_message(query.message.chat.id, md.escape_md("Let's go!\n"
                                                                "Send me message below ⬇️"))
