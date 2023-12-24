@@ -22,7 +22,7 @@ ELEVENLABS_API = 'c207730cb78101ce98761b628554b3a2'
 ## Run migrations
 
 ```
-alembic upgrade head
+alembic upgrade heads
 ```
 
 ## Run admin
