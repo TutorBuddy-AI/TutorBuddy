@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from typing import List
 
 from src.database.models import MessageHistory
@@ -24,6 +25,17 @@ class UserCreateMessage:
                 {"role": "assistant", "content": generated_text}
             ]
         )
+
+    async def was_last_message_sent_two_days_ago(self) -> bool:
+        user_history = await self.get_user_message_history()
+
+        if user_history and user_history.user_message_history:
+            last_message = user_history.user_message_history[-1]
+
+            if last_message.created_at <= datetime.now() - timedelta(days=2):
+                return True
+
+        return False
 
     @Transactional()
     async def save_to_database_message_history(
