@@ -25,8 +25,10 @@ class Newsletter:
             string = daily_news.message.replace("<p>", "").replace("</p>", "")
 
             for tg_id in tg_ids:
-                await bot.send_message(tg_id, string)
-
+                try:
+                    await bot.send_message(tg_id, string)
+                except:
+                    pass
     async def user_topic(self, topic) -> List[int]:
         print(f"Searching for topic: {topic}")
 
