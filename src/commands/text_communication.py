@@ -26,6 +26,13 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
         prompt=message.text,
         type_message="text")
 
+    if await user_service.was_last_message_sent_two_days_ago():
+        await bot.send_sticker(message.chat.id,
+                               "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
+        state_data = await state.get_data()
+        state_data["sticker_sent"] = True
+        await state.update_data(state_data)
+
     generated_text = await CommunicationGenerate(
         tg_id=str(message.chat.id),
         prompt=message.text,
@@ -43,6 +50,8 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
     else:
         generated_text = "Oooops, something wrong. Try request again later..."
         await bot.send_message(message.chat.id, md.escape_md(generated_text))
+        await bot.send_sticker(message.chat.id,
+                               "CAACAgIAAxkBAAELCCtliDqXM7eKSq7b5EjbayXem1cB5gACmD0AApmSeUtVQ3oaOv4DxDME")
 
 
 async def set_message_menu(message: types.Message, generated_text: str):
@@ -76,6 +85,11 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     state_data = await state.get_data()
+    if "sticker_sent" not in state_data:
+        await bot.send_sticker(query.message.chat.id,
+                               "CAACAgIAAxkBAAELBollhzvGQUHW5zqXIk8i-FCo0KcvvgACiTwAAj2PgUvXNnwncAPTwjME")
+        state_data["sticker_sent"] = True
+        await state.update_data(state_data)
 
     generated_text = await MessageHintCreator(
         tg_id=str(message.chat.id)
