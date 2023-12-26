@@ -1,0 +1,1 @@
+from src.commands.scenario.prompts.talk_show import TalkShowPrompt
