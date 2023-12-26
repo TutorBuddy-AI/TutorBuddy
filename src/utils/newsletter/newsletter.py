@@ -4,6 +4,11 @@ from src.database.models.enums.daily_news import DailyNewsEnum
 from sqlalchemy import select, delete, func
 from src.config.initialize import bot
 
+from typing import List
+
+
+from sqlalchemy import select
+
 
 class Newsletter:
     def __init__(self):

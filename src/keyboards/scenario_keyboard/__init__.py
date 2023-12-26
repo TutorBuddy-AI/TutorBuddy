@@ -1,0 +1,2 @@
+from src.keyboards.scenario_keyboard.scenario_keyboard import get_menu_scenario
+from src.keyboards.scenario_keyboard.talk_show import get_choose_job_menu_talk_show_scenario, get_end_menu_talk_show_scenario

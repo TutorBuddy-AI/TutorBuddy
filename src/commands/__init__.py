@@ -1,5 +1,4 @@
 from src.commands.menu.go_back_to_chat import dp
-from src.commands.scenario.scenario import dp
 from src.commands.form_states import dp
 
 from src.commands.choose_speaker import dp
@@ -13,7 +12,8 @@ from src.commands.menu.feedback import dp
 
 from src.commands.cacncel_state import dp
 
-from commands.scenario.TalkShow.talk_show import dp
+from src.commands.scenario.scenario import dp
+from commands.scenario.talk_show.talk_show import dp
 
 from src.commands.menu.edit_profile import dp
 from src.commands.text_communication import dp
