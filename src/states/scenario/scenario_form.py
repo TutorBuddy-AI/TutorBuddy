@@ -1,7 +1,9 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-class StateTalkShow(StatesGroup):
-    waiting_for_job = State()
+class TalkShowForm(StatesGroup):
+    job = State()
+    other_job = State()
+    start_scenario = State()
     question_1 = State()
     question_2 = State()
     question_3 = State()
@@ -16,3 +18,6 @@ class StateTalkShow(StatesGroup):
     question_12 = State()
     question_13 = State()
     question_14 = State()
+    question_future = State()
+    question_advice_to_newcomers = State()
+    end = State()
