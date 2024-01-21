@@ -1,5 +1,5 @@
 import asyncio
-
+from sqlalchemy import select
 from aiogram.dispatcher import FSMContext
 from src.config import dp, bot
 from src.utils.user import UserCreateMessage
@@ -13,22 +13,41 @@ from utils.message_history_mistakes.message_mistakes_creator import MessageMista
 from utils.message_translation import MessageTranslationService
 from utils.message_translation.message_translation_creator import MessageTranslationCreator
 from utils.paraphrasing import MessageParaphraseService
-
+from src.database import session
+from src.database.models import User
 from aiogram import types, md
 from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
+    query_user = select(User).where(User.tg_id == str(message.chat.id))
+    result_user = await session.execute(query_user)
+    user = result_user.scalar()
+
+    if user:
+        speaker = user.speaker
+    else:
+        speaker = "Anastasia"
+    query_speaker = select(User).where(User.speaker == speaker)
+    result_speaker = await session.execute(query_speaker)
+    speaker_data = result_speaker.scalar()
+    speaker_name = speaker_data.speaker if speaker_data else "Anastasia"
+
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
+
     user_service = UserCreateMessage(
         tg_id=str(message.chat.id),
         prompt=message.text,
-        type_message="text")
+        type_message="text"
+    )
+
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker_name} thinks… Please wait")
+    await asyncio.sleep(3)
 
     if await user_service.was_last_message_sent_two_days_ago():
-        await bot.send_sticker(message.chat.id,
-                               "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
+        await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
+
         state_data = await state.get_data()
         state_data["sticker_sent"] = True
         await state.update_data(state_data)
@@ -36,7 +55,8 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
     generated_text = await CommunicationGenerate(
         tg_id=str(message.chat.id),
         prompt=message.text,
-        user_message_history=await user_service.get_user_message_history()).generate_message()
+        user_message_history=await user_service.get_user_message_history()
+    ).generate_message()
 
     if generated_text is not None:
         written_messages = await UserCreateMessage(
@@ -48,11 +68,11 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
         await MessageHelper().group_conversation_info_to_state(state, written_messages)
         await set_message_menu(message, generated_text)
     else:
-        generated_text = "Oooops, something wrong. Try request again later..."
+        generated_text = "Oooops, something wrong. Try the request again later..."
         await bot.send_message(message.chat.id, md.escape_md(generated_text))
-        await bot.send_sticker(message.chat.id,
-                               "CAACAgIAAxkBAAELCCtliDqXM7eKSq7b5EjbayXem1cB5gACmD0AApmSeUtVQ3oaOv4DxDME")
+        await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAELCCtliDqXM7eKSq7b5EjbayXem1cB5gACmD0AApmSeUtVQ3oaOv4DxDME")
 
+    await bot.delete_message(message.chat.id, wait_message.message_id)
 
 async def set_message_menu(message: types.Message, generated_text: str):
     await bot.send_chat_action(chat_id=message.chat.id, action='typing')
@@ -170,6 +190,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     await MessageParaphraseService().create_message_paraphrase(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await asyncio.sleep(3)
 
     await set_message_menu(message, state_data["bot_message_text"])
