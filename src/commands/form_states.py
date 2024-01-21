@@ -13,7 +13,7 @@ from src.utils.user import UserService, UserLocation, UserHelper
 from aiogram.dispatcher import FSMContext
 from aiogram import types, md
 from aiogram.dispatcher.filters import Text
-from aiogram.types import ParseMode, InlineKeyboardMarkup
+from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 
 
 @dp.message_handler(IsNotRegister())
@@ -24,23 +24,57 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
 
     await asyncio.sleep(3)
 
-    await bot.send_message(message.chat.id, md.escape_md("Let's get to know each other first. What should I call you?"),
-                           reply_markup=await get_keyboard_remove())
+    await bot.send_message(
+        message.chat.id,
+        f"Do you want me to call you '{message.from_user.first_name}' or do you prefer a different format?",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(f"{message.from_user.first_name} - ok", callback_data="name_ok")],
+            [InlineKeyboardButton("It’s not me 🙌🏻", callback_data="not_me")]
+        ])
+    )
+
+
+@dp.callback_query_handler(lambda query: query.data == "name_ok", state=Form.name)
+async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
+    await state.update_data(name=query.from_user.first_name)
+    await state.set_state(Form.native_language)
+
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except:
+        pass
+
+    await bot.send_message(
+        query.message.chat.id,
+        md.escape_md(f"Great, nice to meet you {query.from_user.first_name} 😉! I hope we can be friends😊")
+    )
+    await process_native_handler(query, state)
+@dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
+async def process_not_me(query: types.CallbackQuery, state: FSMContext):
+    await state.set_state(Form.name)
+
+    try:
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except:
+        pass
+
+    await bot.send_message(
+        query.message.chat.id,
+        "I understand, in messengers we often improvise\) What's the best way for me to address you?"
+    )
 
 
 @dp.message_handler(state=Form.name)
 async def process_get_name(message: types.Message, state: FSMContext):
-    await state.update_data(name=message.text)
+    user_data = await state.get_data()
+    await state.update_data(name=user_data["name"])
     await state.set_state(Form.native_language)
-
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-    except:
-        pass
 
     await bot.send_message(message.chat.id, md.escape_md("What is your native language?"),
                            reply_markup=await get_choose_native_language_keyboard())
+
 
 @dp.callback_query_handler(lambda query: query.data.startswith("native"), state=Form.native_language)
 async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
