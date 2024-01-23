@@ -11,10 +11,9 @@ from src.database.models import User
 
 @dp.message_handler(content_types=types.ContentType.VOICE)
 async def handle_get_voice_message(message: types.Message):
-    query_user = select(User).where(User.tg_id == str(message.chat.id))
-    result_user = await session.execute(query_user)
-    user = result_user.scalar()
-    if user:
+    user_servic = UserService()
+    user_info = await user_servic.get_user_info(tg_id=message.chat.id)
+    if user_info:
         speaker = user.speaker
     else:
         speaker = "Anastasia"
@@ -35,7 +34,7 @@ async def handle_get_voice_message(message: types.Message):
     )
 
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker_name} thinks… Please wait")
-    await asyncio.sleep(3)
+
 
     generated_text = await CommunicationGenerate(
         tg_id=str(message.chat.id),

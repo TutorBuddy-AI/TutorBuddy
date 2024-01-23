@@ -17,16 +17,17 @@ from src.database import session
 from src.database.models import User
 from aiogram import types, md
 from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
+from utils.user import UserService
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
-    query_user = select(User).where(User.tg_id == str(message.chat.id))
-    result_user = await session.execute(query_user)
-    user = result_user.scalar()
+    user_servic = UserService()
+    user_info = await user_servic.get_user_info(tg_id=message.chat.id)
 
-    if user:
-        speaker = user.speaker
+
+    if user_info:
+        speaker = user_info["speaker"]
     else:
         speaker = "Anastasia"
     query_speaker = select(User).where(User.speaker == speaker)
@@ -43,7 +44,6 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
     )
 
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker_name} thinks… Please wait")
-    await asyncio.sleep(3)
 
     if await user_service.was_last_message_sent_two_days_ago():
         await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
