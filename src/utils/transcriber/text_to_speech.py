@@ -1,4 +1,4 @@
-from typing import Union, Iterator
+from typing import Union, Iterator, Optional
 
 import aiohttp
 
@@ -18,8 +18,8 @@ class TextToSpeech:
             prompt: str,
             tg_id: str
     ):
-        self.id_bot_voice = "8jLmaTrLPyjjGe8C89W7"
-        self.id_nastya_voice = "gR8zQPSPbsxO3VIZlVZs"
+        self.id_bot_voice = "SQbRRoMNiJau4LetNtC3"
+        self.id_nastya_voice = "UBqdLUcTSGqrfr5Cui2M"
         self.model = "eleven_multilingual_v2"
         self.request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
 
@@ -32,13 +32,14 @@ class TextToSpeech:
         self.prompt = prompt
         self.tg_id = tg_id
 
-    async def get_speech(self) -> Union[bytes, Iterator[bytes]]:
+    async def get_speech(self) -> Optional[Union[bytes, Iterator[bytes]]]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=f"{self.request_url}{await self.get_id_voice()}",
                     json=await self.get_combine_data(),
                     headers=self.headers) as response:
                 if response.status == 200:
+                    print(f"Response: {response}")
                     return await response.read()
                 else:
                     return None

@@ -6,7 +6,7 @@ from utils.generate.hint_generator.hint_generator import HintGenerator
 class MessageHintCreator:
     def __init__(
             self,
-            tg_id: str,
+            tg_id: str
     ):
         self.tg_id = tg_id
 
