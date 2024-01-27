@@ -21,8 +21,10 @@ class MessageHelper:
         return helper_info
 
     async def group_conversation_info_to_state(self, state: FSMContext,  messages: List[MessageHistory]) -> None:
-        await state.update_data(type_message=messages[0].type)
-        await state.update_data(user_message_id=messages[0].id)
-        await state.update_data(user_message_text=messages[0].message)
-        await state.update_data(bot_message_id=messages[1].id)
-        await state.update_data(bot_message_text=messages[1].message)
+        state_data = await state.get_data()
+        state_data["type_message"] = messages[0].type
+        state_data["user_message_id"] = messages[0].id
+        state_data["user_message_text"] = messages[0].message
+        state_data["bot_message_id"] = messages[1].id
+        state_data["bot_message_text"] = messages[1].message
+        await state.update_data(state_data)
