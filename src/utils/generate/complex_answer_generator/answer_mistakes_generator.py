@@ -79,19 +79,17 @@ class AnswerMistakesGenerator:
         answer_request = {
             "role": "system",
             "content": """
-            Please, give an answer on the last user's message in JSON format with the following schema: \n
-            {\n
-            "answer": "{text_of_the_answer}",\n
-            "mistakes": ["{mistake1}", "{mistake2}"] \n
+            Please, give an answer on the last user's message in JSON format with the following schema: 
+            { 
+            "answer": "{text_of_the_answer}", 
+            "mistakes": ["{mistake1}", "{mistake2}"] 
             } 
-            text_of_the_answer should be replaced with the text of the answer for user,\n
-            "mistakes" parameter should be replaced with the list of user's mistakes, that he made in the last message 
-            with suggested options to correct those mistakes, 
-            if the message is correct,  the list should be replaced with "null".\n
+            text_of_the_answer should be replaced with the text of the answer for user,
+            "mistakes" parameter should be replaced with the list of strings with the explanation of grammatical and punctuation user's mistakes, that he made in his last message with suggested options to correct those mistakes, 
+            if the last user's message is grammatically correct, doesn't have any punctuation mistakes and all of words were used properly, the list may be empty. 
             There should be nothing else in the text.
             """
         }
 
         extended_history.append(answer_request)
-
         return extended_history

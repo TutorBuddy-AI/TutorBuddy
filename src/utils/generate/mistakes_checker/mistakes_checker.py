@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 from utils.generate import GenerateAI
 from utils.user import UserService
@@ -9,13 +10,16 @@ class MistakesChecker:
     def __init__(
             self,
             tg_id: str,
-            user_message_history: GetUserMessageHistory
+            user_message_history: GetUserMessageHistory,
+            message_text: str
     ):
         self.tg_id = tg_id
         self.request_url = "https://api.openai.com/v1/chat/completions"
         self.user_message_history = user_message_history
+        self.message_text = message_text
 
-    async def generate_mistakes(self) -> str:
+
+    async def generate_mistakes(self) -> Optional[str]:
         generated_text = await GenerateAI(request_url=self.request_url).send_request(
             payload=await self.get_combine_data())
 
@@ -46,12 +50,13 @@ class MistakesChecker:
         mistakes_request = {
             "role": "system",
             "content":
-                "The user would like to know if there are any mistakes in his last message. "
-                "Please list his mistakes and suggest options to correct them."
+                f"""The user would like to know if there are any mistakes in his message: "{self.message_text}".
+                Please list his mistakes and suggest options to correct them."""
         }
 
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append(mistakes_request)
+        print(extended_history)
 
         return extended_history

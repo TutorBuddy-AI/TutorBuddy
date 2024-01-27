@@ -1,3 +1,5 @@
+from typing import Optional
+
 from utils.user import UserService
 from utils.generate import GenerateAI
 from utils.user.schemas import GetUserMessageHistory
@@ -8,13 +10,15 @@ class Paraphraser:
     def __init__(
             self,
             tg_id: str,
-            user_message_history: GetUserMessageHistory
+            user_message_history: GetUserMessageHistory,
+            message_text: str
     ):
         self.tg_id = tg_id
         self.request_url = "https://api.openai.com/v1/chat/completions"
         self.user_message_history = user_message_history
+        self.message_text = message_text
 
-    async def generate_better_phrase(self) -> str:
+    async def generate_better_phrase(self) -> Optional[str]:
         generated_text = await GenerateAI(request_url=self.request_url).send_request(
             payload=await self.get_combine_data())
 
@@ -45,13 +49,14 @@ class Paraphraser:
         paraphrase_request = {
             "role": "system",
             "content":
-                "User asked you to rephrase his last message "
-                "so it could be grammatically correct, polite and short and used a slightly more advanced vocabulary."
-                "Provide more than one option if it's possible."
+                f"""User asked you to rephrase his message: "{self.message_text}"
+                so it could be grammatically correct, polite and short and used a slightly more advanced vocabulary.
+                Provide more than one option if it's possible."""
         }
 
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append(paraphrase_request)
+        print(extended_history)
 
         return extended_history
