@@ -9,7 +9,10 @@ from aiogram.utils.executor import start_webhook
 
 
 async def on_startup(dispatcher):
-    await bot.set_webhook(url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}", secret_token=config.WEBHOOK_SECRET_TOKEN)
+    if config.WEBHOOK_SECRET_TOKEN:
+        await bot.set_webhook(url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}", secret_token=config.WEBHOOK_SECRET_TOKEN)
+    else:
+        await bot.set_webhook(url=f"{config.WEBHOOK_URL}")
     logging.info("Bot starting")
     logging.info("Dispatcher - %r", dispatcher)
 

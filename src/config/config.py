@@ -16,12 +16,14 @@ OPENAI_API = os.environ.get('OPENAI_API')
 PROXY = os.environ.get('PROXY')
 ELEVENLABS_API = os.environ.get('ELEVENLABS_API')
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', "files")
+APP_HOST: str = os.environ.get('APP_HOST', "localhost")
+APP_PORT: str = os.environ.get('APP_PORT', 8000)
 
 
 class Config(BaseModel):
     SKIP_UPDATES: bool = True
-    APP_HOST: str = "localhost"
-    APP_PORT: int = 8000
+    APP_HOST: str = APP_HOST
+    APP_PORT: int = APP_PORT
     BOT_API_TOKEN: str = BOT_API_TOKEN
     DATABASE_URL: str = DATABASE_URL
     WEBHOOK_URL: str = WEBHOOK_URL
