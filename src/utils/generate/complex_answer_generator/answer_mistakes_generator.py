@@ -1,0 +1,95 @@
+import json
+from typing import Optional, Dict
+
+from src.utils.user import UserService
+from src.utils.user.schemas import GetUserMessageHistory
+from src.utils.generate import GenerateAI
+
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+from utils.generate.complex_answer_generator.answer_schema import answer_schema
+
+
+class AnswerMistakesGenerator:
+    """
+    Class to generate AI's answer on user's message in JSON format
+    with the list of user's mistakes
+    """
+    def __init__(
+            self,
+            tg_id: str,
+            prompt: str,
+            user_message_history: GetUserMessageHistory
+    ):
+        self.tg_id = tg_id
+        self.prompt = prompt
+        self.request_url = "https://api.openai.com/v1/chat/completions"
+        self.user_message_history = user_message_history
+
+    async def generate_message(self) -> Optional[Dict[str, object]]:
+        generated_text = await GenerateAI(request_url=self.request_url).send_request(
+            payload=await self.get_combine_data())
+
+        if generated_text is not None:
+            return await self.parse_answer(generated_text["choices"][0]["message"]["content"])
+        else:
+            return None
+
+    @staticmethod
+    async def validate_answer(answer_json: str) -> bool:
+        try:
+            validate(instance=answer_json, schema=answer_schema)
+        except ValidationError as err:
+            return False
+        return True
+
+    async def parse_answer(self, answer_json: str) -> Optional[Dict[str, object]]:
+        try:
+            loaded_json = json.loads(answer_json)
+        except ValueError as err:
+            return None
+        if await self.validate_answer(loaded_json):
+            return loaded_json
+        return None
+
+    async def get_combine_data(self) -> json:
+        return {
+            "model": "gpt-3.5-turbo",
+            "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
+            "max_tokens": 400
+        }
+
+    async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
+        user_info = await UserService().get_user_info(self.tg_id)
+
+        service_request = {
+            "role": "system",
+            "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
+                       f" His English level is {user_info['english_level']}, where 1 is the worst level of"
+                       f" English, and 4 is a good level of English. His goal is to study the English"
+                       f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
+                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                       f"You are English teacher and you need assist user to increase english level. "
+        }
+
+        extended_history = [service_request]
+        extended_history.extend(self.user_message_history)
+        extended_history.append({"role": "user", "content": self.prompt})
+
+        answer_request = {
+            "role": "system",
+            "content": """
+            Please, give an answer on the last user's message in JSON format with the following schema: 
+            { 
+            "answer": "{text_of_the_answer}", 
+            "mistakes": ["{mistake1}", "{mistake2}"] 
+            } 
+            text_of_the_answer should be replaced with the text of the answer for user,
+            "mistakes" parameter should be replaced with the list of strings with the explanation of grammatical and punctuation user's mistakes, that he made in his last message with suggested options to correct those mistakes, 
+            if the last user's message is grammatically correct, doesn't have any punctuation mistakes and all of words were used properly, the list may be empty. 
+            There should be nothing else in the text.
+            """
+        }
+
+        extended_history.append(answer_request)
+        return extended_history

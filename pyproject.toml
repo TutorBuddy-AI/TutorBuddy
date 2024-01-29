@@ -26,6 +26,7 @@ fastapi = "^0.104.1"
 sqlalchemy-file = "^0.6.0"
 pillow = "^10.1.0"
 fasteners = "^0.19"
+jsonschema = "^4.20.0"
 
 
 [build-system]
