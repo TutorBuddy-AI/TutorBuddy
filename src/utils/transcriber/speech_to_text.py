@@ -1,12 +1,7 @@
-from src.config import bot, config
+from src.config import bot
 from src.utils.generate import GenerateAI
 
-import ast
-
 from io import BytesIO
-
-
-OPENAI_API = ast.literal_eval(config.OPENAI_API)
 
 
 class SpeechToText:
@@ -31,8 +26,3 @@ class SpeechToText:
         voice = await bot.get_file(self.file_id)
 
         return await bot.download_file_by_id(voice.file_id)
-
-
-
-
-

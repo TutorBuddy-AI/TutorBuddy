@@ -5,14 +5,10 @@ import aiohttp
 from src.utils.user import UserService
 from src.config import config
 
-import ast
 import json
 
 
-OPENAI_API = ast.literal_eval(config.OPENAI_API)
-
-
-class TextToSpeech:
+class TextToSpeechEleven:
     def __init__(
             self,
             prompt: str,

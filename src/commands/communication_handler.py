@@ -14,8 +14,9 @@ from utils.generate.communication import CommunicationGenerate
 from utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from utils.message import MessageHelper
 from utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
-from utils.transcriber import TextToSpeech, SpeechToText
-from utils.user import UserCreateMessage
+from utils.transcriber import TextToSpeechEleven, SpeechToText
+from utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
+from utils.user import UserCreateMessage, UserService
 
 
 class CommunicationHandler:
@@ -96,12 +97,21 @@ class CommunicationHandler:
                 "CAACAgIAAxkBAAELCCtliDqXM7eKSq7b5EjbayXem1cB5gACmD0AApmSeUtVQ3oaOv4DxDME")
 
     async def render_audio_answer(self, render: Render):
-        audio = await TextToSpeech(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        user_info = await UserService().get_user_info(self.chat_id)
+        user_speaker = user_info['speaker']
+
+        if user_speaker == 'Anastasia':
+            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        elif user_speaker == 'bot':
+            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        else:
+            raise Exception("Unknown speaker")
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(
                 self.chat_id, md.escape_md(render.message_text), reply_markup=render.user_message_markup)
-            answer_message = await self.bot.send_audio(self.chat_id, audio=audio, reply_markup=render.bot_message_markup)
+            answer_message = await self.bot.send_audio(self.chat_id, audio=audio,
+                                                       reply_markup=render.bot_message_markup)
             await self.clear_old_menus()
             await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
         else:
@@ -126,7 +136,7 @@ class CommunicationHandler:
 
     async def send_missed_you_sticker(self):
         await self.bot.send_sticker(self.chat_id,
-                               "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
+                                    "CAACAgIAAxkBAAELCClliDpu7gUs1D7IY2VbH0lFGempgwACnUgAAlH1eEtz9YwiWRWyAAEzBA")
         state_data = await self.state.get_data()
         state_data["sticker_sent"] = True
         await self.state.update_data(state_data)
