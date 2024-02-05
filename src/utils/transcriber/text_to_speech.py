@@ -1,61 +1,21 @@
-from typing import Union, Iterator, Optional
-
-import aiohttp
-
-from src.utils.user import UserService
-from src.config import config
-
-import ast
-import json
-
-
-OPENAI_API = ast.literal_eval(config.OPENAI_API)
+from utils.transcriber import TextToSpeechOpenAI, TextToSpeechEleven
+from utils.user import UserService
 
 
 class TextToSpeech:
-    def __init__(
-            self,
-            prompt: str,
-            tg_id: str
-    ):
-        self.id_bot_voice = "SQbRRoMNiJau4LetNtC3"
-        self.id_nastya_voice = "UBqdLUcTSGqrfr5Cui2M"
-        self.model = "eleven_multilingual_v2"
-        self.request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
-
-        self.headers = {
-            "Accept": "audio/mpeg",
-            "Content-Type": "application/json",
-            "xi-api-key": config.ELEVENLABS_API
-        }
-
+    def __init__(self, prompt: str, tg_id: str):
         self.prompt = prompt
         self.tg_id = tg_id
 
-    async def get_speech(self) -> Optional[Union[bytes, Iterator[bytes]]]:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                    url=f"{self.request_url}{await self.get_id_voice()}",
-                    json=await self.get_combine_data(),
-                    headers=self.headers) as response:
-                if response.status == 200:
-                    print(f"Response: {response}")
-                    return await response.read()
-                else:
-                    return None
-
-    async def get_combine_data(self) -> json:
-        return {
-            "text": self.prompt,
-            "model_id": self.model,
-            "voice_settings": {
-                "stability": 0.5,
-                "similarity_boost": 0.1,
-                "use_speaker_boost": True,
-            },
-        }
+    async def get_speech(self):
+        voice = await self.get_id_voice()
+        if voice == 'Anastasia':
+            audio = await TextToSpeechEleven(prompt=self.prompt, tg_id=str(self.tg_id)).get_speech()
+        else:
+            audio = await TextToSpeechOpenAI(prompt=self.prompt, tg_id=str(self.tg_id)).get_speech()
+        return audio
 
     async def get_id_voice(self) -> str:
         user_info = await UserService().get_user_info(self.tg_id)
 
-        return self.id_nastya_voice if user_info["speaker"] == "Anastasia" else self.id_bot_voice
+        return user_info["speaker"] == "Anastasia"

@@ -14,6 +14,9 @@ from utils.generate.communication import CommunicationGenerate
 from utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from utils.message import MessageHelper
 from utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
+from utils.transcriber import TextToSpeechEleven, SpeechToText
+from utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
+from utils.user import UserCreateMessage, UserService
 from utils.stciker.sticker_sender import StickerSender
 from utils.transcriber import TextToSpeech, SpeechToText
 from utils.user import UserCreateMessage, UserService
@@ -117,7 +120,15 @@ class CommunicationHandler:
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
 
     async def render_audio_answer(self, render: Render):
-        audio = await TextToSpeech(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        user_info = await UserService().get_user_info(self.chat_id)
+        user_speaker = user_info['speaker']
+
+        if user_speaker == 'Anastasia':
+            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        elif user_speaker == 'bot':
+            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        else:
+            raise Exception("Unknown speaker")
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(
