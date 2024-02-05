@@ -14,8 +14,9 @@ async def get_choose_native_language_keyboard() -> InlineKeyboardMarkup:
     german = InlineKeyboardButton(text='German 🇩🇪', callback_data='native_DE')
 
     french = InlineKeyboardButton(text='French 🇫🇷', callback_data='native_FR')
+    other = InlineKeyboardButton(text='Other', callback_data='other_language')
 
-    choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french)
+    choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french, other)
 
     return choose_native_language_inline_kb
 
@@ -27,11 +28,21 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     education = InlineKeyboardButton(text='Education 🎓', callback_data='goal_education')
 
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='goal_travel')
-    relocate = InlineKeyboardButton(text='Relocate 🌍️', callback_data='goal_relocate')
+    relocate = InlineKeyboardButton(text='Move abroad 🌎', callback_data='goal_relocate')
 
-    culture = InlineKeyboardButton(text='Culture 🗽️', callback_data='goal_culture')
+    culture = InlineKeyboardButton(text='Culture 🗽', callback_data='goal_culture')
+    love = InlineKeyboardButton(text='Love 💖️', callback_data='goal_love')
 
-    choose_goal_inline_kb.row(career, education).row(travel, relocate).row(culture)
+    friendship = InlineKeyboardButton(text='Friendship 👋🏻', callback_data='goal_friendship')
+    network = InlineKeyboardButton(text='Network 🤝🏻', callback_data='goal_network')
+
+    other = InlineKeyboardButton(text='Other✍️🏻', callback_data='other_goal')
+
+    (choose_goal_inline_kb
+        .row(career, education).row(travel, relocate)
+        .row(culture, love).row(friendship, network)
+        .row(other)
+     )
 
     return choose_goal_inline_kb
 
@@ -56,30 +67,34 @@ async def get_choose_english_level_keyboard() -> InlineKeyboardMarkup:
 async def get_choose_topic_keyboard() -> InlineKeyboardMarkup:
     choose_topic_inline_kb = InlineKeyboardMarkup(row_width=2)
 
-    book = InlineKeyboardButton(text='Books 📚', callback_data='topic_books')
+    psychology = InlineKeyboardButton(text='Psychology 🧠', callback_data='topic_psychology')
     business = InlineKeyboardButton(text='Business 💵', callback_data='topic_business')
 
-    movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
-    music = InlineKeyboardButton(text='Music 🎵', callback_data='topic_music')
+    science = InlineKeyboardButton(text='Science 🧬', callback_data='topic_science')
+    innovations = InlineKeyboardButton(text='Innovations 💡', callback_data='topic_innovations')
 
     fashion = InlineKeyboardButton(text='Fashion 🕶️', callback_data='topic_fashion')
     art_and_design = InlineKeyboardButton(text='Art & Design 🎨', callback_data='topic_art_and_design')
 
     games = InlineKeyboardButton(text='Games 🕹️', callback_data='topic_games')
-    innovations = InlineKeyboardButton(text='Innovations 💡', callback_data='topic_innovations')
+    music = InlineKeyboardButton(text='Music 🎵', callback_data='topic_music')
 
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='topic_travel')
-    news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
+    book = InlineKeyboardButton(text='Books 📚', callback_data='topic_books')
 
     sports = InlineKeyboardButton(text='Sports ⚽️️', callback_data='topic_sports')
-    career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
+    health = InlineKeyboardButton(text='Health 🫁️', callback_data='topic_health')
 
-    science = InlineKeyboardButton(text='Science 🧬', callback_data='topic_science')
+    movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
+    other = InlineKeyboardButton(text='Other', callback_data='topic_other')
+
+    # news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
+    # career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
 
     done_button = InlineKeyboardButton(text='Accept', callback_data='done')
 
-    choose_topic_inline_kb.row(book, business).row(movies, music).row(fashion, art_and_design).row(games, innovations).\
-        row(travel, news).row(sports, career).row(science).row(done_button)
+    choose_topic_inline_kb.row(psychology, business).row(science, innovations).row(fashion, art_and_design).row(games, music).\
+        row(travel, book).row(sports, health).row(movies, other).row(done_button)
 
     return choose_topic_inline_kb
 
