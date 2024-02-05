@@ -50,4 +50,14 @@ class CommunicationGenerate:
         extended_history.extend(self.user_message_history)
         extended_history.append({"role": "user", "content": self.prompt})
 
+        prompt_request = (
+            "Please, maintain a friendly conversation - answer to the user's question "
+            "and ask him questions about things that interest him, as if you are his buddy or friend. "
+            "If he starts speaking in a language other than English, give him a gentle reprimand "
+            "and suggest that he start speaking English again. Always answer in English only")
+
+        extended_history.append({
+            "role": "system",
+            "content": prompt_request})
+
         return extended_history

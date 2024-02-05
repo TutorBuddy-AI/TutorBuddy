@@ -213,7 +213,7 @@ async def process_other_topic_handler(message: types.Message, state: FSMContext)
     await create_user_setup_speaker_choice(message, state)
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
-    state_data = state.get_data()
+    state_data = await state.get_data()
     user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
 

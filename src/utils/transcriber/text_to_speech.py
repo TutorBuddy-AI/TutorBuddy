@@ -19,3 +19,10 @@ class TextToSpeech:
         user_info = await UserService().get_user_info(self.tg_id)
 
         return user_info["speaker"] == "Anastasia"
+    @staticmethod
+    async def get_speech_by_voice(voice, text):
+        if voice == 'Anastasia':
+            audio = await TextToSpeechEleven.get_speech_for_text(text)
+        else:
+            audio = await TextToSpeechOpenAI.get_speech_for_text(text)
+        return audio

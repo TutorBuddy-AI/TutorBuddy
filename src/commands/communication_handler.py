@@ -18,7 +18,7 @@ from utils.transcriber import TextToSpeechEleven, SpeechToText
 from utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from utils.user import UserCreateMessage, UserService
 from utils.stciker.sticker_sender import StickerSender
-from utils.transcriber import TextToSpeech, SpeechToText
+from utils.transcriber import SpeechToText
 from utils.user import UserCreateMessage, UserService
 
 
@@ -125,7 +125,7 @@ class CommunicationHandler:
 
         if user_speaker == 'Anastasia':
             audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == 'bot':
+        elif user_speaker == "Tutor Bot":
             audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
         else:
             raise Exception("Unknown speaker")

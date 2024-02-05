@@ -11,6 +11,8 @@ from io import BytesIO
 
 OPENAI_API = ast.literal_eval(config.OPENAI_API)
 
+request_url = "https://api.openai.com/v1/audio/speech"
+man_providers = "echo"
 
 class TextToSpeechOpenAI:
     def __init__(
@@ -18,15 +20,21 @@ class TextToSpeechOpenAI:
             prompt: str,
             tg_id: str
     ):
-        self.request_url = "https://api.openai.com/v1/audio/speech"
-        self.man_providers = "echo"
-
         self.prompt = prompt
         self.tg_id = tg_id
 
     async def get_speech(self) -> BytesIO:
-        generated_audio = await GenerateAI(request_url=self.request_url).send_request(
+        generated_audio = await GenerateAI(request_url=request_url).send_request(
             payload=await self.get_combine_data())
+
+        if generated_audio is not None:
+            return generated_audio
+        else:
+            return None
+    @staticmethod
+    async def get_speech_for_text(text) -> BytesIO:
+        generated_audio = await GenerateAI(request_url=request_url).send_request(
+            payload=await TextToSpeechOpenAI.get_combine_data_simple(text))
 
         if generated_audio is not None:
             return generated_audio
@@ -39,9 +47,18 @@ class TextToSpeechOpenAI:
 
         return {
             "model": "tts-1-hd",
-            "voice": self.man_providers,
+            "voice": man_providers,
             "input": self.prompt,
             "speed": speed
+        }
+    @staticmethod
+    async def get_combine_data_simple(text) -> json:
+
+        return {
+            "model": "tts-1-hd",
+            "voice": man_providers,
+            "input": text,
+            "speed": 1.0
         }
 
     async def get_english_level(self) -> int:

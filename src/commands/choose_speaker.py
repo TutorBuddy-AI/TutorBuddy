@@ -52,7 +52,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
 async def start_talk(message: types.Message, state: FSMContext):
     text = await TalkInitializer(message.chat.id).generate_message()
 
-    user_service = UserCreateMessage(
+    await UserCreateMessage(
         tg_id=str(message.chat.id),
         prompt=text,
         type_message="text").save_to_database_message_history(
@@ -62,4 +62,5 @@ async def start_talk(message: types.Message, state: FSMContext):
     )
 
     await bot.send_message(message.chat.id, md.escape_md(text))
+    await state.finish()
 

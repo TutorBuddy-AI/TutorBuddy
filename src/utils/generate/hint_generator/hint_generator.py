@@ -49,6 +49,7 @@ class HintGenerator:
                 "probably because of using too complicated(or just unfamiliar to him) words, terms and phrases. "
                 "Please explain it to him and give him some hints so he could understand and respond. "
                 "Use simple words and phrases."
+                "If there is no need for further explanation, kindly convey that"
         }
 
         extended_history = [service_request]
