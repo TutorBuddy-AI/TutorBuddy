@@ -3,10 +3,14 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 class Form(StatesGroup):
     name = State()
+    other_name = State()
     native_language = State()
+    other_language = State()
     goal = State()
+    other_goal = State()
     english_level = State()
     topic = State()
+    additional_topic = State()
 
 
 class NewValueUserInfo(StatesGroup):
@@ -32,3 +36,6 @@ class FormNativeLanguage(StatesGroup):
 
 class FormEnglishLevel(StatesGroup):
     new_english_level = State()
+
+class FormInitTalk(StatesGroup):
+    init_user_message = State()

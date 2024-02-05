@@ -6,9 +6,10 @@ from utils.answer.render import Render
 
 class AnswerRenderer:
     """Class to present generation results in messages"""
-    def __init__(self, answer: Answer, message_text: str, message_type: str):
+    def __init__(self, answer: Answer, message_text: str, reply_to_message_id, message_type: str):
         self.answer = answer
         self.answer_text = answer.answer_text
+        self.reply_to_message_id = reply_to_message_id
         self.are_mistakes_provided = answer.are_mistakes_provided
         self.mistakes = answer.mistakes
         self.message_text = message_text
@@ -64,19 +65,19 @@ class AnswerRenderer:
             case Answer(answer_text=None):
                 return Render(
                     "Oooops, something wrong. Try request again later...",
-                    self.message_text, self.message_type, False)
+                    self.message_text, self.reply_to_message_id, self.message_type, False)
             case Answer(answer_text=answ_text, are_mistakes_provided=False):
                 user_message_markup = self.get_user_message_markup(0)
                 bot_message_markup = self.get_answer_markup()
                 return Render(
-                    self.answer_text, self.message_text, self.message_type, True,
-                    user_message_markup, bot_message_markup
+                    self.answer_text, self.message_text, self.reply_to_message_id,
+                    self.message_type, True, user_message_markup, bot_message_markup
                 )
             case _:
                 user_message_markup = self.get_user_message_markup(len(self.mistakes))
                 bot_message_markup = self.get_answer_markup()
                 return Render(
-                    self.answer_text, self.message_text, self.message_type, True,
-                    user_message_markup, bot_message_markup
+                    self.answer_text, self.message_text, self.reply_to_message_id,
+                    self.message_type, True, user_message_markup, bot_message_markup
                 )
 

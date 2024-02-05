@@ -1,23 +1,99 @@
 from aiogram import md
 from src.utils.payments.tariff_plans import get_tariff_plans
 
-
-async def get_welcome_text():
+def get_welcome_text_before_start():
     return md.text(
-        "Hi! I'm **Tutor Buddy**, your personal English language practice tutor 💭\n\n"
+        "Hi! This is your personal Tutor Buddy and I will help you to improve your English.\n\n"
+        "By practicing English everyday with me, you will be able to:\n\n"
+        "🚀 work or study abroad\n"
+        "⚡️ excel at a job interview\n"
+        "🌟 ace your exams\n"
+        "have everyday conversations and build your confidence!")
+
+def get_welcome_text(name):
+    return md.escape_md(
+        f"Hi {name}! I'mTutor Buddy, your personal English language practice tutor 💭\n\n"
         "I know how difficult it is to speak English without practice and a native speaker around.\n\n"
         "In order to feel confident in dialogues in a foreign language you need to get between 600 and 1,000 hours of "
         "practice. Talking to me every day will make it fun and rewarding.\n\n"
-        "Let's get started! 🏄🏽‍♀️",
-        sep='\n\n')
+        "Let's get started! 🏄🏽‍♀️")
 
-async def get_choose_bot_text():
+def get_lets_know_each_other():
+    return md.text(
+        "Let's get to know each other first"
+    )
+
+def get_choose_bot_text():
     return md.escape_md(
         "You can continue talking to me or choose one of the other speaking partners. They are Tutor Buddy co-founder's"
         " digital twins, so you can get to know them through voice and visuals and discuss anything with them.\n\n"
         "👩🏻‍🚀 Anastasia is keen on entrepreneurship, fashion, movies and science\n\n"
         "Please notice that if you choose this option, another chat with a person will pop up."
     )
+
+def get_other_native_language_question():
+    return md.escape_md(
+        "What is your native language? Write only its name, for example, 'Japanese'"
+    )
+
+def get_incorrect_native_language_question():
+    return md.escape_md(
+        "The name of the language looks incorrect. Please use only English characters in the name of the language.\n"
+        "Please, tell me the other name of your native language"
+    )
+
+def get_other_goal():
+    return md.escape_md(f"Please describe the reason why you want to practice English?")
+
+def get_chose_some_topics():
+    return md.escape_md(
+        "Choose some appealing topics (more than 2). "
+        "It will help us to have interesting conversations and I will also share some relevant news! 🤩"
+    )
+
+def get_other_topics():
+    return md.escape_md(
+        "Please list other topics that interest you, separated by commas. "
+        "Example: '3d printing, knitting'"
+    )
+
+def get_choose_buddy_text1():
+    return md.escape_md(
+        "To have even more fun practicing English, "
+        "you can talk to Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️")
+
+
+def get_choose_buddy_text2():
+    return md.escape_md(
+        "She can be your speaking partner, "
+        "so you will get to know her through voice and visuals. "
+        "Anastasia is open to share opinions and debate on various topics 💬")
+
+def get_choose_buddy_text3():
+    return md.escape_md(
+        "By the way, another digital twins will be available soon! "
+        "🌟 You can switch personas later using menu.")
+
+def get_choice_is_done():
+    return md.escape_md("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
+
+def get_greeting_anastasia():
+    return md.escape_md(
+        "Hi, Name 😌 I am Anastasia, nice to meet you! "
+        "I am an entrepreneur and the TutorBuddy's founder! "
+        "I'm interested in technology, fashion, movies, innovations and science. "
+        "I am a digital twin, but you can"
+    )
+
+def get_start_talk(is_bot: bool, name: str):
+    prefix = f"Hi, {name}!" if is_bot else ""
+    return (
+            prefix + "The best way to practice spoken English is to speak! "
+            "Go ahead and send me a voice message or text me. "
+            "Tell me, how is your day going?")
+
+
+
 
 # def get_models_text():
 #     return md.text(

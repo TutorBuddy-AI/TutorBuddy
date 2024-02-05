@@ -1,5 +1,5 @@
 import asyncio
-
+from sqlalchemy import select
 from aiogram.dispatcher import FSMContext
 from commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
@@ -12,27 +12,28 @@ from utils.message_history_mistakes.message_mistakes_creator import MessageMista
 from utils.message_translation import MessageTranslationService
 from utils.message_translation.message_translation_creator import MessageTranslationCreator
 from utils.paraphrasing import MessageParaphraseService
-
+from src.database import session
+from src.database.models import User
 from aiogram import types, md
 from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
+from utils.user import UserService, UserCreateMessage
+
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     await handler.handle_text_message()
+
 
 @dp.callback_query_handler(text="request_hint")
 async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     message: Message = query.message
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
-    if "sticker_sent" not in state_data:
-        await bot.send_sticker(query.message.chat.id,
-                               "CAACAgIAAxkBAAELBollhzvGQUHW5zqXIk8i-FCo0KcvvgACiTwAAj2PgUvXNnwncAPTwjME")
-        state_data["sticker_sent"] = True
-        await state.update_data(state_data)
 
     generated_text = await MessageHintCreator(
         tg_id=str(message.chat.id)
@@ -53,6 +54,7 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
 
@@ -77,6 +79,7 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
@@ -98,6 +101,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
 
@@ -111,6 +115,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     await MessageParaphraseService().create_message_paraphrase(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
     await asyncio.sleep(3)
 
     await handler.render_answer(await handler.load_render_from_context())
