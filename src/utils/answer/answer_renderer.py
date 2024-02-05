@@ -35,9 +35,11 @@ class AnswerRenderer:
     def get_user_message_markup(self, num_mistakes: int = 0) -> InlineKeyboardMarkup:
         user_message_markup = InlineKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
 
-        buttons_list = list([InlineKeyboardButton(
-            '📈 Say it better',
-            callback_data="request_paraphrase")])
+        buttons_list = list([
+            # InlineKeyboardButton(
+            # '📈 Say it better',
+            # callback_data="request_paraphrase")
+        ])
         # ToDo fix if misttakes in json are ok
         # mistakes button won't be provided only if mistakes were provided as empty list
         # if (self.are_mistakes_provided and (num_mistakes != 0)) or (not self.are_mistakes_provided):
@@ -57,7 +59,7 @@ class AnswerRenderer:
             '📖 Translate',
             callback_data="request_translation")
 
-        bot_message_markup.row(get_hint_btn, get_translation_btn)
+        bot_message_markup.row(get_translation_btn, get_hint_btn)
         return bot_message_markup
 
     def render(self) -> Render:

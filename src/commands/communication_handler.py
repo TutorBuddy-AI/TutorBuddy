@@ -18,7 +18,7 @@ from utils.transcriber import TextToSpeechEleven, SpeechToText
 from utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from utils.user import UserCreateMessage, UserService
 from utils.stciker.sticker_sender import StickerSender
-from utils.transcriber import TextToSpeech, SpeechToText
+from utils.transcriber import SpeechToText
 from utils.user import UserCreateMessage, UserService
 
 

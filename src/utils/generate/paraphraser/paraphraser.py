@@ -49,9 +49,12 @@ class Paraphraser:
         paraphrase_request = {
             "role": "system",
             "content":
-                f"""User asked you to rephrase his message: "{self.message_text}"
-                so it could be grammatically correct, polite and short and used a slightly more advanced vocabulary.
-                Provide more than one option if it's possible."""
+                f"Kindly rephrase the user's message: '{self.message_text}' "
+                "to ensure grammatical accuracy, politeness, and brevity. If possible, provide multiple options. "
+                "If the original message is already well-constructed and concise, "
+                "please indicate that no rephrasing is necessary. "
+                "Don't rephrase assistant's messages - there's no need"
+                "If there is only 'Hi' or something similar - just explain that you can't rephrase it"
         }
 
         extended_history = [service_request]

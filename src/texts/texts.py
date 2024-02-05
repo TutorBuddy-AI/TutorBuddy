@@ -86,7 +86,7 @@ def get_greeting_anastasia():
     )
 
 def get_start_talk(is_bot: bool, name: str):
-    prefix = f"Hi, {name}!" if is_bot else ""
+    prefix = f"Hi, {name}! " if is_bot else ""
     return (
             prefix + "The best way to practice spoken English is to speak! "
             "Go ahead and send me a voice message or text me. "
