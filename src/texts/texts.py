@@ -51,6 +51,11 @@ def get_chose_some_topics():
         "It will help us to have interesting conversations and I will also share some relevant news! 🤩"
     )
 
+def get_chose_some_more_topics():
+    return md.escape_md(
+        "Please, choose more than 2 topics"
+    )
+
 def get_other_topics():
     return md.escape_md(
         "Please list other topics that interest you, separated by commas. "
@@ -78,12 +83,10 @@ def get_choice_is_done():
     return md.escape_md("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
 
 def get_greeting_anastasia():
-    return md.escape_md(
-        "Hi, Name 😌 I am Anastasia, nice to meet you! "
-        "I am an entrepreneur and the TutorBuddy's founder! "
-        "I'm interested in technology, fashion, movies, innovations and science. "
-        "I am a digital twin, but you can"
-    )
+    return ("I am Anastasia, nice to meet you! "
+    "I am an entrepreneur and the TutorBuddy's founder! "
+    "I'm interested in technology, fashion, movies, innovations and science. "
+    "I am a digital twin, but you can")
 
 def get_start_talk(is_bot: bool, name: str):
     prefix = f"Hi, {name}! " if is_bot else ""

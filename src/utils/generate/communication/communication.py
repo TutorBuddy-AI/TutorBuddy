@@ -1,4 +1,5 @@
 import json
+import logging
 
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
@@ -30,7 +31,7 @@ class CommunicationGenerate:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 400
+            "max_tokens": 100
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
@@ -59,5 +60,7 @@ class CommunicationGenerate:
         extended_history.append({
             "role": "system",
             "content": prompt_request})
+
+        logging.info(f"Extended history [CommunicationGenerate]: {extended_history}")
 
         return extended_history

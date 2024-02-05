@@ -182,7 +182,6 @@ class CommunicationHandler:
             tg_id=str(self.chat_id),
             prompt=user_message_text,
             user_message_history=await user_service.get_user_message_history()).generate_message()
-        print(generated_json)
         if generated_json:
             answer = Answer(answer_text=generated_json["answer"], mistakes=generated_json["mistakes"])
         else:

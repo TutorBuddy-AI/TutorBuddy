@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional
 
 from utils.generate import GenerateAI
@@ -57,6 +58,6 @@ class MistakesChecker:
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append(mistakes_request)
-        print(extended_history)
+        logging.info(f"Extended history [MistakesChecker]: {extended_history}")
 
         return extended_history

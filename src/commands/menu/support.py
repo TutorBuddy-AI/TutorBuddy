@@ -11,11 +11,6 @@ from src.utils.generate.question_history.question_history import SupportHistory
 async def support_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormSupport.message)
 
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    except:
-        pass
-
     await bot.send_message(message.chat.id, md.escape_md("TutorBuddy team is always on duty!"
                                                          " 🦸🏻‍️🦸🏽‍️ What is the problem?"),
                            reply_markup=await get_go_back_inline_keyboard())
@@ -25,11 +20,6 @@ async def support_handler(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FormSupport.message)
 async def support_query_handler(message: types.Message, state: FSMContext):
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    except:
-        pass
 
     await state.update_data(new_value=message.text)
 

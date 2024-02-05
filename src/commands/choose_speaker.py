@@ -31,18 +31,18 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
 async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
-    await user_service.change_speaker(tg_id=str(query.message.chat.id), new_speaker="Anastasia")
+    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
 
     await bot.send_message(query.message.chat.id, get_choice_is_done())
-
+    user_info = await user_service.get_user_info(tg_id=str(tg_id))
+    name = user_info["name"]
     greeting_nastya = get_greeting_anastasia()
-    await bot.send_message(query.message.chat.id, get_greeting_anastasia())
+    await bot.send_message(query.message.chat.id, md.escape_md(f"Hi, {name} 😌" + get_greeting_anastasia()))
 
-    audio = await TextToSpeech(tg_id=tg_id, prompt=greeting_nastya).get_speech()
+    audio = await TextToSpeech(tg_id=tg_id, prompt=f"Hi, {name} " + get_greeting_anastasia()).get_speech()
     await bot.send_audio(query.message.chat.id, audio)
 
-    user_info = await user_service.get_user_info(tg_id=str(tg_id))
-    check_text = get_start_talk(False, user_info["name"])
+    check_text = get_start_talk(False, name)
     await bot.send_message(query.message.chat.id, md.escape_md(check_text + "💬"))
     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
     await bot.send_audio(query.message.chat.id, audio)

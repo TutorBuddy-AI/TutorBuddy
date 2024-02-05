@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Optional, Dict
 
 from src.utils.user import UserService
@@ -56,7 +57,7 @@ class AnswerMistakesGenerator:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 400
+            "max_tokens": 100
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
@@ -97,4 +98,7 @@ class AnswerMistakesGenerator:
         }
 
         extended_history.append(answer_request)
+
+        logging.info(f"Extended history [AnswerMistakesGenerator]: {extended_history}")
+
         return extended_history

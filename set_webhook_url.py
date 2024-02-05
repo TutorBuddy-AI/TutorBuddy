@@ -28,11 +28,12 @@ async def on_startup(dispatcher):
     ]
     await bot.set_my_commands(bot_commands)
 
-# async def on_shutdown(dispatcher):
-#     await bot.delete_webhook()
+async def on_shutdown():
+    await bot.delete_webhook(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
+    on_shutdown()
     start_webhook(
         dispatcher=dp,
         webhook_path=config.WEBHOOK_PATH,

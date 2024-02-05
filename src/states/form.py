@@ -27,12 +27,14 @@ class FormName(StatesGroup):
 
 class FormTopic(StatesGroup):
     new_topic = State()
+    new_additional_topic = State()
 
 class FormSpeaker(StatesGroup):
     new_speaker = State()
 
 class FormNativeLanguage(StatesGroup):
     new_native_language = State()
+    new_other_native_language = State()
 
 class FormEnglishLevel(StatesGroup):
     new_english_level = State()
