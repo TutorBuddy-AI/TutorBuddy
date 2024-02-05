@@ -125,7 +125,7 @@ class CommunicationHandler:
 
         if user_speaker == 'Anastasia':
             audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == 'bot':
+        elif user_speaker == "Tutor Bot":
             audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
         else:
             raise Exception("Unknown speaker")

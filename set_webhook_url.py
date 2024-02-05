@@ -12,7 +12,7 @@ async def on_startup(dispatcher):
     if config.WEBHOOK_SECRET_TOKEN:
         await bot.set_webhook(url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}", secret_token=config.WEBHOOK_SECRET_TOKEN)
     else:
-        await bot.set_webhook(url=f"{config.WEBHOOK_URL}")
+        await bot.set_webhook(url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}")
     logging.info("Bot starting")
     logging.info("Dispatcher - %r", dispatcher)
 
