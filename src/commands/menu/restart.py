@@ -28,12 +28,6 @@ async def restart_handler(message: types.Message):
 async def restart_query_handler(query: CallbackQuery):
     await UserService().delete_user_info(tg_id=str(query.message.chat.id))
 
-    try:
-        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
-    except:
-        pass
-
     await bot.send_message(query.message.chat.id, md.escape_md("Great, your profile is completely cleared."
                                                                " Click /start to log in again"),
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("/start")))

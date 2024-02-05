@@ -6,7 +6,7 @@ from src.filters import IsNotRegister
 from src.texts.texts import get_welcome_text, get_choose_bot_text, get_welcome_text_before_start, \
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_choose_buddy_text1, get_choose_buddy_text3, \
-    get_choose_buddy_text2
+    get_choose_buddy_text2, get_chose_some_more_topics
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard,\
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 
@@ -184,7 +184,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""
     was_other = False
-    # ToDo check number of chosen
+    topics_num = 0
     for row_button in keyboard:
         for button in row_button:
             text = button.text.split()
@@ -193,8 +193,15 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                 if text[1] == "Other":
                     was_other = True
                 else:
+                    topics_num += 1
                     result_text += text[1] + " "
+    if topics_num <= 2:
+        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
+                               reply_markup=await get_choose_topic_keyboard())
+    else:
+        await process_topics(query, state, result_text, was_other)
 
+async def process_topics(query: types.CallbackQuery, state: FSMContext, result_text, was_other):
     async with state.proxy() as data:
         data["topic"] = result_text
 

@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from utils.user import UserService
@@ -31,7 +32,7 @@ class Paraphraser:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 400
+            "max_tokens": 100
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
@@ -60,6 +61,7 @@ class Paraphraser:
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append(paraphrase_request)
-        print(extended_history)
+
+        logging.info(f"Extended history [Paraphraser]: {extended_history}")
 
         return extended_history

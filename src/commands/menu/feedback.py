@@ -11,11 +11,6 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    try:
-        await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
-    except:
-        pass
-
     await bot.send_message(query.message.chat.id, md.escape_md("TutorBuddy team is always glad to hear your feedback!"
                                                                " Tell us what do you like or dislike about this bot and"
                                                                " how can we improve it?"),
@@ -25,11 +20,6 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
 @dp.message_handler(commands=["feedback"])
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
-
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    except:
-        pass
 
     await bot.send_message(message.chat.id, md.escape_md("TutorBuddy team is always glad to hear your feedback!"
                                                          " Tell us what do you like or dislike about this bot and"
@@ -41,10 +31,6 @@ async def feedback_handler(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FormFeedback.message)
 async def feedback_query_handler(message: types.Message, state: FSMContext):
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    except:
-        pass
 
     await state.update_data(new_value=message.text)
 

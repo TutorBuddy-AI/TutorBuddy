@@ -155,7 +155,6 @@ async def process_get_other_job(message: types.Message, state: FSMContext):
     await state.set_state(TalkShowForm.question_2)
 
     data = await state.get_data()
-    print(data)
 
     job = data.get("job")
 

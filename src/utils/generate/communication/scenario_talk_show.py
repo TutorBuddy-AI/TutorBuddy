@@ -1,4 +1,5 @@
 import json
+import logging
 
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
@@ -46,5 +47,7 @@ class ScenarioTalkShowGenerate:
 
         extended_history = [service_request]
         extended_history.append({"role": "user", "content": self.prompt})
+
+        logging.info(f"Extended history [ScenarioTalkShowGenerate]: {extended_history}")
 
         return extended_history

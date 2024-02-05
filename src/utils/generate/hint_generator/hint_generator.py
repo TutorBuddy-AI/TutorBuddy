@@ -1,3 +1,5 @@
+import logging
+
 from utils.user import UserService
 from utils.generate import GenerateAI
 from utils.user.schemas import GetUserMessageHistory
@@ -55,5 +57,7 @@ class HintGenerator:
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append(hint_request)
+
+        logging.info(f"Extended history [HintGenerator]: {extended_history}")
 
         return extended_history

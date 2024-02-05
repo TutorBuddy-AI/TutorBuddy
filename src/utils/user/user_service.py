@@ -101,8 +101,8 @@ class UserService:
         await session.execute(query)
 
     @Transactional()
-    async def change_topic(self, tg_id: str, new_topic: str) -> None:
-        query = update(User).where(User.tg_id == tg_id).values(topic=new_topic)
+    async def change_topic(self, tg_id: str, new_topic: str, new_additional_topic: str) -> None:
+        query = update(User).where(User.tg_id == tg_id).values(topic=new_topic, additional_topic=new_additional_topic)
         await session.execute(query)
 
     @Transactional()

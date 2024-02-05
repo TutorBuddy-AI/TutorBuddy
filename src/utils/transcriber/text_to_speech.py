@@ -8,8 +8,8 @@ class TextToSpeech:
         self.tg_id = tg_id
 
     async def get_speech(self):
-        voice = await self.get_id_voice()
-        if voice == 'Anastasia':
+        id_voice = await self.get_id_voice()
+        if id_voice:
             audio = await TextToSpeechEleven(prompt=self.prompt, tg_id=str(self.tg_id)).get_speech()
         else:
             audio = await TextToSpeechOpenAI(prompt=self.prompt, tg_id=str(self.tg_id)).get_speech()
