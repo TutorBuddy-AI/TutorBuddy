@@ -6,6 +6,7 @@ class GetUserInfo(BaseModel):
     native_lang: str | None
     topic: str | None
     english_level: str | None
+    speaker: str | None
 
 class UserInfo(BaseModel):
     tg_id: str
@@ -19,6 +20,7 @@ class UserInfo(BaseModel):
     goal: str | None
     native_lang: str | None
     topic: str | None
+    additional_topic: str | None
     english_level: str | None
 
 
@@ -42,4 +44,5 @@ class StateUserInfo(BaseModel):
     goal: str | None
     english_level: str | None
     topic: str | None
+    additional_topic: str | None
     source: str | None

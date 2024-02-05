@@ -17,14 +17,14 @@ async def on_startup(dispatcher):
     logging.info("Dispatcher - %r", dispatcher)
 
     bot_commands = [
-        BotCommand(command="/restart", description="Restart the bot"),
-        BotCommand(command="/scenario", description="Choose a scenario (soon)"),
-        BotCommand(command="/changetopic", description="Change topic"),
-        BotCommand(command="/editprofile", description="Edit profile"),
-        BotCommand(command="/persona", description="Choose a persona to chat"),
-        BotCommand(command="/all_mistakes", description="Show all my mistakes"),
-        BotCommand(command="/support", description="Contact support"),
-        BotCommand(command="/feedback", description="Leave feedback"),
+        BotCommand(command="/restart", description="⚙ Restart the bot"),
+        BotCommand(command="/scenario", description="🎬 Choose a scenario (soon)"),
+        BotCommand(command="/changetopic", description="🔁 Change topic"),
+        BotCommand(command="/editprofile", description="✏ Edit profile"),
+        BotCommand(command="/persona", description="👥 Choose a persona to chat"),
+        BotCommand(command="/all_mistakes", description="🔴 Show all my mistakes"),
+        BotCommand(command="/support", description="👨💻 Contact support"),
+        BotCommand(command="/feedback", description="💬 Leave feedback"),
     ]
     await bot.set_my_commands(bot_commands)
 

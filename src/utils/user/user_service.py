@@ -13,11 +13,11 @@ from utils.paraphrasing import MessageParaphraseService
 
 class UserService:
     def __init__(self):
-        ...
+        pass
 
     @Transactional()
     async def create_user(
-            self, user_info: UserInfo, user_location_info: UserLocationInfo
+            self, user_info: UserInfo
     ) -> None:
         user = User(
             tg_id=str(user_info["tg_id"]),
@@ -31,6 +31,7 @@ class UserService:
             goal=user_info["goal"],
             native_lang=user_info["native_lang"],
             topic=user_info["topic"],
+            additional_topic = user_info["additional_topic"],
             english_level=user_info["english_level"]
         )
 

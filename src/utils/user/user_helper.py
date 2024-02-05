@@ -21,6 +21,7 @@ class UserHelper:
             "goal": state_user_info["goal"],
             "native_lang": state_user_info["native_language"],
             "topic": state_user_info["topic"],
+            "additional_topic": state_user_info["additional_topic"],
             "english_level": state_user_info["english_level"]
         }
         return user_info

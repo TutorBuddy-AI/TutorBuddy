@@ -17,11 +17,11 @@ async def receive_update(update: Dict, request: Request):
     try:
         source = update_obj.message.get_args()
         context = dp.current_state(chat=update_obj.message.chat.id, user=update_obj.message.chat.id)
-        await context.set_data({
-            "ip_address": None,
-            "source": source if source is not None else None,
-            "tg_language": update_obj.message.from_user.language_code
-        })
+        data = await context.get_data()
+        data["ip_address"] = None
+        data["source"] = source if source is not None else None
+        data["tg_language"] = update_obj.message.from_user.language_code
+        await context.set_data(data)
     except:
         pass
     finally:

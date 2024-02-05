@@ -16,37 +16,13 @@ from src.database import session
 from src.database.models import User
 from aiogram import types, md
 from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
-from utils.user import UserService
+from utils.user import UserService, UserCreateMessage
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
-    user_servic = UserService()
-    user_info = await user_servic.get_user_info(tg_id=message.chat.id)
-
-
-    if user_info:
-        speaker = user_info["speaker"]
-    else:
-        speaker = "Anastasia"
-    query_speaker = select(User).where(User.speaker == speaker)
-    result_speaker = await session.execute(query_speaker)
-    speaker_data = result_speaker.scalar()
-    speaker_name = speaker_data.speaker if speaker_data else "Anastasia"
-
-    await bot.send_chat_action(chat_id=message.chat.id, action='typing')
-
-    user_service = UserCreateMessage(
-        tg_id=str(message.chat.id),
-        prompt=message.text,
-        type_message="text"
-    )
-
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker_name} thinks… Please wait")
-
-
-    await bot.delete_message(message.chat.id, wait_message.message_id)
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     await handler.handle_text_message()
 
@@ -55,13 +31,9 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
 async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     message: Message = query.message
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
-    if "sticker_sent" not in state_data:
-        await bot.send_sticker(query.message.chat.id,
-                               "CAACAgIAAxkBAAELBollhzvGQUHW5zqXIk8i-FCo0KcvvgACiTwAAj2PgUvXNnwncAPTwjME")
-        state_data["sticker_sent"] = True
-        await state.update_data(state_data)
 
     generated_text = await MessageHintCreator(
         tg_id=str(message.chat.id)
@@ -82,6 +54,7 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
 
@@ -106,6 +79,7 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
@@ -127,6 +101,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
 
     handler = CommunicationHandler(message, state, bot)
+    await handler.init()
 
     state_data = await state.get_data()
 

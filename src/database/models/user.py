@@ -60,6 +60,7 @@ class User(Base, TimestampMixin):
     native_lang = Column(String, nullable=True)
     teach_lang = Column(String, nullable=False, default="EN")
     topic = Column(String, nullable=True)
+    additional_topic = Column(String, nullable=True)
     english_level = Column(String, nullable=True)
 
     roles = relationship(
