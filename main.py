@@ -14,7 +14,9 @@ def main():
         app="src.fastapi_app:app",
         host=config.APP_HOST,
         port=config.APP_PORT,
-        reload=False
+        reload=False,
+        proxy_headers=True,
+        forwarded_allow_ips="*"
     )
 
 
