@@ -52,14 +52,17 @@ class AnswerRenderer:
     def get_answer_markup() -> InlineKeyboardMarkup:
         bot_message_markup = InlineKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
 
-        get_hint_btn = InlineKeyboardButton(
-            '💡 Hint',
-            callback_data="request_hint")
+        # get_hint_btn = InlineKeyboardButton(
+        #     '💡 Hint',
+        #     callback_data="request_hint")
+        get_mistake_btn = InlineKeyboardButton(
+            '🔴 Mistakes',
+            callback_data="request_mistakes")
         get_translation_btn = InlineKeyboardButton(
             '📖 Translate',
             callback_data="request_translation")
 
-        bot_message_markup.row(get_translation_btn, get_hint_btn)
+        bot_message_markup.row(get_translation_btn, get_mistake_btn)
         return bot_message_markup
 
     def render(self) -> Render:
@@ -83,3 +86,13 @@ class AnswerRenderer:
                     self.message_type, True, user_message_markup, bot_message_markup
                 )
 
+    @staticmethod
+    def get_translate_markup() -> InlineKeyboardMarkup:
+        bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+        get_translation_btn = InlineKeyboardButton(
+            '📖 Translate',
+            callback_data="request_translation_newsletter")
+
+        bot_message_markup.row(get_translation_btn)
+        return bot_message_markup

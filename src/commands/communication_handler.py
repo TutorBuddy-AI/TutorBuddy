@@ -4,6 +4,8 @@ from aiogram import Bot
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 from aiogram import md
+from aiogram import types
+from aiogram.types import ParseMode
 
 from database.models import MessageHistory
 from utils.answer import AnswerRenderer
@@ -20,7 +22,9 @@ from utils.user import UserCreateMessage, UserService
 from utils.stciker.sticker_sender import StickerSender
 from utils.transcriber import SpeechToText
 from utils.user import UserCreateMessage, UserService
-
+from utils.newsletter.newsletter import convert_bytes_to_ogg
+import datetime
+import os
 
 class CommunicationHandler:
     def __init__(self, message: Message, state: FSMContext, bot: Bot):
@@ -104,20 +108,44 @@ class CommunicationHandler:
         await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
 
     async def render_text_answer(self, render: Render):
+        user_info = await UserService().get_user_info(self.chat_id)
+        user_speaker = user_info['speaker']
+
+        if user_speaker == 'Anastasia':
+            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        elif user_speaker == "Tutor Bot":
+            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
+        else:
+            raise Exception("Unknown speaker")
+
         if render.is_generation_successful:
-            additional_menu_message = await self.bot.send_message(
-                self.chat_id, md.escape_md("✍️🏻"), reply_markup=render.user_message_markup,
-                reply_to_message_id=render.reply_to_message_id
-            )
-            answer_message = await self.bot.send_message(
-                self.chat_id, md.escape_md(render.answer_text),
-                reply_markup=render.bot_message_markup, reply_to_message_id=render.reply_to_message_id)
+            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
+            await convert_bytes_to_ogg(audio,file_ogg)
+            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
+
+            answer_message = await self.bot.send_voice(
+                                   self.chat_id,
+                                   audio_input_file,
+                                   caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                                   parse_mode=ParseMode.HTML,
+                                   reply_markup=render.bot_message_markup,
+                                   reply_to_message_id=render.reply_to_message_id)
+
             await self.clear_old_menus()
             await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
         else:
-            await self.bot.send_message(self.chat_id, md.escape_md(render.answer_text),
-                reply_to_message_id=render.reply_to_message_id)
+            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
+            await convert_bytes_to_ogg(audio,file_ogg)
+            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
+
+            await self.bot.send_voice(self.chat_id,
+                                      audio_input_file,
+                                      caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                                      parse_mode=ParseMode.HTML,
+                                      reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
+
+        os.remove(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
 
     async def render_audio_answer(self, render: Render):
         user_info = await UserService().get_user_info(self.chat_id)
@@ -132,18 +160,32 @@ class CommunicationHandler:
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(
-                self.chat_id, md.escape_md(f"Transcript: {render.message_text}"),
-                reply_markup=render.user_message_markup, reply_to_message_id=render.reply_to_message_id)
-            answer_message = await self.bot.send_audio(
-                self.chat_id, audio=audio, reply_markup=render.bot_message_markup,
-                reply_to_message_id=render.reply_to_message_id
-            )
+                self.chat_id, f"<i>🎙 Transcript</i>:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
+                reply_to_message_id=render.reply_to_message_id)
+
+            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
+            await convert_bytes_to_ogg(audio,file_ogg)
+            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
+            answer_message = await self.bot.send_voice(
+                                   self.chat_id,
+                                   audio_input_file,
+                                   caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                                   parse_mode=ParseMode.HTML,
+                                   reply_markup=render.bot_message_markup,
+                                   reply_to_message_id=render.reply_to_message_id
+                                  )
+
             await self.clear_old_menus()
             await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
         else:
-            await self.bot.send_audio(self.chat_id, audio,
+            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
+            await convert_bytes_to_ogg(audio,file_ogg)
+            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
+            await self.bot.send_voice(self.chat_id, audio_input_file,
                 reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
+
+        os.remove(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
 
     async def regsiter_menu(self, answer_message_id, additional_menu_message_id):
         state_data = await self.state.get_data()
