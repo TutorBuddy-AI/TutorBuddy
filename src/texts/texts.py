@@ -10,9 +10,9 @@ def get_welcome_text_before_start():
         "🌟 ace your exams\n"
         "have everyday conversations and build your confidence!")
 
-def get_welcome_text(name):
+def get_welcome_text():
     return md.escape_md(
-        f"Hi {name}! I'mTutor Buddy, your personal English language practice tutor 💭\n\n"
+        f"Hi! I'mTutor Buddy, your personal English language practice tutor 💭\n\n"
         "I know how difficult it is to speak English without practice and a native speaker around.\n\n"
         "In order to feel confident in dialogues in a foreign language you need to get between 600 and 1,000 hours of "
         "practice. Talking to me every day will make it fun and rewarding.\n\n"
