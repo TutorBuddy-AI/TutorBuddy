@@ -41,7 +41,7 @@ class TalkInitializer:
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
                        f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
                        f"You are his buddy in English practice and also his friend. "
-                       f"Please, chose one of topics and him something"
+                       f"Please, chose one of topics and ask him something"
         }
 
         extended_history = [service_request]

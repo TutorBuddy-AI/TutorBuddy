@@ -17,6 +17,7 @@ from typing import Dict
 
 app = FastAPI()
 
+
 @app.on_event("startup")
 async def on_startup():
     if config.WEBHOOK_SECRET_TOKEN:
@@ -42,10 +43,12 @@ async def on_startup():
     ]
     await bot.set_my_commands(bot_commands)
 
+
 @app.on_event("shutdown")
 async def on_shutdown():
     await bot.delete_webhook(drop_pending_updates=True)
     bot.get_session().close()
+
 
 @app.post(f"/webhook")
 async def receive_update(update: Dict, request: Request):
@@ -66,7 +69,6 @@ async def receive_update(update: Dict, request: Request):
     finally:
         pass
     return {"status_code": 200}
-
 
 
 @app.get('/start_newsletter')
