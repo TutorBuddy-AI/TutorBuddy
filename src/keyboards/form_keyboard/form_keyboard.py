@@ -51,13 +51,13 @@ async def get_choose_english_level_keyboard() -> InlineKeyboardMarkup:
 
     choose_english_level_inline_kb = InlineKeyboardMarkup(row_width=1)
 
-    level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases (1)', callback_data='level_1')
-    level_2 = InlineKeyboardButton(text='I can have simple conversations about familiar topics (2)',
+    level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases', callback_data='level_1')
+    level_2 = InlineKeyboardButton(text='I can only have simple conversations',
                                    callback_data='level_2')
 
-    level_3 = InlineKeyboardButton(text='I can communicate confidently\n\n on various subjects (3)',
+    level_3 = InlineKeyboardButton(text='I can talk about various subjects',
                                    callback_data='level_3')
-    level_4 = InlineKeyboardButton(text='I express myself fluently in any situation (4)', callback_data='level_4')
+    level_4 = InlineKeyboardButton(text='I express myself fluently in any situation', callback_data='level_4')
 
     choose_english_level_inline_kb.row(level_1).row(level_2).row(level_3).row(level_4)
 
