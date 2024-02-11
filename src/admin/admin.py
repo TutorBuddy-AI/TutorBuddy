@@ -1,5 +1,3 @@
-import shutil
-import aiofiles
 import uvicorn
 import os
 from starlette.middleware import Middleware
@@ -19,7 +17,7 @@ from starlette_admin import EnumField, TinyMCEEditorField, FileField
 from starlette_admin.exceptions import FormValidationError, LoginFailed
 import logging
 
-from storage.storage import configure_storage
+from src.storage.storage import configure_storage
 
 Base = declarative_base()
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -99,7 +97,8 @@ class MyAuthProvider(AuthProvider):
 # Create admin
 admin = Admin(engine, title="AI Tutor Buddy Admin",
               auth_provider=MyAuthProvider(allow_paths=["/static/logo.svg"]),
-              middlewares=[Middleware(SessionMiddleware, secret_key=os.getenv("SECRET"))], )
+              middlewares=[Middleware(SessionMiddleware, secret_key=os.getenv("SECRET"))],
+              templates_dir="templates")
 
 
 # example how to work with fields and access
@@ -120,6 +119,8 @@ class UserView(ModelView):
 
 
 class DailyNewsView(ModelView):
+    list_template: str = "newsletters.html"
+
     fields = [
         DailyNews.id,
         DailyNews.topic,
@@ -135,6 +136,7 @@ class DailyNewsView(ModelView):
             ],
         ),
     ]
+
 
 exclude_fields_from_list = [DailyNews.created_at, DailyNews.updated_at]
 exclude_fields_from_edit = [DailyNews.created_at, DailyNews.updated_at]
