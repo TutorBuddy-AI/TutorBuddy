@@ -119,3 +119,17 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     await asyncio.sleep(3)
 
     await handler.render_answer(await handler.load_render_from_context())
+
+
+@dp.message_handler(content_types=types.ContentType.VIDEO)
+async def handle_video_message(message: types.Message):
+    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
+
+
+@dp.message_handler(content_types=types.ContentType.STICKER)
+async def handle_sticker_message(message: types.Message):
+    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
+
+@dp.message_handler(content_types=types.ContentType.VIDEO_NOTE)
+async def handle_video_note_message(message: types.Message):
+    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
