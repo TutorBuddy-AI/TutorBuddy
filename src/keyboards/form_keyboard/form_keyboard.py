@@ -31,7 +31,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='goal_travel')
     relocate = InlineKeyboardButton(text='Move abroad 🌎', callback_data='goal_relocate')
 
-    culture = InlineKeyboardButton(text='For fun 🗽', callback_data='goal_culture')
+    entertainment = InlineKeyboardButton(text='For fun 🗽', callback_data='goal_entertainment')
     love = InlineKeyboardButton(text='Love 💖️', callback_data='goal_love')
 
     friendship = InlineKeyboardButton(text='Friendship 👋🏻', callback_data='goal_friendship')
@@ -42,7 +42,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     (choose_goal_inline_kb
      .row(business)
      .row(career, education).row(travel, relocate)
-     .row(culture, love).row(friendship, network)
+     .row(goal_entertainment, love).row(friendship, network)
      .row(other)
      )
 
