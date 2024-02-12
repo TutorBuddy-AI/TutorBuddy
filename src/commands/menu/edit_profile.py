@@ -85,11 +85,13 @@ async def changed_native_language_query_handler(query: CallbackQuery, state: FSM
 
     await state.finish()
 
+
 @dp.callback_query_handler(lambda query: query.data == "other_language", state=FormNativeLanguage.new_native_language)
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_native_language_question(),
         reply_markup = types.ReplyKeyboardRemove())
     await state.set_state(FormNativeLanguage.new_other_native_language)
+
 
 @dp.message_handler(state=FormNativeLanguage.new_other_native_language)
 async def process_other_language(message: types.Message, state: FSMContext):

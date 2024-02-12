@@ -27,6 +27,7 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     await bot.send_audio(query.message.chat.id, audio)
     await state.set_state(FormInitTalk.init_user_message)
 
+
 @dp.callback_query_handler(text="continue_nastya")
 async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
@@ -47,6 +48,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
     await bot.send_audio(query.message.chat.id, audio)
     await state.set_state(FormInitTalk.init_user_message)
+
 
 @dp.message_handler(state=FormInitTalk.init_user_message)
 async def start_talk(message: types.Message, state: FSMContext):

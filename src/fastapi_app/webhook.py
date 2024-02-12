@@ -2,6 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
+from src.commands.form_states import process_start_register_user, process_get_name  # DON'T DELETE
 from src.config import dp, bot, config
 from src.utils.newsletter.newsletter import Newsletter
 from aiogram import types
@@ -16,6 +17,7 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def on_startup():
+    await bot.delete_webhook(drop_pending_updates=True)
     if config.WEBHOOK_SECRET_TOKEN:
         await bot.set_webhook(
             url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}",

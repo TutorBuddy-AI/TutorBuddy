@@ -1,1 +1,1 @@
-from mistakes_checker import MistakesChecker
+from src.utils.generate.mistakes_checker.mistakes_checker import MistakesChecker

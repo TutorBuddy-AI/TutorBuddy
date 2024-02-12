@@ -8,7 +8,7 @@ from src.utils.generate import GenerateAI
 
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
-from answer_schema import answer_schema
+from src.utils.generate.complex_answer_generator.answer_schema import answer_schema
 
 
 class AnswerMistakesGenerator:

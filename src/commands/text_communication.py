@@ -1,5 +1,4 @@
 import asyncio
-from sqlalchemy import select
 from aiogram.dispatcher import FSMContext
 from src.commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
@@ -14,7 +13,6 @@ from src.utils.message_translation.message_translation_creator import MessageTra
 from src.utils.paraphrasing import MessageParaphraseService
 from aiogram import types, md
 from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
-from src.utils.user import UserService, UserCreateMessage
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
@@ -71,6 +69,7 @@ async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
 
     await handler.render_answer(await handler.load_render_from_context())
 
+
 @dp.callback_query_handler(text="request_translation")
 async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
@@ -94,7 +93,7 @@ async def handle_get_translation(query: CallbackQuery, state: FSMContext):
     await handler.render_answer(await handler.load_render_from_context())
 
 
-@dp.callback_query_handler(text=["request_paraphrase"])
+@dp.callback_query_handler(text="request_paraphrase")
 async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
 
@@ -105,7 +104,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
     generated_text = await MessageParaphraseCreator(
         tg_id=str(message.chat.id),
-        message_text = state_data["user_message_text"]
+        message_text=state_data["user_message_text"]
     ).create_communication_message_text()
 
     helper_info = await MessageHelper().group_message_helper_info(state_data, message, generated_text)

@@ -12,19 +12,17 @@ from src.utils.answer import AnswerRenderer
 from src.utils.answer.answer import Answer
 from src.utils.answer.render import Render
 from src.utils.answer.render_helper import RenderHelper
+from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.generate.communication import CommunicationGenerate
 from src.utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from src.utils.message import MessageHelper
 from src.utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
-from src.utils.transcriber import TextToSpeechEleven, SpeechToText
+from src.utils.transcriber import TextToSpeechEleven
 from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
-from src.utils.user import UserCreateMessage, UserService
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserCreateMessage, UserService
-from src.utils.newsletter.newsletter import convert_bytes_to_ogg
-import datetime
-import os
+
 
 class CommunicationHandler:
     def __init__(self, message: Message, state: FSMContext, bot: Bot):
@@ -43,7 +41,6 @@ class CommunicationHandler:
         self.speaker = user_info["speaker"] if user_info["speaker"] else "Tutor Bot"
 
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
-
 
     async def handle_audio_message(self):
         wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
@@ -91,19 +88,28 @@ class CommunicationHandler:
 
     async def render_answer(self, render: Render):
         if render.message_type == "text":
-            await self.render_text_answer(render)
+            await self.copy_text_message(render)
         else:
             await self.copy_audio_message(render)
+
+    async def copy_text_message(self, render: Render):
+        state_data = await self.state.get_data()
+        answer_message = await self.bot.copy_message(
+            self.chat_id, from_chat_id=self.chat_id, message_id=state_data["answer_message_id"],
+            parse_mode=ParseMode.HTML, reply_markup=render.bot_message_markup,
+            reply_to_message_id=render.reply_to_message_id)
+        await self.clear_old_menus()
+        await self.regsiter_menu(answer_message.message_id, None)
 
     async def copy_audio_message(self, render: Render):
         state_data = await self.state.get_data()
         additional_menu_message = await self.bot.send_message(
-            self.chat_id, md.escape_md(f"Transcript: {render.message_text}"), reply_markup=render.user_message_markup,
-            reply_to_message_id = render.reply_to_message_id
-        )
+            self.chat_id, f"<i>🎙 Transcript</i>:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
+            reply_to_message_id=render.reply_to_message_id)
         answer_message = await self.bot.copy_message(
             self.chat_id, from_chat_id=self.chat_id, message_id=state_data["answer_message_id"],
-            reply_markup=render.bot_message_markup, reply_to_message_id = render.reply_to_message_id)
+            parse_mode=ParseMode.HTML, reply_markup=render.bot_message_markup,
+            reply_to_message_id=render.reply_to_message_id)
         await self.clear_old_menus()
         await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
 
@@ -119,33 +125,25 @@ class CommunicationHandler:
             raise Exception("Unknown speaker")
 
         if render.is_generation_successful:
-            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
-            await convert_bytes_to_ogg(audio,file_ogg)
-            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
-
-            answer_message = await self.bot.send_voice(
-                                   self.chat_id,
-                                   audio_input_file,
-                                   caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
-                                   parse_mode=ParseMode.HTML,
-                                   reply_markup=render.bot_message_markup,
-                                   reply_to_message_id=render.reply_to_message_id)
+            with AudioConverter(audio) as ogg_file:
+                answer_message = await self.bot.send_voice(
+                    self.chat_id,
+                    types.InputFile(ogg_file),
+                    caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=render.bot_message_markup,
+                    reply_to_message_id=render.reply_to_message_id)
 
             await self.clear_old_menus()
-            await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
+            await self.regsiter_menu(answer_message.message_id, None)
         else:
-            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
-            await convert_bytes_to_ogg(audio,file_ogg)
-            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
-
-            await self.bot.send_voice(self.chat_id,
-                                      audio_input_file,
-                                      caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
-                                      parse_mode=ParseMode.HTML,
-                                      reply_to_message_id=render.reply_to_message_id)
+            with AudioConverter(audio) as ogg_file:
+                await self.bot.send_voice(self.chat_id,
+                                          types.InputFile(ogg_file),
+                                          caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                                          parse_mode=ParseMode.HTML,
+                                          reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
-
-        os.remove(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
 
     async def render_audio_answer(self, render: Render):
         user_info = await UserService().get_user_info(self.chat_id)
@@ -163,29 +161,24 @@ class CommunicationHandler:
                 self.chat_id, f"<i>🎙 Transcript</i>:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
                 reply_to_message_id=render.reply_to_message_id)
 
-            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
-            await convert_bytes_to_ogg(audio,file_ogg)
-            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
-            answer_message = await self.bot.send_voice(
-                                   self.chat_id,
-                                   audio_input_file,
-                                   caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
-                                   parse_mode=ParseMode.HTML,
-                                   reply_markup=render.bot_message_markup,
-                                   reply_to_message_id=render.reply_to_message_id
-                                  )
+            with AudioConverter(audio) as ogg_file:
+                answer_message = await self.bot.send_voice(
+                                       self.chat_id,
+                                       types.InputFile(ogg_file),
+                                       caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
+                                       parse_mode=ParseMode.HTML,
+                                       reply_markup=render.bot_message_markup,
+                                       reply_to_message_id=render.reply_to_message_id
+                                      )
 
             await self.clear_old_menus()
             await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
         else:
-            file_ogg = f'{datetime.datetime.now()}{self.chat_id}.ogg'
-            await convert_bytes_to_ogg(audio,file_ogg)
-            audio_input_file = types.InputFile(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
-            await self.bot.send_voice(self.chat_id, audio_input_file,
-                reply_to_message_id=render.reply_to_message_id)
+            with AudioConverter(audio) as ogg_file:
+                await self.bot.send_voice(
+                    self.chat_id, types.InputFile(ogg_file),
+                    reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
-
-        os.remove(f'/home/ubuntu/AI-TutorBuddy-bot/{file_ogg}')
 
     async def regsiter_menu(self, answer_message_id, additional_menu_message_id):
         state_data = await self.state.get_data()
@@ -199,8 +192,9 @@ class CommunicationHandler:
             await self.bot.edit_message_reply_markup(
                 chat_id=self.chat_id, message_id=state_data["answer_message_id"], reply_markup=None)
             state_data["answer_message_id"] = None
-            await self.bot.edit_message_reply_markup(
-                chat_id=self.chat_id, message_id=state_data["additional_menu_message_id"], reply_markup=None)
+        if ("additional_menu_message_id" in state_data) and state_data["additional_menu_message_id"]:
+            # await self.bot.edit_message_reply_markup(
+            #     chat_id=self.chat_id, message_id=state_data["additional_menu_message_id"], reply_markup=None)
             state_data["additional_menu_message_id"] = None
         await self.state.update_data(state_data)
 
