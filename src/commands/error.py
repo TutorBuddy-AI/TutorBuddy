@@ -1,6 +1,7 @@
 from aiogram import md
 
-from config import dp, bot
+from src.config import dp, bot
+
 @dp.errors_handler()
 async def error_handler(update, error) -> None:
     await dp.current_state().finish()

@@ -1,1 +1,1 @@
-from utils.message_hint.message_hint_service import MessageHintService
+from src.utils.message_hint.message_hint_service import MessageHintService

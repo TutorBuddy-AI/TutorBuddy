@@ -4,7 +4,7 @@ from src.database import session, Transactional
 from src.database.models.enums.daily_news import DailyNewsEnum
 from sqlalchemy import select, delete
 
-from utils.daily_news.daily_news_history import GetUserDailyNewsHistory
+from daily_news_history import GetUserDailyNewsHistory
 
 
 class DailyNew:

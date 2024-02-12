@@ -1,6 +1,6 @@
-from utils.generate.paraphraser import Paraphraser
-from utils.user import UserService
-from utils.user.schemas import GetUserMessageHistory
+from src.utils.generate.paraphraser import Paraphraser
+from src.utils.user import UserService
+from src.utils.user.schemas import GetUserMessageHistory
 
 
 class MessageParaphraseCreator:

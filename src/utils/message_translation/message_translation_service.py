@@ -1,8 +1,8 @@
-from database import Transactional
-from database.models import MessageTranslation
+from src.database import Transactional
+from src.database.models import MessageTranslation
 from sqlalchemy import delete
 from src.database import session
-from utils.message.schema import MessageHelperInfo
+from src.utils.message.schema import MessageHelperInfo
 
 
 class MessageTranslationService:

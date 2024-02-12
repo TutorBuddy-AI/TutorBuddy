@@ -2,6 +2,7 @@ import uuid
 from yookassa import Payment
 from src.database.models import User
 
+
 def get_payment_url(amount, payload, desc, user: User) -> str:
     """
     Get youkassa payment url

@@ -1,6 +1,6 @@
 from src.utils.user.schemas import GetUserMessageHistory
 from src.utils.user.user_service import UserService
-from utils.generate.hint_generator.hint_generator import HintGenerator
+from src.utils.generate.hint_generator.hint_generator import HintGenerator
 
 
 class MessageHintCreator:

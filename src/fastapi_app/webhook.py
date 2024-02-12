@@ -2,11 +2,10 @@ import traceback
 
 from aiogram.types import BotCommand
 
-from config import config
+from src.config import config
 from src.config import dp, bot
-from src.commands.form_states import process_start_register_user, process_get_name
-from src.filters import IsNotRegister
-from src.states import Form
+from src.commands.form_states import process_start_register_user, process_get_name  # Magic Import - don't touch
+from src.states import Form  # Magic Import - don't touch
 from src.utils.newsletter.newsletter import Newsletter
 from aiogram import types
 
@@ -17,8 +16,10 @@ from typing import Dict
 
 app = FastAPI()
 
+
 @app.on_event("startup")
 async def on_startup():
+    await bot.delete_webhook(drop_pending_updates=True)
     if config.WEBHOOK_SECRET_TOKEN:
         await bot.set_webhook(
             url=f"{config.WEBHOOK_URL}{config.WEBHOOK_PATH}",
@@ -42,10 +43,12 @@ async def on_startup():
     ]
     await bot.set_my_commands(bot_commands)
 
+
 @app.on_event("shutdown")
 async def on_shutdown():
     await bot.delete_webhook(drop_pending_updates=True)
     bot.get_session().close()
+
 
 @app.post(f"/webhook")
 async def receive_update(update: Dict, request: Request):
@@ -68,11 +71,10 @@ async def receive_update(update: Dict, request: Request):
     return {"status_code": 200}
 
 
-
 @app.get('/start_newsletter')
 async def send_newsletter():
     try:
         await Newsletter().send_newsletter()
         return {'message': 'Newsletter sent'}
     except Exception as e:
-        pass
+        traceback.print_exc()

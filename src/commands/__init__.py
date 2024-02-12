@@ -15,7 +15,6 @@ from src.commands.menu.feedback import dp
 from src.commands.cacncel_state import dp
 
 from src.commands.scenario.scenario import dp
-from commands.scenario.talk_show.talk_show import dp
 
 from src.commands.menu.edit_profile import dp
 from src.commands.text_communication import dp

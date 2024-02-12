@@ -1,2 +1,2 @@
-from utils.message_translation.message_translation_service import MessageTranslationService
+from src.utils.message_translation.message_translation_service import MessageTranslationService
 
