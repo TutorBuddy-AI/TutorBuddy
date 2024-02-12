@@ -53,7 +53,7 @@ def get_chose_some_topics():
 
 def get_chose_some_more_topics():
     return md.escape_md(
-        "Please, choose 3 topics or more"
+        "Please, choose 3+ topics"
     )
 
 def get_other_topics():
