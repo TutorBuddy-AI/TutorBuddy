@@ -11,11 +11,13 @@ class TranslateGenerate:
     def __init__(
             self,
             tg_id: str,
+            message_text: str,
             user_message_history: GetUserMessageHistory
     ):
         self.tg_id = tg_id
         self.request_url = "https://api.openai.com/v1/chat/completions"
         self.user_message_history = user_message_history
+        self.message_text = message_text
 
     async def translate(self) -> str:
         payload = await self.get_combine_data()
@@ -34,7 +36,7 @@ class TranslateGenerate:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 100
+            "max_tokens": 400
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
@@ -52,7 +54,7 @@ class TranslateGenerate:
         translate_request = {
             "role": "system",
             "content":
-                f"User didn't understand your last message, "
+                f"User didn't understand your message: {self.message_text}"
                 f"Please translate it into {await self.user_native_lang()}. "
         }
 

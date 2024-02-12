@@ -77,4 +77,4 @@ async def send_newsletter():
         await Newsletter().send_newsletter()
         return {'message': 'Newsletter sent'}
     except Exception as e:
-        pass
+        traceback.print_exc()

@@ -10,9 +10,10 @@ class MessageTranslationCreator:
     ):
         self.tg_id = tg_id
 
-    async def create_communication_message_text(self) -> str:
+    async def create_communication_message_text(self, message_text: str) -> str:
         generated_text = await TranslateGenerate(
             tg_id=str(self.tg_id),
+            message_text=message_text,
             user_message_history=await self.get_user_message_history()
         ).translate()
 

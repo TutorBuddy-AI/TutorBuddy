@@ -60,7 +60,7 @@ class AnswerRenderer:
             callback_data="request_mistakes")
         get_translation_btn = InlineKeyboardButton(
             '📖 Translate',
-            callback_data="request_translation")
+            callback_data="request_caption_translation")
 
         bot_message_markup.row(get_translation_btn, get_mistake_btn)
         return bot_message_markup
@@ -87,12 +87,23 @@ class AnswerRenderer:
                 )
 
     @staticmethod
-    def get_translate_markup() -> InlineKeyboardMarkup:
+    def get_translate_caption_markup() -> InlineKeyboardMarkup:
         bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
         get_translation_btn = InlineKeyboardButton(
             '📖 Translate',
-            callback_data="request_translation_newsletter")
+            callback_data="request_caption_translation_standalone")
+
+        bot_message_markup.row(get_translation_btn)
+        return bot_message_markup
+
+    @staticmethod
+    def get_translation_for_message(message_text: str) -> InlineKeyboardMarkup:
+        bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+        get_translation_btn = InlineKeyboardButton(
+            '📖 Translate',
+            callback_data=f"request_translation:{message_text}")
 
         bot_message_markup.row(get_translation_btn)
         return bot_message_markup

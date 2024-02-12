@@ -33,7 +33,8 @@ class AudioConverter:
             # Вызываем ffmpeg, передавая байты аудио через stdin
             subprocess.run(
                 ['ffmpeg', '-y', '-i', f'{input_file.name}', '-c:a', 'libopus', f'{self.output_file.name}'],
-                check=True
+                check=True,
+                capture_output=False
             )
             return self.output_file.name
         except Exception as e:
