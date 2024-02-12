@@ -23,6 +23,7 @@ async def get_choose_native_language_keyboard() -> InlineKeyboardMarkup:
 
 async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     choose_goal_inline_kb = InlineKeyboardMarkup(row_width=2)
+    business = InlineKeyboardButton(text='Business 💵', callback_data='goal_business')
 
     career = InlineKeyboardButton(text='Career 🪜', callback_data='goal_career')
     education = InlineKeyboardButton(text='Education 🎓', callback_data='goal_education')
@@ -30,7 +31,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='goal_travel')
     relocate = InlineKeyboardButton(text='Move abroad 🌎', callback_data='goal_relocate')
 
-    culture = InlineKeyboardButton(text='Culture 🗽', callback_data='goal_culture')
+    culture = InlineKeyboardButton(text='For fun 🗽', callback_data='goal_culture')
     love = InlineKeyboardButton(text='Love 💖️', callback_data='goal_love')
 
     friendship = InlineKeyboardButton(text='Friendship 👋🏻', callback_data='goal_friendship')
@@ -39,6 +40,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     other = InlineKeyboardButton(text='Other✍️🏻', callback_data='other_goal')
 
     (choose_goal_inline_kb
+     .row(business)
      .row(career, education).row(travel, relocate)
      .row(culture, love).row(friendship, network)
      .row(other)
