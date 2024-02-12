@@ -7,16 +7,23 @@ class StickerSender:
         self.chat_id = chat_id
         self.pack = anastasias_pack if speaker == "Anastasia" else tutorbots_pack
 
-    async def send_problem_sticker(self, reply_to = None):
+    async def send_problem_sticker(self, reply_to=None):
         await self.bot.send_sticker(
             self.chat_id,
             self.pack["problem"],
             reply_to_message_id=reply_to
         )
 
-    async def send_miss_you_sticker(self, reply_to = None):
+    async def send_miss_you_sticker(self, reply_to=None):
         await self.bot.send_sticker(
             self.chat_id,
             self.pack["miss_you"],
+            reply_to_message_id=reply_to
+        )
+
+    async def send_you_rock_sticker(self, reply_to=None):
+        await self.bot.send_sticker(
+            self.chat_id,
+            self.pack["you_rock"],
             reply_to_message_id=reply_to
         )

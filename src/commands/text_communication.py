@@ -17,7 +17,7 @@ from src.database.models import User
 from aiogram import types, md
 from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 from utils.user import UserService, UserCreateMessage
-
+from utils.stciker.sticker_sender import StickerSender
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
@@ -122,14 +122,16 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
 
 @dp.message_handler(content_types=types.ContentType.VIDEO)
-async def handle_video_message(message: types.Message):
-    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
-
+async def handle_video_message(message: Message):
+    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_you_rock_sticker()
 
 @dp.message_handler(content_types=types.ContentType.STICKER)
-async def handle_sticker_message(message: types.Message):
-    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
+async def handle_sticker_message(message: Message):
+    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_you_rock_sticker()
 
 @dp.message_handler(content_types=types.ContentType.VIDEO_NOTE)
-async def handle_video_note_message(message: types.Message):
-    await bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDbpNlyb0pHOyhNQjw-EChxZGnMwHPHwACETsAAs-QgUsjPzmN1IEEZTQE")
+async def handle_video_note_message(message: Message):
+    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_you_rock_sticker()
