@@ -1,1 +1,1 @@
-from utils.message.schema.message import MessageStateInfo, MessageHelperInfo, ConversationStateInfo
+from src.utils.message.schema.message import MessageStateInfo, MessageHelperInfo, ConversationStateInfo

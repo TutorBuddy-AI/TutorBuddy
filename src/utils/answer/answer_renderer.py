@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from utils.answer.answer import Answer
-from utils.answer.render import Render
+from src.utils.answer.answer import Answer
+from src.utils.answer.render import Render
 
 
 class AnswerRenderer:
@@ -52,14 +52,17 @@ class AnswerRenderer:
     def get_answer_markup() -> InlineKeyboardMarkup:
         bot_message_markup = InlineKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
 
-        get_hint_btn = InlineKeyboardButton(
-            '💡 Hint',
-            callback_data="request_hint")
+        # get_hint_btn = InlineKeyboardButton(
+        #     '💡 Hint',
+        #     callback_data="request_hint")
+        get_mistake_btn = InlineKeyboardButton(
+            '🔴 Mistakes',
+            callback_data="request_mistakes")
         get_translation_btn = InlineKeyboardButton(
             '📖 Translate',
-            callback_data="request_translation")
+            callback_data="request_caption_translation")
 
-        bot_message_markup.row(get_translation_btn, get_hint_btn)
+        bot_message_markup.row(get_translation_btn, get_mistake_btn)
         return bot_message_markup
 
     def render(self) -> Render:
@@ -83,3 +86,24 @@ class AnswerRenderer:
                     self.message_type, True, user_message_markup, bot_message_markup
                 )
 
+    @staticmethod
+    def get_translate_caption_markup() -> InlineKeyboardMarkup:
+        bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+        get_translation_btn = InlineKeyboardButton(
+            '📖 Translate',
+            callback_data="request_caption_translation_standalone")
+
+        bot_message_markup.row(get_translation_btn)
+        return bot_message_markup
+
+    @staticmethod
+    def get_translation_for_message(message_text: str) -> InlineKeyboardMarkup:
+        bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+        get_translation_btn = InlineKeyboardButton(
+            '📖 Translate',
+            callback_data=f"request_translation:{message_text}")
+
+        bot_message_markup.row(get_translation_btn)
+        return bot_message_markup

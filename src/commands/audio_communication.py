@@ -1,6 +1,6 @@
 from aiogram.dispatcher import FSMContext
 
-from commands.communication_handler import CommunicationHandler
+from src.commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
 from aiogram import types
 

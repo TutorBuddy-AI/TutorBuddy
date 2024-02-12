@@ -3,8 +3,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from src.config import dp, bot
-from src.keyboards import get_go_back_inline_keyboard
 from src.utils.message_history_mistakes import MessageMistakesService
+
 
 @dp.message_handler(commands=["all_mistakes"])
 async def get_mistakes(message: types.Message, state: FSMContext):
@@ -20,6 +20,7 @@ async def get_mistakes(message: types.Message, state: FSMContext):
     await send_data(message.chat.id, data[current_index], create_inline_keyboard(current_index, len(data)),
                     message.message_id)
 
+
 def create_inline_keyboard(current_index, total_elements):
     keyboard = InlineKeyboardMarkup(row_width=3)
     prev_button = InlineKeyboardButton("⬅️", callback_data="prev")
@@ -33,6 +34,7 @@ def create_inline_keyboard(current_index, total_elements):
     keyboard.row(prev_button, index_button, next_button).add(go_back_btn)
 
     return keyboard
+
 
 @dp.callback_query_handler(lambda query: query.data in ["prev", "next"])
 async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMContext):

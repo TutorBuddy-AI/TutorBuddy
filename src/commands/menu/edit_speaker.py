@@ -22,6 +22,7 @@ async def edit_speaker_handler(message: types.Message):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+
 @dp.callback_query_handler(lambda query: query.data.startswith("speaker"))
 async def change_speaker_query_handler(query: CallbackQuery):
     await UserService().change_speaker(tg_id=str(query.message.chat.id), new_speaker=query.data.split('_')[1])

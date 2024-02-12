@@ -6,9 +6,9 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 
 from src.utils.message_history_mistakes import MessageMistakesService
 from sqlalchemy import select, update, delete
-from utils.message_hint import MessageHintService
-from utils.message_translation import MessageTranslationService
-from utils.paraphrasing import MessageParaphraseService
+from src.utils.message_hint import MessageHintService
+from src.utils.message_translation import MessageTranslationService
+from src.utils.paraphrasing import MessageParaphraseService
 
 
 class UserService:
