@@ -1,5 +1,5 @@
-from utils.transcriber import TextToSpeechOpenAI, TextToSpeechEleven
-from utils.user import UserService
+from src.utils.transcriber import TextToSpeechOpenAI, TextToSpeechEleven
+from src.utils.user import UserService
 
 
 class TextToSpeech:

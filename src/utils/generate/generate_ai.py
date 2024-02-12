@@ -12,6 +12,7 @@ from src.config import config
 OPENAI_API = ast.literal_eval(config.OPENAI_API)
 PROXY = ast.literal_eval(config.PROXY)
 
+
 class GenerateAI:
     def __init__(self, request_url: str):
         self.headers = {"Authorization": []}

@@ -1,8 +1,8 @@
 from typing import List
 
 from aiogram.dispatcher import FSMContext
-from database.models import MessageHistory
-from utils.message.schema import MessageHelperInfo, ConversationStateInfo
+from src.database.models import MessageHistory
+from src.utils.message.schema import MessageHelperInfo, ConversationStateInfo
 from aiogram.types import Message
 
 

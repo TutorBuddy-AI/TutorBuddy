@@ -14,6 +14,7 @@ OPENAI_API = ast.literal_eval(config.OPENAI_API)
 request_url = "https://api.openai.com/v1/audio/speech"
 man_providers = "echo"
 
+
 class TextToSpeechOpenAI:
     def __init__(
             self,

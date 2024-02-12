@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 
 async def get_choose_native_language_keyboard() -> InlineKeyboardMarkup:
@@ -23,6 +23,7 @@ async def get_choose_native_language_keyboard() -> InlineKeyboardMarkup:
 
 async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     choose_goal_inline_kb = InlineKeyboardMarkup(row_width=2)
+    business = InlineKeyboardButton(text='Business 💵', callback_data='goal_business')
 
     career = InlineKeyboardButton(text='Career 🪜', callback_data='goal_career')
     education = InlineKeyboardButton(text='Education 🎓', callback_data='goal_education')
@@ -30,7 +31,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='goal_travel')
     relocate = InlineKeyboardButton(text='Move abroad 🌎', callback_data='goal_relocate')
 
-    culture = InlineKeyboardButton(text='Culture 🗽', callback_data='goal_culture')
+    entertainment = InlineKeyboardButton(text='For fun 🗽', callback_data='goal_entertainment')
     love = InlineKeyboardButton(text='Love 💖️', callback_data='goal_love')
 
     friendship = InlineKeyboardButton(text='Friendship 👋🏻', callback_data='goal_friendship')
@@ -39,64 +40,85 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     other = InlineKeyboardButton(text='Other✍️🏻', callback_data='other_goal')
 
     (choose_goal_inline_kb
-        .row(career, education).row(travel, relocate)
-        .row(culture, love).row(friendship, network)
-        .row(other)
+     .row(business)
+     .row(career, education).row(travel, relocate)
+     .row(entertainment, love).row(friendship, network)
+     .row(other)
      )
 
     return choose_goal_inline_kb
 
 
 async def get_choose_english_level_keyboard() -> InlineKeyboardMarkup:
-
     choose_english_level_inline_kb = InlineKeyboardMarkup(row_width=1)
 
-    level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases (1)', callback_data='level_1')
-    level_2 = InlineKeyboardButton(text='I can have simple conversations about familiar topics (2)',
+    level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases', callback_data='level_1')
+    level_2 = InlineKeyboardButton(text='I can only have simple conversations',
                                    callback_data='level_2')
 
-    level_3 = InlineKeyboardButton(text='I can communicate confidently\n\n on various subjects (3)',
+    level_3 = InlineKeyboardButton(text='I can talk about various subjects',
                                    callback_data='level_3')
-    level_4 = InlineKeyboardButton(text='I express myself fluently in any situation (4)', callback_data='level_4')
+    level_4 = InlineKeyboardButton(text='I express myself fluently in any situation', callback_data='level_4')
 
     choose_english_level_inline_kb.row(level_1).row(level_2).row(level_3).row(level_4)
 
     return choose_english_level_inline_kb
 
 
-async def get_choose_topic_keyboard() -> InlineKeyboardMarkup:
-    choose_topic_inline_kb = InlineKeyboardMarkup(row_width=2)
+async def get_choose_topic_keyboard(callback_query: CallbackQuery = None) -> InlineKeyboardMarkup:
+    if callback_query:
+        choose_topic_inline_kb = callback_query.message.reply_markup
 
-    psychology = InlineKeyboardButton(text='Psychology 🧠', callback_data='topic_psychology')
-    business = InlineKeyboardButton(text='Business 💵', callback_data='topic_business')
+        for row in choose_topic_inline_kb.inline_keyboard:
+            for button in row:
+                if button.callback_data == callback_query.data:
+                    if button.text.startswith("✅ "):
+                        button.text = button.text.replace("✅ ", "")
+                    else:
+                        button.text = "✅ " + button.text
+                    break
+    else:
+        choose_topic_inline_kb = InlineKeyboardMarkup(row_width=2)
 
-    science = InlineKeyboardButton(text='Science 🧬', callback_data='topic_science')
-    innovations = InlineKeyboardButton(text='Innovations 💡', callback_data='topic_innovations')
+        psychology = InlineKeyboardButton(text='Psychology 🧠', callback_data='topic_psychology')
+        business = InlineKeyboardButton(text='Business 💵', callback_data='topic_business')
 
-    fashion = InlineKeyboardButton(text='Fashion 🕶️', callback_data='topic_fashion')
-    art_and_design = InlineKeyboardButton(text='Art & Design 🎨', callback_data='topic_art_and_design')
+        startups = InlineKeyboardButton(text='StartUps 🚀', callback_data='topic_startups')
+        innovations = InlineKeyboardButton(text='Innovations 💡', callback_data='topic_innovations')
 
-    games = InlineKeyboardButton(text='Games 🕹️', callback_data='topic_games')
-    music = InlineKeyboardButton(text='Music 🎵', callback_data='topic_music')
+        fashion = InlineKeyboardButton(text='Fashion 🕶', callback_data='topic_fashion')
+        art_and_design = InlineKeyboardButton(text='Art & Design 🎨', callback_data='topic_art_and_design')
 
-    travel = InlineKeyboardButton(text='Travel ✈️', callback_data='topic_travel')
-    book = InlineKeyboardButton(text='Books 📚', callback_data='topic_books')
+        games = InlineKeyboardButton(text='Games 🕹', callback_data='topic_games')
+        science = InlineKeyboardButton(text='Science 🧬', callback_data='topic_science')
 
-    sports = InlineKeyboardButton(text='Sports ⚽️️', callback_data='topic_sports')
-    health = InlineKeyboardButton(text='Health 🫁️', callback_data='topic_health')
+        travel = InlineKeyboardButton(text='Travel ✈️', callback_data='topic_travel')
+        book = InlineKeyboardButton(text='Books 📚', callback_data='topic_books')
 
-    movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
-    other = InlineKeyboardButton(text='Other', callback_data='topic_other')
+        sports = InlineKeyboardButton(text='Sports ⚽️', callback_data='topic_sports')
+        health = InlineKeyboardButton(text='Health 🫁', callback_data='topic_health')
 
-    # news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
-    # career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
+        movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
+        other = InlineKeyboardButton(text='Other ✍️🗒', callback_data='topic_other')
 
-    done_button = InlineKeyboardButton(text='Accept', callback_data='done')
+        # news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
+        # career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
 
-    choose_topic_inline_kb.row(psychology, business).row(science, innovations).row(fashion, art_and_design).row(games, music).\
-        row(travel, book).row(sports, health).row(movies, other).row(done_button)
+        done_button = InlineKeyboardButton(text='Accept ✅', callback_data='done')
+
+        choose_topic_inline_kb.add(
+            psychology, business,
+            startups, innovations,
+            fashion, art_and_design,
+            games, science,
+            travel, book,
+            sports, health,
+            movies, other
+        )
+        choose_topic_inline_kb.row(done_button)
 
     return choose_topic_inline_kb
+
 
 async def get_choose_bot_keyboard() -> InlineKeyboardMarkup:
     choose_bot_inline_kb = InlineKeyboardMarkup(row_width=2)

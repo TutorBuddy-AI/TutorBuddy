@@ -1,1 +1,1 @@
-from utils.generate.paraphraser.paraphraser import Paraphraser
+from src.utils.generate.paraphraser.paraphraser import Paraphraser

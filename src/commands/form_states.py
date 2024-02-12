@@ -17,14 +17,16 @@ from aiogram import types, md
 from aiogram.types import InputFile
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 
+
 async def clean_messages(chat_id: str, message_id: str):
     try:
         await bot.delete_message(chat_id=chat_id, message_id=message_id)
     except:
         pass
 
+
 @dp.message_handler(IsNotRegister())
-async def process_start_register_user(message: types.Message, state: FSMContext):
+async def process_start_register_user(message: types.Message):
     """
     Function to explain bot idea for new users
     """
@@ -39,6 +41,7 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
             [InlineKeyboardButton("Let's start", callback_data="start")]
         ])
     )
+
 
 @dp.callback_query_handler(text=["start"])
 async def process_start_acquaintance(query: types.CallbackQuery, state: FSMContext):
@@ -65,6 +68,7 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
         query.message.chat.id, md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
 
+
 async def say_hello(name: str, chat_id: str):
     await bot.send_message(
         chat_id,
@@ -90,6 +94,7 @@ async def process_not_me(query: types.CallbackQuery, state: FSMContext):
         reply_markup = types.ReplyKeyboardRemove()
     )
 
+
 @dp.message_handler(state=Form.other_name)
 async def process_get_name(message: types.Message, state: FSMContext):
     name = message.text
@@ -102,6 +107,7 @@ async def process_get_name(message: types.Message, state: FSMContext):
         message.chat.id, md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
 
+
 @dp.callback_query_handler(lambda query: query.data.startswith("native"), state=Form.native_language)
 async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
@@ -112,11 +118,14 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
         query.message.chat.id, md.escape_md("Why are you practicing English?"),
         reply_markup=await get_choose_goal_keyboard())
 
+
 @dp.callback_query_handler(lambda query: query.data == "other_language", state=Form.native_language)
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
-    await bot.send_message(query.message.chat.id, get_other_native_language_question(),
-        reply_markup = types.ReplyKeyboardRemove())
+    await bot.send_message(
+        query.message.chat.id, get_other_native_language_question(),
+        reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(Form.other_language)
+
 
 @dp.message_handler(state=Form.other_language)
 async def process_other_language(message: types.Message, state: FSMContext):
@@ -129,6 +138,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
                                reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
 
+
 @dp.callback_query_handler(lambda query: query.data.startswith("goal"), state=Form.goal)
 async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
@@ -138,11 +148,13 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
                            reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
 
+
 @dp.callback_query_handler(lambda query: query.data == "other_goal", state=Form.goal)
 async def start_process_other_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_goal(),
         reply_markup = types.ReplyKeyboardRemove())
     await state.set_state(Form.other_goal)
+
 
 @dp.message_handler(state=Form.other_goal)
 async def process_other_goal_handler(message: types.Message, state: FSMContext):
@@ -151,6 +163,7 @@ async def process_other_goal_handler(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, md.escape_md(f"What is your English level?🧑🏽‍🏫👩🏻‍🏫"),
                            reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
+
 
 @dp.callback_query_handler(lambda query: query.data.startswith("level"), state=Form.english_level)
 async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
@@ -162,22 +175,12 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_chose_some_topics(),
                            reply_markup=await get_choose_topic_keyboard())
 
+
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=Form.topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    keyboard = callback_query.message.reply_markup.inline_keyboard
-
-    for row in keyboard:
-        for button in row:
-            if button.callback_data == callback_query.data and button.text.startswith("✅ "):
-                button.text = button.text.replace("✅ ", "")
-                break
-
-            if button.callback_data == callback_query.data and not button.text.startswith("✅ "):
-                button.text = "✅ " + button.text
-                break
-
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=InlineKeyboardMarkup(row_width=2, inline_keyboard=keyboard))
+                                        reply_markup=await get_choose_topic_keyboard(callback_query))
+
 
 @dp.callback_query_handler(text="done", state=Form.topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
@@ -196,10 +199,10 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     topics_num += 1
                     result_text += text[1] + " "
     if topics_num <= 2:
-        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
-                               reply_markup=await get_choose_topic_keyboard())
+        await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
+
 
 async def process_topics(query: types.CallbackQuery, state: FSMContext, result_text, was_other):
     async with state.proxy() as data:
@@ -213,11 +216,13 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
             data["additional_topic"] = ""
         await create_user_setup_speaker_choice(query.message, state)
 
+
 @dp.message_handler(state=Form.additional_topic)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["additional_topic"] = message.text
     await create_user_setup_speaker_choice(message, state)
+
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
@@ -232,7 +237,8 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await asyncio.sleep(2)
     await bot.send_message(message.chat.id, get_choose_buddy_text3())
     await asyncio.sleep(2)
-    await bot.send_animation(message.chat.id, animation=InputFile("./files/tutorbuddy_choose.gif"),
-                           reply_markup=await get_choose_bot_keyboard())
+    await bot.send_animation(
+        message.chat.id, animation=InputFile("./files/tutorbuddy_choose.gif"),
+        reply_markup=await get_choose_bot_keyboard())
 
     await state.finish()

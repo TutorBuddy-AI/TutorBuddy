@@ -1,4 +1,3 @@
-import asyncio
 from src.database.models import QuestionsHistory
 from sqlalchemy import select, delete
 from src.database import session, Transactional

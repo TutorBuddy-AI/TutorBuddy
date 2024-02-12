@@ -1,5 +1,5 @@
-from database import Transactional
-from database.models import MessageHistory, MessageMistakes
+from src.database import Transactional
+from src.database.models import MessageHistory, MessageMistakes
 from sqlalchemy import select, delete
 from sqlalchemy.orm import aliased
 from src.database import session

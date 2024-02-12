@@ -1,8 +1,8 @@
 import logging
 
-from utils.user import UserService
-from utils.generate import GenerateAI
-from utils.user.schemas import GetUserMessageHistory
+from src.utils.user import UserService
+from src.utils.generate import GenerateAI
+from src.utils.user.schemas import GetUserMessageHistory
 import json
 
 
@@ -29,7 +29,7 @@ class HintGenerator:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 100
+            "max_tokens": 400
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:

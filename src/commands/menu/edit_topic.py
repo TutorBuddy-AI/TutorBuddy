@@ -7,7 +7,7 @@ from src.keyboards import get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_topic_keyboard
 from src.states import FormTopic
 from src.utils.user import UserService
-from texts.texts import get_chose_some_more_topics, get_other_topics
+from src.texts.texts import get_chose_some_more_topics, get_other_topics
 
 
 @dp.message_handler(commands=["changetopic"])
@@ -28,20 +28,7 @@ async def change_topic_handler(query: CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=FormTopic.new_topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    keyboard = callback_query.message.reply_markup.inline_keyboard
-
-    for row in keyboard:
-        for button in row:
-            if button.callback_data == callback_query.data and button.text.startswith("✅ "):
-                button.text = button.text.replace("✅ ", "")
-                break
-
-            if button.callback_data == callback_query.data and not button.text.startswith("✅ "):
-                button.text = "✅ " + button.text
-                break
-
-    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=InlineKeyboardMarkup(row_width=2, inline_keyboard=keyboard))
+    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id, reply_markup=await get_choose_topic_keyboard(callback_query))
 
 
 @dp.callback_query_handler(text="done", state=FormTopic.new_topic)
@@ -61,8 +48,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     topics_num += 1
                     result_text += text[1] + " "
     if topics_num <= 2:
-        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
-                               reply_markup=await get_choose_topic_keyboard())
+        await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
 
@@ -104,11 +90,13 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
             data["additional_topic"] = ""
         await create_user_setup_speaker_choice(query.message, state)
 
+
 @dp.message_handler(state=FormTopic.new_additional_topic)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["additional_topic"] = message.text
     await create_user_setup_speaker_choice(message, state)
+
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
