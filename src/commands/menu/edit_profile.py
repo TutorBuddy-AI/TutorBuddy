@@ -7,7 +7,7 @@ from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboar
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
 from src.states import FormName, FormNativeLanguage, FormEnglishLevel
 from src.utils.user import UserService
-from texts.texts import get_incorrect_native_language_question, get_other_native_language_question
+from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
 
 
 @dp.message_handler(commands=["editprofile"])

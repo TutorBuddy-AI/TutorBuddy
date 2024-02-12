@@ -1,1 +1,1 @@
-from utils.paraphrasing.message_paraphrase_service import MessageParaphraseService
+from src.utils.paraphrasing.message_paraphrase_service import MessageParaphraseService

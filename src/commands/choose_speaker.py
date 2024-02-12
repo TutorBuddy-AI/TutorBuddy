@@ -5,11 +5,11 @@ from src.utils.user import UserService
 
 from aiogram import types, md
 
-from states.form import FormInitTalk
-from texts.texts import get_choice_is_done, get_start_talk, get_greeting_anastasia
-from utils.generate.talk_initializer.talk_initializer import TalkInitializer
-from utils.transcriber.text_to_speech import TextToSpeech
-from utils.user import UserCreateMessage
+from src.states.form import FormInitTalk
+from src.texts.texts import get_choice_is_done, get_start_talk, get_greeting_anastasia
+from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
+from src.utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.user import UserCreateMessage
 
 
 @dp.callback_query_handler(text="continue_bot")

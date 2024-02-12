@@ -2,11 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
-from config import config
-from src.config import dp, bot
-from src.commands.form_states import process_start_register_user, process_get_name
-from src.filters import IsNotRegister
-from src.states import Form
+from src.config import dp, bot, config
 from src.utils.newsletter.newsletter import Newsletter
 from aiogram import types
 

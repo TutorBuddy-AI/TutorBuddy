@@ -4,7 +4,7 @@ from src.utils.user.user_service import UserService
 from src.utils.generate import GenerateAI
 import json
 
-from utils.user.schemas import GetUserMessageHistory
+from src.utils.user.schemas import GetUserMessageHistory
 
 
 class TranslateGenerate:

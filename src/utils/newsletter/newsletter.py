@@ -1,6 +1,4 @@
-from typing import List
 from sqlalchemy import select
-import io
 from src.config.initialize import bot
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
@@ -9,8 +7,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from aiogram import types
 from src.database.models.message_history import MessageHistory
-from utils.transcriber.text_to_speech import TextToSpeech
-from aiogram.utils.markdown import spoiler, text
+from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.types import ParseMode
 import subprocess
 from io import BytesIO

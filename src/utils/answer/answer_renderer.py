@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from utils.answer.answer import Answer
-from utils.answer.render import Render
+from src.utils.answer.answer import Answer
+from src.utils.answer.render import Render
 
 
 class AnswerRenderer:

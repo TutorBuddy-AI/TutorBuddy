@@ -1,9 +1,9 @@
 import logging
 from typing import Optional
 
-from utils.user import UserService
-from utils.generate import GenerateAI
-from utils.user.schemas import GetUserMessageHistory
+from src.utils.user import UserService
+from src.utils.generate import GenerateAI
+from src.utils.user.schemas import GetUserMessageHistory
 import json
 
 

@@ -1,6 +1,6 @@
-from utils.generate.translate.translate import TranslateGenerate
-from utils.user import UserService
-from utils.user.schemas import GetUserMessageHistory
+from src.utils.generate.translate.translate import TranslateGenerate
+from src.utils.user import UserService
+from src.utils.user.schemas import GetUserMessageHistory
 
 
 class MessageTranslationCreator:

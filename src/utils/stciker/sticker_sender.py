@@ -1,4 +1,4 @@
-from utils.stciker.sticker_pack import anastasias_pack, tutorbots_pack
+from sticker_pack import anastasias_pack, tutorbots_pack
 
 
 class StickerSender:

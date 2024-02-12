@@ -7,7 +7,7 @@ from src.keyboards import get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_topic_keyboard
 from src.states import FormTopic
 from src.utils.user import UserService
-from texts.texts import get_chose_some_more_topics, get_other_topics
+from src.texts.texts import get_chose_some_more_topics, get_other_topics
 
 
 @dp.message_handler(commands=["changetopic"])
@@ -104,11 +104,13 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
             data["additional_topic"] = ""
         await create_user_setup_speaker_choice(query.message, state)
 
+
 @dp.message_handler(state=FormTopic.new_additional_topic)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["additional_topic"] = message.text
     await create_user_setup_speaker_choice(message, state)
+
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
     state_data = await state.get_data()

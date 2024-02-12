@@ -1,6 +1,6 @@
 from aiogram.dispatcher import FSMContext
 
-from utils.answer.render import Render
+from render import Render
 
 
 class RenderHelper:

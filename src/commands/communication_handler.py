@@ -7,22 +7,22 @@ from aiogram import md
 from aiogram import types
 from aiogram.types import ParseMode
 
-from database.models import MessageHistory
-from utils.answer import AnswerRenderer
-from utils.answer.answer import Answer
-from utils.answer.render import Render
-from utils.answer.render_helper import RenderHelper
-from utils.generate.communication import CommunicationGenerate
-from utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
-from utils.message import MessageHelper
-from utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
-from utils.transcriber import TextToSpeechEleven, SpeechToText
-from utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
-from utils.user import UserCreateMessage, UserService
-from utils.stciker.sticker_sender import StickerSender
-from utils.transcriber import SpeechToText
-from utils.user import UserCreateMessage, UserService
-from utils.newsletter.newsletter import convert_bytes_to_ogg
+from src.database.models import MessageHistory
+from src.utils.answer import AnswerRenderer
+from src.utils.answer.answer import Answer
+from src.utils.answer.render import Render
+from src.utils.answer.render_helper import RenderHelper
+from src.utils.generate.communication import CommunicationGenerate
+from src.utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
+from src.utils.message import MessageHelper
+from src.utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
+from src.utils.transcriber import TextToSpeechEleven, SpeechToText
+from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
+from src.utils.user import UserCreateMessage, UserService
+from src.utils.stciker.sticker_sender import StickerSender
+from src.utils.transcriber import SpeechToText
+from src.utils.user import UserCreateMessage, UserService
+from src.utils.newsletter.newsletter import convert_bytes_to_ogg
 import datetime
 import os
 

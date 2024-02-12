@@ -7,3 +7,4 @@ from src.database.models.feedbacks_history import FeedbacksHistory
 from src.database.models.questions_history import QuestionsHistory
 from src.database.models.message_hint import MessageHint
 from src.database.models.message_paraphrase import MessageParaphrase
+from src.database.models.message_translation import MessageTranslation

@@ -1,22 +1,20 @@
 import asyncio
 from sqlalchemy import select
 from aiogram.dispatcher import FSMContext
-from commands.communication_handler import CommunicationHandler
+from src.commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
 from aiogram.types import CallbackQuery, Message
-from utils.message import MessageHelper
-from utils.message_hint.message_hint_creator import MessageHintCreator
-from utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper
-from utils.message_hint.message_hint_service import MessageHintService
-from utils.message_history_mistakes.message_mistakes_creator import MessageMistakesCreator
-from utils.message_translation import MessageTranslationService
-from utils.message_translation.message_translation_creator import MessageTranslationCreator
-from utils.paraphrasing import MessageParaphraseService
-from src.database import session
-from src.database.models import User
+from src.utils.message import MessageHelper
+from src.utils.message_hint.message_hint_creator import MessageHintCreator
+from src.utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper
+from src.utils.message_hint.message_hint_service import MessageHintService
+from src.utils.message_history_mistakes.message_mistakes_creator import MessageMistakesCreator
+from src.utils.message_translation import MessageTranslationService
+from src.utils.message_translation.message_translation_creator import MessageTranslationCreator
+from src.utils.paraphrasing import MessageParaphraseService
 from aiogram import types, md
-from utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
-from utils.user import UserService, UserCreateMessage
+from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
+from src.utils.user import UserService, UserCreateMessage
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
