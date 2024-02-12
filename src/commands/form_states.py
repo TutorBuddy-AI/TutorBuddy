@@ -196,8 +196,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     topics_num += 1
                     result_text += text[1] + " "
     if topics_num <= 2:
-        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
-                               reply_markup=await get_choose_topic_keyboard())
+        await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
 
