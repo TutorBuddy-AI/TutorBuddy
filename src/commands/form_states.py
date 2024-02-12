@@ -164,20 +164,8 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=Form.topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    keyboard = callback_query.message.reply_markup.inline_keyboard
-
-    for row in keyboard:
-        for button in row:
-            if button.callback_data == callback_query.data and button.text.startswith("✅ "):
-                button.text = button.text.replace("✅ ", "")
-                break
-
-            if button.callback_data == callback_query.data and not button.text.startswith("✅ "):
-                button.text = "✅ " + button.text
-                break
-
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=InlineKeyboardMarkup(row_width=2, inline_keyboard=keyboard))
+                                        reply_markup=await get_choose_topic_keyboard(callback_query))
 
 @dp.callback_query_handler(text="done", state=Form.topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
