@@ -7,14 +7,14 @@ from src.texts.texts import get_welcome_text, get_choose_bot_text, get_welcome_t
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_choose_buddy_text1, get_choose_buddy_text3, \
     get_choose_buddy_text2, get_chose_some_more_topics
-from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard,\
+from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 
 from src.utils.user import UserService, UserHelper
 
 from aiogram.dispatcher import FSMContext
 from aiogram import types, md
-from aiogram.types import InputFile
+from aiogram.types import InputFile, CallbackQuery
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 
 
@@ -30,28 +30,30 @@ async def process_start_register_user(message: types.Message):
     """
     Function to explain bot idea for new users
     """
-    await bot.send_message(
-        message.chat.id, get_welcome_text_before_start(), parse_mode=ParseMode.MARKDOWN)
+    welcome_text = get_welcome_text()
 
-    await asyncio.sleep(1)
+    await bot.send_message(message.chat.id, welcome_text)
     await bot.send_animation(
         message.chat.id,
-        animation=InputFile("./files/learn_english.gif"),
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton("Let's start", callback_data="start")]
-        ])
+        animation=InputFile("./files/tutorbuddy_welcome.gif")
     )
+    await bot.send_message(
+        message.chat.id,
+        get_lets_know_each_other()
+    )
+    await process_start_acquaintance(message, state)
 
 
 @dp.callback_query_handler(text=["start"])
 async def process_start_acquaintance(query: types.CallbackQuery, state: FSMContext):
+
     await state.set_state(Form.name)
     await bot.send_message(
-        query.message.chat.id,
+        query.chat.id,
         f"Do you want me to call you '{query.from_user.first_name}' or do you prefer a different format?",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(f"{query.from_user.first_name} - ok", callback_data="name_ok")],
-            [InlineKeyboardButton("It’s not me 🙌🏻", callback_data="not_me")]
+            [InlineKeyboardButton(f"{query.from_user.first_name} - good 👍", callback_data="name_ok")],
+            [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")]
         ])
     )
 
@@ -62,28 +64,9 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = name
     await state.set_state(Form.native_language)
-
-    await say_hello(name, query.message.chat.id)
     await bot.send_message(
         query.message.chat.id, md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
-
-
-async def say_hello(name: str, chat_id: str):
-    await bot.send_message(
-        chat_id,
-        get_welcome_text(name)
-    )
-    await bot.send_animation(
-        chat_id,
-        animation=InputFile("./files/tutorbuddy_welcome.gif")
-    )
-    await bot.send_message(
-        chat_id,
-        get_lets_know_each_other()
-    )
-    await asyncio.sleep(2)
-
 
 @dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
 async def process_not_me(query: types.CallbackQuery, state: FSMContext):
@@ -91,7 +74,7 @@ async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(
         query.message.chat.id,
         "I understand, in messengers we often improvise\) What's the best way for me to address you?",
-        reply_markup = types.ReplyKeyboardRemove()
+        reply_markup=types.ReplyKeyboardRemove()
     )
 
 
@@ -121,9 +104,8 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(lambda query: query.data == "other_language", state=Form.native_language)
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
-    await bot.send_message(
-        query.message.chat.id, get_other_native_language_question(),
-        reply_markup=types.ReplyKeyboardRemove())
+    await bot.send_message(query.message.chat.id, get_other_native_language_question(),
+                           reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(Form.other_language)
 
 
@@ -133,7 +115,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, get_incorrect_native_language_question())
     else:
         async with state.proxy() as data:
-            data["native_language"]=message.text
+            data["native_language"] = message.text
         await bot.send_message(message.chat.id, md.escape_md("Why are you practicing English?"),
                                reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
@@ -152,7 +134,7 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda query: query.data == "other_goal", state=Form.goal)
 async def start_process_other_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_goal(),
-        reply_markup = types.ReplyKeyboardRemove())
+                           reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(Form.other_goal)
 
 
@@ -210,7 +192,7 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
 
     if was_other:
         await state.set_state(Form.additional_topic)
-        await bot.send_message(query.message.chat.id,get_other_topics())
+        await bot.send_message(query.message.chat.id, get_other_topics())
     else:
         async with state.proxy() as data:
             data["additional_topic"] = ""
@@ -230,7 +212,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
-                                                          # переменную, которая закоменчена выше
+    # переменную, которая закоменчена выше
     await bot.send_message(message.chat.id, get_choose_buddy_text1())
     await asyncio.sleep(2)
     await bot.send_message(message.chat.id, get_choose_buddy_text2())
