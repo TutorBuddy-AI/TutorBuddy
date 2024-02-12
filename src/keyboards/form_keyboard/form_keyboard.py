@@ -42,7 +42,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     (choose_goal_inline_kb
      .row(business)
      .row(career, education).row(travel, relocate)
-     .row(goal_entertainment, love).row(friendship, network)
+     .row(entertainment, love).row(friendship, network)
      .row(other)
      )
 
