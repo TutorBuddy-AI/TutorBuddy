@@ -11,7 +11,7 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_message(query.message.chat.id, md.escape_md("TutorBuddy team is always glad to hear your feedback!"
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/feedback.jpg'), caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
                                                                " Tell us what do you like or dislike about this bot and"
                                                                " how can we improve it?"),
                            reply_markup=await get_go_back_inline_keyboard())
@@ -21,7 +21,7 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_message(message.chat.id, md.escape_md("TutorBuddy team is always glad to hear your feedback!"
+    await bot.send_photo(message.chat.id,photo=types.InputFile('./files/feedback.jpg'), caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
                                                          " Tell us what do you like or dislike about this bot and"
                                                          " how can we improve it?"),
                            reply_markup=await get_go_back_inline_keyboard())

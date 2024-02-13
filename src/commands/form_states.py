@@ -97,8 +97,8 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
         data["native_language"] = query.data.split("_")[1]
     await state.set_state(Form.goal)
 
-    await bot.send_message(
-        query.message.chat.id, md.escape_md("Why are you practicing English?"),
+    await bot.send_photo(
+        query.message.chat.id, photo=types.InputFile('./files/goal.png'), caption=md.escape_md("Why are you practicing English?"),
         reply_markup=await get_choose_goal_keyboard())
 
 
@@ -115,8 +115,8 @@ async def process_other_language(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, get_incorrect_native_language_question())
     else:
         async with state.proxy() as data:
-            data["native_language"] = message.text
-        await bot.send_message(message.chat.id, md.escape_md("Why are you practicing English?"),
+            data["native_language"]=message.text
+        await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'), caption=md.escape_md("Why are you practicing English?"),
                                reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
 
@@ -154,7 +154,7 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(Form.topic)
 
-    await bot.send_message(query.message.chat.id, get_chose_some_topics(),
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/topic.jpg'), caption=get_chose_some_topics(),
                            reply_markup=await get_choose_topic_keyboard())
 
 
