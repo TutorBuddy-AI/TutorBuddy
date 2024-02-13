@@ -116,7 +116,7 @@ class CommunicationHandler:
     async def render_text_answer(self, render: Render):
         user_info = await UserService().get_user_info(self.chat_id)
         user_speaker = user_info['speaker']
-
+        additional_menu_message = None
         if user_speaker == 'Anastasia':
             audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
         elif user_speaker == "Tutor Bot":
@@ -135,7 +135,7 @@ class CommunicationHandler:
                     reply_to_message_id=render.reply_to_message_id)
 
             await self.clear_old_menus()
-            await self.regsiter_menu(answer_message.message_id, None)
+            await self.regsiter_menu(answer_message.message_id, additional_menu_message)
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(self.chat_id,
