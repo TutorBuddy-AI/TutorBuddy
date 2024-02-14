@@ -219,10 +219,10 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
     # переменную, которая закоменчена выше
-
+    name = user_info["call_name"]
     await bot.send_message(
         message.chat.id,
-        f"Great! Nice getting to know you, {user_info["call_name"]}! I guess it’s my turn to tell you about me.",
+        f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me.",
         reply_markup=markup)
     await asyncio.sleep(1)
 
