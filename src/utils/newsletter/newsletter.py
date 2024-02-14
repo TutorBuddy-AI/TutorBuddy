@@ -18,7 +18,7 @@ from aiogram.types.web_app_info import WebAppInfo
 import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
-
+from markdownify import markdownify as md
 # log_directory = '/home/ubuntu/AI-TutorBuddy-bot/src/utils/newsletter/logs'
 # log_file_path = os.path.join(log_directory, 'newsletter.log')
 # if not os.path.exists(log_directory):
@@ -56,8 +56,9 @@ class Newsletter:
 
             # Предварительно убрал с текста любые HTML теги, так как starlette сохраняет с ними
             # Вывести текст с <p> и <br> просто ?возможно? (не проверял еще), но в caption точно не принимает их
-            post_text = daily_news.message.replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
-                "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", "")
+            post_text = md(daily_news.message)
+                #          .replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
+                # "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", ""))
             for tgid in tg_id_list:
                 try:
                     post_message = MessageHistory(
@@ -70,27 +71,29 @@ class Newsletter:
                     session.add(post_message)
                     voice = await self.get_voice(tgid)
                     audio = await TextToSpeech.get_speech_by_voice(voice, post_text)
+                    post_translate_button = AnswerRenderer.get_button_caption_translation(
+                        bot_message_id=post_message.id, user_message_id="")
                     # Отправка фото с текстом newsletter под ним
+                    bot.send_message()
                     text_photo = await bot.send_photo(
                         chat_id=int(tgid),
                         photo=types.InputFile(path_img),
                         caption=post_text,
-                        parse_mode=ParseMode.HTML,
-                        reply_markup=InlineKeyboardMarkup().add(
+                        parse_mode=ParseMode.MARKDOWN,
+                        reply_markup=InlineKeyboardMarkup().row(
                             InlineKeyboardButton(
                                 text='Original article ➡️📃',
                                 web_app=WebAppInfo(),
                                 url=daily_news.url)
-                        )
+                        ).row(post_translate_button)
                     )
                     # Удаляю файл ogg который мы отправили как войс месседж
                     # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
                     # Отправка голосового сообщение. Озвучка newsletter
                     # Написал метод get_tranlate_markup где только кнопка translate, она пока не работает,
                     # хотя callback тот же что и у обычной
-                    pure_audio_markup = AnswerRenderer.get_translation_for_message(post_text)
                     with AudioConverter(audio) as ogg_file:
-                        await bot.send_voice(int(tgid), types.InputFile(ogg_file), reply_markup=pure_audio_markup)
+                        await bot.send_voice(int(tgid), types.InputFile(ogg_file))
                     # Задержка перед вопросом user
                     await asyncio.sleep(2)
 
@@ -111,9 +114,10 @@ class Newsletter:
                     )
                     # Сохранение в MessageHistory текст поста
                     session.add(talk_message)
-
+                    voice = await self.get_voice(tgid)
                     audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-                    markup = AnswerRenderer.get_translate_caption_markup()
+                    markup = AnswerRenderer.get_markup_caption_translation(
+                        bot_message_id=talk_message.id, user_message_id="")
                     with AudioConverter(audio) as ogg_file:
                         # Отправка вопроса юзера по поводу newsletter голосовое сообщение
                         await bot.send_voice(int(tgid),

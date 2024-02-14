@@ -3,12 +3,15 @@ import asyncio
 from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
-from src.texts.texts import get_welcome_text, get_choose_bot_text, get_welcome_text_before_start, \
+from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_text_before_start, \
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
-    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text
+    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text, \
+    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
+from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.transcriber.text_to_speech import TextToSpeech
 
 from src.utils.user import UserService, UserHelper
 
@@ -31,7 +34,7 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
     Function to explain bot idea for new users
     """
     welcome_text = get_welcome_text()
-    caption_markup = AnswerRenderer.get_translation_for_caption_standalone_markup()
+    caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
 
     await bot.send_animation(
         message.chat.id,
@@ -54,7 +57,7 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(f"{message.from_user.first_name} - good 👍", callback_data="name_ok")],
             [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")],
-            [AnswerRenderer.get_translation_for_text_standalone_button()]
+            [AnswerRenderer.get_button_text_translation_standalone()]
         ])
     )
 
@@ -73,7 +76,7 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
 async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.other_name)
-    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+    markup = AnswerRenderer.get_markup_text_translation_standalone()
     await bot.send_message(
         query.message.chat.id,
         md.escape_md("I understand, in messengers we often improvise) What's the best way for me to address you?"),
@@ -117,8 +120,9 @@ async def process_other_language(message: types.Message, state: FSMContext):
     else:
         async with state.proxy() as data:
             data["native_language"]=message.text
-        await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'), caption=md.escape_md("Why are you practicing English?"),
-                               reply_markup=await get_choose_goal_keyboard())
+        await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'),
+                             caption=md.escape_md("Why are you practicing English?"),
+                             reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
 
 
@@ -155,8 +159,9 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(Form.topic)
 
-    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/topic.jpg'), caption=get_chose_some_topics(),
-                           reply_markup=await get_choose_topic_keyboard())
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/topic.jpg'),
+                         caption=get_chose_some_topics(),
+                         reply_markup=await get_choose_topic_keyboard())
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=Form.topic)
@@ -193,7 +198,7 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
 
     if was_other:
         await state.set_state(Form.additional_topic)
-        markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+        markup = AnswerRenderer.get_markup_text_translation_standalone()
         await bot.send_message(query.message.chat.id, get_other_topics(), reply_markup=markup)
     else:
         async with state.proxy() as data:
@@ -212,14 +217,51 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     state_data = await state.get_data()
     user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
-    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+    great_markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
     # переменную, которая закоменчена выше
-    await bot.send_message(message.chat.id, get_choose_buddy_text(), reply_markup=markup)
-    await asyncio.sleep(2)
-    await bot.send_animation(
-        message.chat.id, animation=InputFile("./files/tutorbuddy_choose.gif"),
-        reply_markup=await get_choose_bot_keyboard())
+    name = user_info["call_name"]
+    await bot.send_message(
+        message.chat.id,
+        md.escape_md(f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me."),
+        reply_markup=great_markup)
+    await asyncio.sleep(1)
 
+    caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
+    await bot.send_photo(
+        message.chat.id,
+        photo=types.InputFile('./files/meet_bot.png'),
+        caption=get_meet_bot_message(),
+        reply_markup=caption_markup)
+
+    meet_bot_text = get_meet_bot_text()
+    audio = await TextToSpeech.get_speech_by_voice(voice="Tutor Bot", text=meet_bot_text)
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            types.InputFile(ogg_file),
+            parse_mode=ParseMode.HTML
+        )
+
+    await asyncio.sleep(2)
+
+    await bot.send_photo(
+        message.chat.id,
+        photo=types.InputFile('./files/meet_nastya.png'),
+        caption=get_meet_nastya_message(user_info["call_name"]),
+        reply_markup=caption_markup)
+
+    meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
+    audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            types.InputFile(ogg_file),
+            parse_mode=ParseMode.HTML
+        )
+
+    await bot.send_message(
+        message.chat.id, text=md.escape_md("Who would you like to talk to?"),
+        reply_markup=await get_choose_bot_keyboard())
     await state.finish()
