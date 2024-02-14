@@ -3,6 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from src.config import dp, bot
 from src.keyboards.scenario_keyboard import get_menu_scenario
+from src.utils.answer import AnswerRenderer
 
 
 @dp.callback_query_handler(text="go_back_to_scenario")
@@ -30,7 +31,10 @@ async def scenario_handler(message: types.Message, state: FSMContext):
     # await bot.send_message(message.chat.id, md.escape_md("Choose a scenario to practice your English"
     #                                                      f" in various possible situations! 🗣️"),
     #                        reply_markup=await get_menu_scenario())
+    translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=True)
     await bot.send_message(
         message.chat.id,
         md.escape_md(
-            "We are working on this functionality and it will be ready soon! See you!"))
+            "We are working on this functionality and it will be ready soon! See you!"),
+        reply_markup=translate_markup
+    )

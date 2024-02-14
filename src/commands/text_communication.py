@@ -22,6 +22,8 @@ from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseC
 from src.utils.stciker.sticker_sender import StickerSender
 from aiogram.utils.callback_data import CallbackData
 
+from src.utils.user import UserService
+
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
@@ -103,7 +105,6 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
     state_data = await state.get_data()
     message = query.message
     lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
-    # ToDo data["native_language"]
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
@@ -120,6 +121,38 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     state_data = await state.get_data()
     message = query.message
     lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
+
+    generated_text = await MessageTranslationCreator(
+        tg_id=str(message.chat.id)
+    ).create_communication_message_text_standalone(message.caption, lang)
+
+    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
+
+@dp.callback_query_handler(text="request_text_translation_standalone_for_user", state="*")
+async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, state: FSMContext):
+    """
+    Callback to translate standalone message text, when user is not logged in
+    """
+    message = query.message
+    user_info = await UserService().get_user_info(message.chat.id)
+    lang = user_info["native_lang"]
+
+    generated_text = await MessageTranslationCreator(
+        tg_id=str(message.chat.id)
+    ).create_communication_message_text_standalone(message.text, lang)
+
+    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
+
+@dp.callback_query_handler(text="request_caption_translation_standalone_for_user", state="*")
+async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
+    """
+    Callback to translate standalone message caption, when user is not logged in
+    """
+    message = query.message
+    user_info = await UserService().get_user_info(message.chat.id)
+    lang = user_info["native_lang"]
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)

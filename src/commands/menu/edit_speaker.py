@@ -1,6 +1,7 @@
 from aiogram import types, md
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
+from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.config import dp, bot
 from src.keyboards import get_go_back_inline_keyboard
@@ -15,7 +16,9 @@ async def edit_speaker_handler(message: types.Message):
 
     go_back = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
-    persona_kb.add(nastya).add(bot_tutor).add(go_back)
+
+
+    persona_kb.add(nastya).add(bot_tutor).add(go_back).add(AnswerRenderer.get_button_text_translation_standalone(for_user=True))
 
     await bot.send_message(message.chat.id, md.escape_md("Who would you like to talk with? 💌"),
                            reply_markup=persona_kb)

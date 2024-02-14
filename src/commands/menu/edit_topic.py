@@ -15,7 +15,7 @@ async def change_topic_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
     await bot.send_message(message.chat.id, f"Which topic would you like to discuss instead? 🤓",
-                           reply_markup=await get_choose_topic_keyboard())
+                           reply_markup=await get_choose_topic_keyboard(for_user=True))
 
 
 @dp.callback_query_handler(lambda query: query.data == "change_topic")
@@ -23,12 +23,13 @@ async def change_topic_handler(query: CallbackQuery, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
     await bot.send_message(query.message.chat.id, md.escape_md(f"Which topic would you like to discuss instead? 🤓"),
-                           reply_markup=await get_choose_topic_keyboard())
+                           reply_markup=await get_choose_topic_keyboard(for_user=True))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=FormTopic.new_topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id, reply_markup=await get_choose_topic_keyboard(callback_query))
+    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
+                                        reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True))
 
 
 @dp.callback_query_handler(text="done", state=FormTopic.new_topic)
@@ -47,7 +48,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                 else:
                     topics_num += 1
                     result_text += text[1] + " "
-    if topics_num <= 2:
+    if topics_num < 1:
         await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
@@ -71,9 +72,9 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     topics_num += 1
                     result_text += text[1] + " "
 
-    if topics_num <= 2:
+    if topics_num < 1:
         await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
-                               reply_markup=await get_choose_topic_keyboard())
+                               reply_markup=await get_choose_topic_keyboard(for_user=True))
     else:
         await process_topics(query, state, result_text, was_other)
 

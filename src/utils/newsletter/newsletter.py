@@ -88,7 +88,7 @@ class Newsletter:
                     # Отправка голосового сообщение. Озвучка newsletter
                     # Написал метод get_tranlate_markup где только кнопка translate, она пока не работает,
                     # хотя callback тот же что и у обычной
-                    pure_audio_markup = AnswerRenderer.get_translation_for_message(post_text)
+                    pure_audio_markup = AnswerRenderer.get_markup_translation_for_message(post_text)
                     with AudioConverter(audio) as ogg_file:
                         await bot.send_voice(int(tgid), types.InputFile(ogg_file), reply_markup=pure_audio_markup)
                     # Задержка перед вопросом user
@@ -113,7 +113,7 @@ class Newsletter:
                     session.add(talk_message)
 
                     audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-                    markup = AnswerRenderer.get_translate_caption_markup()
+                    markup = AnswerRenderer.get_markup_caption_translation()
                     with AudioConverter(audio) as ogg_file:
                         # Отправка вопроса юзера по поводу newsletter голосовое сообщение
                         await bot.send_voice(int(tgid),

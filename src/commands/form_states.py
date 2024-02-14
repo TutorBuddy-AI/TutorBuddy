@@ -31,7 +31,7 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
     Function to explain bot idea for new users
     """
     welcome_text = get_welcome_text()
-    caption_markup = AnswerRenderer.get_translation_for_caption_standalone_markup()
+    caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
 
     await bot.send_animation(
         message.chat.id,
@@ -54,7 +54,7 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(f"{message.from_user.first_name} - good 👍", callback_data="name_ok")],
             [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")],
-            [AnswerRenderer.get_translation_for_text_standalone_button()]
+            [AnswerRenderer.get_button_text_translation_standalone()]
         ])
     )
 
@@ -73,7 +73,7 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
 async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.other_name)
-    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+    markup = AnswerRenderer.get_markup_text_translation_standalone()
     await bot.send_message(
         query.message.chat.id,
         md.escape_md("I understand, in messengers we often improvise) What's the best way for me to address you?"),
@@ -193,7 +193,7 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
 
     if was_other:
         await state.set_state(Form.additional_topic)
-        markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+        markup = AnswerRenderer.get_markup_text_translation_standalone()
         await bot.send_message(query.message.chat.id, get_other_topics(), reply_markup=markup)
     else:
         async with state.proxy() as data:
@@ -212,7 +212,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     state_data = await state.get_data()
     user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
-    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+    markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
     # переменную, которая закоменчена выше

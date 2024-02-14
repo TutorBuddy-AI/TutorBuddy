@@ -6,6 +6,7 @@ from src.config import dp, bot
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
 from src.states import FormName, FormNativeLanguage, FormEnglishLevel
+from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
 
@@ -24,7 +25,9 @@ async def edit_profile_handler(message: types.Message):
     user_topic = InlineKeyboardButton(text='Chosen topics', callback_data='get_user_topic')
     go_back = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
-    edit_profile_kb.row(name, topic).row(native_language, english_level).row(user_topic, go_back)
+    translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+
+    edit_profile_kb.row(name, topic).row(native_language, english_level).row(user_topic, go_back).row(translate_button)
 
     await bot.send_message(message.chat.id, md.escape_md("What would you like to change?"),
                            reply_markup=edit_profile_kb)
@@ -67,7 +70,7 @@ async def change_native_language_query_handler(query: CallbackQuery, state: FSMC
 
     await bot.send_message(query.message.chat.id, f"Current native language: {user_info['native_lang']}\n\n"
                                                   f"Choose the new native language",
-                           reply_markup=await get_choose_native_language_keyboard())
+                           reply_markup=await get_choose_native_language_keyboard(for_user=True))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("native"), state=FormNativeLanguage.new_native_language)
@@ -88,8 +91,9 @@ async def changed_native_language_query_handler(query: CallbackQuery, state: FSM
 
 @dp.callback_query_handler(lambda query: query.data == "other_language", state=FormNativeLanguage.new_native_language)
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
+    translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=True)
     await bot.send_message(query.message.chat.id, get_other_native_language_question(),
-        reply_markup = types.ReplyKeyboardRemove())
+                           reply_markup=translate_markup)
     await state.set_state(FormNativeLanguage.new_other_native_language)
 
 
@@ -99,12 +103,12 @@ async def process_other_language(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, get_incorrect_native_language_question())
     else:
         async with state.proxy() as data:
-            data["native_language"]=message.text
+            data["native_language"] = message.text
         await UserService().change_native_language(
             tg_id=str(message.chat.id),
             new_native_language=message.text)
         await bot.send_message(message.chat.id, "The native language has been successfully changed\n"
-                                                      f"Current native language: {message.text}",
+                                                f"Current native language: {message.text}",
                                reply_markup=await get_go_back_inline_keyboard())
 
         await state.finish()
@@ -122,7 +126,7 @@ async def change_english_level_query_handler(query: CallbackQuery, state: FSMCon
                                                                f" English, and 4 is a good level of English):"
                                                                f" {user_info['english_level']}\n\n"
                                                                f"Choose your english leve"),
-                           reply_markup=await get_choose_english_level_keyboard())
+                           reply_markup=await get_choose_english_level_keyboard(for_user=True))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("level"), state=FormEnglishLevel.new_english_level)
