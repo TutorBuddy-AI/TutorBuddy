@@ -12,6 +12,7 @@ class DailyNews(Base, TimestampMixin):
     id = Column(Integer, primary_key=True)
     message = Column(String, nullable=True)
     topic = Column(String, nullable=True)
+    url = Column(String, nullable=True)
     type = Column(Unicode, nullable=False, default=DailyNewsEnum)
     path_to_data = Column(String, nullable=True)
 

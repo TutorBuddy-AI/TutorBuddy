@@ -124,6 +124,7 @@ class DailyNewsView(ModelView):
     fields = [
         DailyNews.id,
         DailyNews.topic,
+        DailyNews.url,
         TinyMCEEditorField("message"),
         DailyNews.image,
         EnumField(

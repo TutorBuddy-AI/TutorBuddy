@@ -11,7 +11,7 @@ from src.utils.generate.question_history.question_history import SupportHistory
 async def support_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormSupport.message)
 
-    await bot.send_message(message.chat.id, md.escape_md("TutorBuddy team is always on duty!"
+    await bot.send_photo(message.chat.id, photo=types.InputFile('./files/support.png'), caption=md.escape_md("TutorBuddy team is always on duty!"
                                                          " 🦸🏻‍️🦸🏽‍️ What is the problem?"),
                            reply_markup=await get_go_back_inline_keyboard())
 
