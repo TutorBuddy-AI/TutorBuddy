@@ -70,6 +70,8 @@ class Newsletter:
                     session.add(post_message)
                     voice = await self.get_voice(tgid)
                     audio = await TextToSpeech.get_speech_by_voice(voice, post_text)
+                    post_translate_button = AnswerRenderer.get_button_caption_translation(
+                        bot_message_id=post_message.id, user_message_id="")
                     # Отправка фото с текстом newsletter под ним
                     text_photo = await bot.send_photo(
                         chat_id=int(tgid),
@@ -80,7 +82,8 @@ class Newsletter:
                             InlineKeyboardButton(
                                 text='Original article ➡️📃',
                                 web_app=WebAppInfo(),
-                                url=daily_news.url)
+                                url=daily_news.url),
+                            post_translate_button
                         )
                     )
                     # Удаляю файл ogg который мы отправили как войс месседж
@@ -88,9 +91,8 @@ class Newsletter:
                     # Отправка голосового сообщение. Озвучка newsletter
                     # Написал метод get_tranlate_markup где только кнопка translate, она пока не работает,
                     # хотя callback тот же что и у обычной
-                    pure_audio_markup = AnswerRenderer.get_markup_translation_for_message(post_text)
                     with AudioConverter(audio) as ogg_file:
-                        await bot.send_voice(int(tgid), types.InputFile(ogg_file), reply_markup=pure_audio_markup)
+                        await bot.send_voice(int(tgid), types.InputFile(ogg_file))
                     # Задержка перед вопросом user
                     await asyncio.sleep(2)
 
@@ -113,7 +115,8 @@ class Newsletter:
                     session.add(talk_message)
 
                     audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-                    markup = AnswerRenderer.get_markup_caption_translation()
+                    markup = AnswerRenderer.get_markup_caption_translation(
+                        bot_message_id=talk_message.id, user_message_id="")
                     with AudioConverter(audio) as ogg_file:
                         # Отправка вопроса юзера по поводу newsletter голосовое сообщение
                         await bot.send_voice(int(tgid),

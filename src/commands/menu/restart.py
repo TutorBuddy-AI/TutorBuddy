@@ -8,11 +8,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 
 @dp.message_handler(commands=["restart"])
 async def restart_handler(message: types.Message):
-    try:
-        await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)
-    except:
-        pass
-
     restart_kb = InlineKeyboardMarkup(row_width=2)
 
     btn_yes = InlineKeyboardButton(text='Yes, restart the bot ⚙️', callback_data='restart')

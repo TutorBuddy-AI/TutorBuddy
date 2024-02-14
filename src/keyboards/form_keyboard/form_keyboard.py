@@ -47,7 +47,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
      .row(career, relocate).row(travel, love)
      .row(friendship, network)
      .row(entertainment, other)
-     .row(AnswerRenderer.get_button_text_translation_standalone())
+     .row(AnswerRenderer.get_button_caption_translation_standalone())
      )
 
     return choose_goal_inline_kb
@@ -121,7 +121,7 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None, for_us
             movies, other
         )
         choose_topic_inline_kb.row(done_button).row(
-            AnswerRenderer.get_button_text_translation_standalone(for_user=for_user))
+            AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user))
 
     return choose_topic_inline_kb
 

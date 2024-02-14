@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Optional, Dict
 
+from src.utils.const import LANGUAGE_LEVEL_MAPPING
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
 from src.utils.generate import GenerateAI
@@ -62,11 +63,12 @@ class AnswerMistakesGenerator:
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
         user_info = await UserService().get_user_info(self.tg_id)
+        mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
 
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
-                       f" His English level is {user_info['english_level']}, where 1 is the worst level of"
+                       f" His English level is {mapped_level}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
                        f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
@@ -86,15 +88,17 @@ class AnswerMistakesGenerator:
             "mistakes": ["{mistake1}", "{mistake2}"] 
             } 
             text_of_the_answer should be replaced with the text of the answer for user,
-            "mistakes" parameter should be replaced with the list of strings with the explanation of grammatical and punctuation user's mistakes, that he made in his last message with suggested options to correct those mistakes, 
-            if the last user's message is grammatically correct, doesn't have any punctuation mistakes and all of words were used properly, the list may be empty. 
+            "mistakes" parameter should be replaced with the list of strings with the explanation of grammatical 
+            and punctuation user's mistakes, that he made in his last message with suggested options to correct 
+            those mistakes, if the last user's message is grammatically correct, doesn't have any punctuation 
+            mistakes and all of words were used properly, the list may be empty. 
             There should be nothing else in the text.
             Please, let's keep the conversation friendly and engaging. 
             Answer the user's questions and inquire about topics that interest them, 
             as if you're chatting with a friend. 
             If the conversation shifts to a language other than English, kindly remind them to continue in English. 
             Always respond in English only.
-            """
+            """ + f" Write your message using {mapped_level} English level, please"
         }
 
         extended_history.append(answer_request)

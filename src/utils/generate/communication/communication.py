@@ -1,6 +1,7 @@
 import json
 import logging
 
+from src.utils.const import LANGUAGE_LEVEL_MAPPING
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
 from src.utils.generate import GenerateAI
@@ -36,12 +37,11 @@ class CommunicationGenerate:
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
         user_info = await UserService().get_user_info(self.tg_id)
-
+        mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
-                       f" His English level is {user_info['english_level']}, where 1 is the worst level of"
-                       f" English, and 4 is a good level of English. His goal is to study the English"
+                       f" His English level is '{mapped_level}'. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
                        f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
@@ -52,10 +52,12 @@ class CommunicationGenerate:
         extended_history.append({"role": "user", "content": self.prompt})
 
         prompt_request = (
-            "Please, maintain a friendly conversation - answer to the user's question "
-            "and ask him questions about things that interest him, as if you are his buddy or friend. "
-            "If he starts speaking in a language other than English, give him a gentle reprimand "
-            "and suggest that he start speaking English again. Always answer in English only")
+            f"Please, maintain a friendly conversation - answer to the user's question "
+            f"and ask him questions about things that interest him, as if you are his buddy or friend. "
+            f"If he starts speaking in a language other than English, give him a gentle reprimand "
+            f"and suggest that he start speaking English again. Always answer in English only. "
+            f"Write your message using {mapped_level} English level, please"
+        )
 
         extended_history.append({
             "role": "system",

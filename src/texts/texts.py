@@ -90,10 +90,11 @@ def get_choice_is_done():
 
 
 def get_greeting_anastasia():
-    return ("I am Anastasia, nice to meet you! "
-    "I am an entrepreneur and the TutorBuddy's founder! "
-    "I'm interested in technology, fashion, movies, innovations and science. "
-    "I am a digital twin, but you can")
+    return (
+        "I am Anastasia, nice to meet you! "
+        "I am an entrepreneur and the TutorBuddy's founder! "
+        "I'm interested in technology, fashion, movies, innovations and science. "
+        "I am a digital twin, but you can")
 
 
 def get_start_talk(is_bot: bool, name: str):
@@ -104,7 +105,33 @@ def get_start_talk(is_bot: bool, name: str):
             "Tell me, how is your day going?")
 
 
+def get_meet_bot_text():
+    return ("I am TutorBuddy, that one English-speaking friend, "
+            "who is always there to help you sharpen your language skills. "
+            "My range of interest is quite wide and I hope we’ll find a lot in common "
+            "By the way, meet Anastasia, a digital twin of the TutorBuddy's founder! ")
 
+
+def get_meet_bot_message():
+    return (
+        "I am TutorBuddy, that one English-speaking friend, "
+        "who is always there to help you sharpen your language skills. "
+        "My range of interest is quite wide and I hope we’ll find a lot in common 😉"
+        "By the way, meet Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️"
+    )
+
+
+def get_meet_nastya_text(name):
+    return (f"Hello {name}, my name is Anastasia Andrizh and I am a tech entrepreneur. "
+            f"I have been doing business since I was 19. "
+            f"Now I am building this startup, TutorBuddy AI, and practicing English along with you."
+            f"I can also be your speaking partner, so you will get to know me through voice and visuals. "
+            f"Most of all, I like the topics of innovation, startups and fashion. "
+            f"I would be happy to share opinions with you and debate on various topics ")
+
+
+def get_meet_nastya_message(name):
+    return get_meet_nastya_text(name) + "💬"
 
 # def get_models_text():
 #     return md.text(
