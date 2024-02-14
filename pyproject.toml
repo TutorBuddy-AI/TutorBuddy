@@ -28,6 +28,7 @@ fasteners = "^0.19"
 jsonschema = "^4.20.0"
 starlette-admin = "^0.13.2"
 pydub = "^0.25.1"
+markdownify = "^0.11.6"
 
 
 [build-system]

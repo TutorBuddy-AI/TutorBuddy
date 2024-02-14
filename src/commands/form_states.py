@@ -10,6 +10,8 @@ from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
+from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.transcriber.text_to_speech import TextToSpeech
 
 from src.utils.user import UserService, UserHelper
 
@@ -215,39 +217,51 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     state_data = await state.get_data()
     user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
-    markup = AnswerRenderer.get_markup_text_translation_standalone()
+    great_markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
     # переменную, которая закоменчена выше
     name = user_info["call_name"]
     await bot.send_message(
         message.chat.id,
-        f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me.",
-        reply_markup=markup)
+        md.escape_md(f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me."),
+        reply_markup=great_markup)
     await asyncio.sleep(1)
 
+    caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     await bot.send_photo(
         message.chat.id,
-        photo=types.InputFile('./files/meet_bot.jpg'),
+        photo=types.InputFile('./files/meet_bot.png'),
         caption=get_meet_bot_message(),
-        reply_markup=markup)
-    await bot.send_message(message.chat.id, get_choose_buddy_text(), reply_markup=markup)
+        reply_markup=caption_markup)
 
     meet_bot_text = get_meet_bot_text()
-    # ToDo generate audio
+    audio = await TextToSpeech.get_speech_by_voice(voice="Tutor Bot", text=meet_bot_text)
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            types.InputFile(ogg_file),
+            parse_mode=ParseMode.HTML
+        )
 
     await asyncio.sleep(2)
 
     await bot.send_photo(
         message.chat.id,
-        photo=types.InputFile('./files/meet_nastya.jpg'),
+        photo=types.InputFile('./files/meet_nastya.png'),
         caption=get_meet_nastya_message(user_info["call_name"]),
-        reply_markup=markup)
+        reply_markup=caption_markup)
 
     meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
-    # ToDo generate audio
+    audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            types.InputFile(ogg_file),
+            parse_mode=ParseMode.HTML
+        )
 
     await bot.send_message(
-        message.chat.id, text="Who would you like to talk to?",
+        message.chat.id, text=md.escape_md("Who would you like to talk to?"),
         reply_markup=await get_choose_bot_keyboard())
     await state.finish()

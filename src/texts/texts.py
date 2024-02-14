@@ -113,10 +113,10 @@ def get_meet_bot_text():
 
 
 def get_meet_bot_message():
-    return (
+    return md.escape_md(
         "I am TutorBuddy, that one English-speaking friend, "
         "who is always there to help you sharpen your language skills. "
-        "My range of interest is quite wide and I hope we’ll find a lot in common 😉"
+        "My range of interest is quite wide and I hope we’ll find a lot in common 😉\n\n"
         "By the way, meet Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️"
     )
 
@@ -131,7 +131,7 @@ def get_meet_nastya_text(name):
 
 
 def get_meet_nastya_message(name):
-    return get_meet_nastya_text(name) + "💬"
+    return md.escape_md(get_meet_nastya_text(name) + "💬")
 
 # def get_models_text():
 #     return md.text(

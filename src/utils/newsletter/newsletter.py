@@ -18,7 +18,7 @@ from aiogram.types.web_app_info import WebAppInfo
 import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
-
+from markdownify import markdownify as md
 # log_directory = '/home/ubuntu/AI-TutorBuddy-bot/src/utils/newsletter/logs'
 # log_file_path = os.path.join(log_directory, 'newsletter.log')
 # if not os.path.exists(log_directory):
@@ -56,8 +56,9 @@ class Newsletter:
 
             # Предварительно убрал с текста любые HTML теги, так как starlette сохраняет с ними
             # Вывести текст с <p> и <br> просто ?возможно? (не проверял еще), но в caption точно не принимает их
-            post_text = daily_news.message.replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
-                "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", "")
+            post_text = md(daily_news.message)
+                #          .replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
+                # "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", ""))
             for tgid in tg_id_list:
                 try:
                     post_message = MessageHistory(
@@ -73,18 +74,18 @@ class Newsletter:
                     post_translate_button = AnswerRenderer.get_button_caption_translation(
                         bot_message_id=post_message.id, user_message_id="")
                     # Отправка фото с текстом newsletter под ним
+                    bot.send_message()
                     text_photo = await bot.send_photo(
                         chat_id=int(tgid),
                         photo=types.InputFile(path_img),
                         caption=post_text,
-                        parse_mode=ParseMode.HTML,
-                        reply_markup=InlineKeyboardMarkup().add(
+                        parse_mode=ParseMode.MARKDOWN,
+                        reply_markup=InlineKeyboardMarkup().row(
                             InlineKeyboardButton(
                                 text='Original article ➡️📃',
                                 web_app=WebAppInfo(),
-                                url=daily_news.url),
-                            post_translate_button
-                        )
+                                url=daily_news.url)
+                        ).row(post_translate_button)
                     )
                     # Удаляю файл ogg который мы отправили как войс месседж
                     # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
@@ -113,7 +114,7 @@ class Newsletter:
                     )
                     # Сохранение в MessageHistory текст поста
                     session.add(talk_message)
-
+                    voice = await self.get_voice(tgid)
                     audio = await TextToSpeech.get_speech_by_voice(voice, answer)
                     markup = AnswerRenderer.get_markup_caption_translation(
                         bot_message_id=talk_message.id, user_message_id="")

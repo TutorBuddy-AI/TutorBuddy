@@ -125,7 +125,11 @@ class AnswerRenderer:
 
         get_translation_btn = InlineKeyboardButton(
             '📖 Translate',
-            callback_data=f"request_caption_translation:{user_message_id}:{bot_message_id}")
+            callback_data=translation_data.new(
+                action="request_caption_translation",
+                bot_message_id=bot_message_id,
+                user_message_id=user_message_id
+            ))
 
         bot_message_markup.row(get_translation_btn)
         return bot_message_markup
