@@ -80,7 +80,7 @@ class Newsletter:
                             InlineKeyboardButton(
                                 text='Original article ➡️📃',
                                 web_app=WebAppInfo(),
-                                url="https://tutorbuddyai.tech")
+                                url=daily_news.url)
                         )
                     )
                     # Удаляю файл ogg который мы отправили как войс месседж
