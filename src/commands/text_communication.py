@@ -1,11 +1,15 @@
 import asyncio
+import json
 import re
 
 from aiogram.dispatcher import FSMContext
 from src.commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
 from aiogram.types import CallbackQuery, Message
+
+from src.utils.answer.answer_renderer import translation_data, mistakes_data
 from src.utils.message import MessageHelper
+from src.utils.message.message_service import MessageService
 from src.utils.message_hint.message_hint_creator import MessageHintCreator
 from src.utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper
 from src.utils.message_hint.message_hint_service import MessageHintService
@@ -16,6 +20,7 @@ from src.utils.paraphrasing import MessageParaphraseService
 from aiogram import types, md
 from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 from src.utils.stciker.sticker_sender import StickerSender
+from aiogram.utils.callback_data import CallbackData
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
@@ -48,87 +53,101 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     await handler.render_answer(await handler.load_render_from_context())
 
 
-@dp.callback_query_handler(text="request_mistakes")
-async def handle_get_mistakes(query: CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(mistakes_data.filter())
+async def handle_get_mistakes(query: CallbackQuery, callback_data: translation_data):
     message = query.message
 
-    handler = CommunicationHandler(message, state, bot)
-    await handler.init()
-
-    state_data = await state.get_data()
-
+    user_message = await MessageService().get_message(str(message.chat.id), int(callback_data["user_message_id"]))
     generated_text = await MessageMistakesCreator(
         tg_id=str(message.chat.id),
-        message_text=state_data["user_message_text"]
+        message_text=user_message.message
     ).create_communication_message_text()
 
     mistakes_info = await MessageMistakesHelper().group_message_mistakes_info(
-        state_data, message, generated_text)
+        int(callback_data["user_message_id"]), int(callback_data["bot_message_id"]),
+        user_message.type, message, generated_text)
 
     await MessageMistakesService().create_mistakes(mistakes_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
 
 
-@dp.callback_query_handler(text="request_caption_translation")
-async def handle_get_translation(query: CallbackQuery, state: FSMContext):
-    state_data = await state.get_data()
+@dp.callback_query_handler(translation_data.filter())
+async def handle_get_translation(query: CallbackQuery, callback_data: translation_data):
+    """
+    Callback to translate message caption. Text is provided in query message,
+    Message ids are provided in callback_data
+    """
+    # ToDo add callback without of text in message
     message = query.message
-
-    handler = CommunicationHandler(message, state, bot)
-    await handler.init()
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text(message.caption)
 
+    user_message_id = int(callback_data["user_message_id"]) if callback_data["user_message_id"] else None
+    bot_message_id = int(callback_data["bot_message_id"]) if callback_data["bot_message_id"] else None
     helper_info = await MessageHelper().group_message_helper_info(
-        state_data, message, generated_text)
+        user_message_id, bot_message_id, message, generated_text)
 
     await MessageTranslationService().create_translation(helper_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
 
 
-@dp.callback_query_handler(text="request_caption_translation_standalone")
+@dp.callback_query_handler(text="request_text_translation_standalone", state="*")
+async def handle_get_translation_text_standalone(query: CallbackQuery, state: FSMContext):
+    """
+    Callback to translate standalone message text, when user is not logged in
+    """
+    state_data = await state.get_data()
+    message = query.message
+    lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
+    # ToDo data["native_language"]
+
+    generated_text = await MessageTranslationCreator(
+        tg_id=str(message.chat.id)
+    ).create_communication_message_text_standalone(message.text, lang)
+
+    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+
+
+@dp.callback_query_handler(text="request_caption_translation_standalone", state="*")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
+    """
+    Callback to translate standalone message caption, when user is not logged in
+    """
     state_data = await state.get_data()
     message = query.message
-
-    handler = CommunicationHandler(message, state, bot)
-    await handler.init()
+    lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
 
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
-    ).create_communication_message_text(message.text)
-
-    # helper_info = await MessageHelper().group_message_helper_info(
-    #     state_data, message, generated_text)
-
-    # await MessageTranslationService().create_translation(helper_info)
+    ).create_communication_message_text_standalone(message.caption, lang)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text))
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
-async def handle_get_translation_for_message(query: CallbackQuery, state: FSMContext):
-    state_data = await state.get_data()
-    message = query.message
-    text = query.data.replace("request_translation:", "", 1)
-
-    handler = CommunicationHandler(message, state, bot)
-    await handler.init()
-
-    generated_text = await MessageTranslationCreator(
-        tg_id=str(message.chat.id)
-    ).create_communication_message_text(text)
-
-    # helper_info = await MessageHelper().group_message_helper_info(
-    #     state_data, message, generated_text)
-
-    # await MessageTranslationService().create_translation(helper_info)
-
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+# @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
+# async def handle_get_translation_for_message(query: CallbackQuery, state: FSMContext):
+#     """
+#     Callback to translate text in callback data
+#     Depricated?
+#     """
+#     state_data = await state.get_data()
+#     message = query.message
+#     text = query.data.replace("request_translation:", "", 1)
+#
+#     generated_text = await MessageTranslationCreator(
+#         tg_id=str(message.chat.id)
+#     ).create_communication_message_text(text)
+#
+#     helper_info = await MessageHelper().group_message_helper_info(
+#         state_data, message, generated_text)
+#
+#     await MessageTranslationService().create_translation(helper_info)
+#
+#     await bot.send_message(message.chat.id, md.escape_md(generated_text))
 
 
 @dp.callback_query_handler(text="request_paraphrase")

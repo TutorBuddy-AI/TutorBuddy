@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Union, Iterator, Optional
 
 import aiohttp
@@ -27,7 +28,7 @@ class TextToSpeechEleven:
         self.prompt = prompt
         self.tg_id = tg_id
 
-    async def get_speech(self) -> Optional[Union[bytes, Iterator[bytes]]]:
+    async def get_speech(self) -> Optional[BytesIO]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=f"{request_url}{id_nastya_voice}",
@@ -35,11 +36,12 @@ class TextToSpeechEleven:
                     headers=headers) as response:
                 if response.status == 200:
                     print(f"Response: {response}")
-                    return await response.read()
+                    return BytesIO(await response.read())
                 else:
                     return None
+
     @staticmethod
-    async def get_speech_for_text(text) -> Optional[Union[bytes, Iterator[bytes]]]:
+    async def get_speech_for_text(text) -> Optional[BytesIO]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
                     url=f"{request_url}{id_nastya_voice}",
@@ -47,7 +49,7 @@ class TextToSpeechEleven:
                     headers=headers) as response:
                 if response.status == 200:
                     print(f"Response: {response}")
-                    return await response.read()
+                    return BytesIO(await response.read())
                 else:
                     return None
 

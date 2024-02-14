@@ -32,6 +32,7 @@ class TextToSpeechOpenAI:
             return generated_audio
         else:
             return None
+
     @staticmethod
     async def get_speech_for_text(text) -> BytesIO:
         generated_audio = await GenerateAI(request_url=request_url).send_request(
@@ -52,6 +53,7 @@ class TextToSpeechOpenAI:
             "input": self.prompt,
             "speed": speed
         }
+
     @staticmethod
     async def get_combine_data_simple(text) -> json:
 

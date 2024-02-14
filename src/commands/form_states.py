@@ -5,10 +5,10 @@ from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_welcome_text, get_choose_bot_text, get_welcome_text_before_start, \
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
-    get_chose_some_topics, get_other_goal, get_other_topics, get_choose_buddy_text1, get_choose_buddy_text3, \
-    get_choose_buddy_text2, get_chose_some_more_topics
+    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
+from src.utils.answer import AnswerRenderer
 
 from src.utils.user import UserService, UserHelper
 
@@ -26,34 +26,35 @@ async def clean_messages(chat_id: str, message_id: str):
 
 
 @dp.message_handler(IsNotRegister())
-async def process_start_register_user(message: types.Message):
+async def process_start_register_user(message: types.Message, state: FSMContext):
     """
     Function to explain bot idea for new users
     """
     welcome_text = get_welcome_text()
+    caption_markup = AnswerRenderer.get_translation_for_caption_standalone_markup()
 
-    await bot.send_message(message.chat.id, welcome_text)
     await bot.send_animation(
         message.chat.id,
-        animation=InputFile("./files/tutorbuddy_welcome.gif")
+        caption=welcome_text,
+        animation=InputFile("./files/tutorbuddy_welcome.gif"),
+        reply_markup=caption_markup
     )
-    await bot.send_message(
-        message.chat.id,
-        get_lets_know_each_other()
-    )
+    await asyncio.sleep(2)
     await process_start_acquaintance(message, state)
 
 
 @dp.callback_query_handler(text=["start"])
-async def process_start_acquaintance(query: types.CallbackQuery, state: FSMContext):
-
+async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
     await bot.send_message(
-        query.chat.id,
-        f"Do you want me to call you '{query.from_user.first_name}' or do you prefer a different format?",
+        message.chat.id,
+        md.escape_md(
+            f"Let's get to know each other first\n\n"
+            f"Do you want me to call you '{message.from_user.first_name}' or do you prefer a different format?"),
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(f"{query.from_user.first_name} - good 👍", callback_data="name_ok")],
-            [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")]
+            [InlineKeyboardButton(f"{message.from_user.first_name} - good 👍", callback_data="name_ok")],
+            [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")],
+            [AnswerRenderer.get_translation_for_text_standalone_button()]
         ])
     )
 
@@ -68,23 +69,23 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
         query.message.chat.id, md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
 
+
 @dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
 async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.other_name)
+    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
     await bot.send_message(
         query.message.chat.id,
-        "I understand, in messengers we often improvise\) What's the best way for me to address you?",
-        reply_markup=types.ReplyKeyboardRemove()
+        md.escape_md("I understand, in messengers we often improvise) What's the best way for me to address you?"),
+        reply_markup=markup
     )
 
 
 @dp.message_handler(state=Form.other_name)
 async def process_get_name(message: types.Message, state: FSMContext):
-    name = message.text
     async with state.proxy() as data:
         data["name"] = message.text
 
-    await say_hello(name, message.chat.id)
     await state.set_state(Form.native_language)
     await bot.send_message(
         message.chat.id, md.escape_md("What is your native language?"),
@@ -180,7 +181,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                 else:
                     topics_num += 1
                     result_text += text[1] + " "
-    if topics_num <= 2:
+    if topics_num < 1:
         await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
@@ -192,7 +193,8 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
 
     if was_other:
         await state.set_state(Form.additional_topic)
-        await bot.send_message(query.message.chat.id, get_other_topics())
+        markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+        await bot.send_message(query.message.chat.id, get_other_topics(), reply_markup=markup)
     else:
         async with state.proxy() as data:
             data["additional_topic"] = ""
@@ -210,14 +212,11 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     state_data = await state.get_data()
     user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
+    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
     # переменную, которая закоменчена выше
-    await bot.send_message(message.chat.id, get_choose_buddy_text1())
-    await asyncio.sleep(2)
-    await bot.send_message(message.chat.id, get_choose_buddy_text2())
-    await asyncio.sleep(2)
-    await bot.send_message(message.chat.id, get_choose_buddy_text3())
+    await bot.send_message(message.chat.id, get_choose_buddy_text(), reply_markup=markup)
     await asyncio.sleep(2)
     await bot.send_animation(
         message.chat.id, animation=InputFile("./files/tutorbuddy_choose.gif"),

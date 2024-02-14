@@ -1,6 +1,7 @@
 from aiogram import md
 from src.utils.payments.tariff_plans import get_tariff_plans
 
+
 def get_welcome_text_before_start():
     return md.text(
         "Hi! This is your personal Tutor Buddy and I will help you to improve your English.\n\n"
@@ -10,6 +11,7 @@ def get_welcome_text_before_start():
         "🌟 ace your exams\n"
         "have everyday conversations and build your confidence!")
 
+
 def get_welcome_text():
     return md.escape_md(
         f"Hi! I'mTutor Buddy, your personal English language practice tutor 💭\n\n"
@@ -18,10 +20,12 @@ def get_welcome_text():
         "practice. Talking to me every day will make it fun and rewarding.\n\n"
         "Let's get started! 🏄🏽‍♀️")
 
+
 def get_lets_know_each_other():
     return md.text(
         "Let's get to know each other first"
     )
+
 
 def get_choose_bot_text():
     return md.escape_md(
@@ -31,10 +35,12 @@ def get_choose_bot_text():
         "Please notice that if you choose this option, another chat with a person will pop up."
     )
 
+
 def get_other_native_language_question():
     return md.escape_md(
         "What is your native language? Write only its name, for example, 'Japanese'"
     )
+
 
 def get_incorrect_native_language_question():
     return md.escape_md(
@@ -42,19 +48,23 @@ def get_incorrect_native_language_question():
         "Please, tell me the other name of your native language"
     )
 
+
 def get_other_goal():
     return md.escape_md(f"Please describe the reason why you want to practice English?")
 
+
 def get_chose_some_topics():
     return md.escape_md(
-        "Choose some appealing topics (more than 2). "
+        "Choose some appealing topics (one or more). "
         "It will help us to have interesting conversations and I will also share some relevant news! 🤩"
     )
 
+
 def get_chose_some_more_topics():
-    return md.escape_md(
-        "Please, choose 3+ topics"
+    return md.text(
+        "Please, choose 1+ topics"
     )
+
 
 def get_other_topics():
     return md.escape_md(
@@ -62,31 +72,29 @@ def get_other_topics():
         "Example: '3d printing, knitting'"
     )
 
-def get_choose_buddy_text1():
+
+def get_choose_buddy_text():
     return md.escape_md(
         "To have even more fun practicing English, "
-        "you can talk to Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️")
-
-
-def get_choose_buddy_text2():
-    return md.escape_md(
+        "you can talk to Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️\n\n"
         "She can be your speaking partner, "
         "so you will get to know her through voice and visuals. "
-        "Anastasia is open to share opinions and debate on various topics 💬")
-
-def get_choose_buddy_text3():
-    return md.escape_md(
+        "Anastasia is open to share opinions and debate on various topics 💬\n\n"
         "By the way, another digital twins will be available soon! "
-        "🌟 You can switch personas later using menu.")
+        "🌟 You can switch personas later using menu."
+    )
+
 
 def get_choice_is_done():
     return md.escape_md("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
+
 
 def get_greeting_anastasia():
     return ("I am Anastasia, nice to meet you! "
     "I am an entrepreneur and the TutorBuddy's founder! "
     "I'm interested in technology, fashion, movies, innovations and science. "
     "I am a digital twin, but you can")
+
 
 def get_start_talk(is_bot: bool, name: str):
     prefix = f"Hi, {name}! " if is_bot else ""

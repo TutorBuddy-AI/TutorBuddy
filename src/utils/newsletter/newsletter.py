@@ -1,7 +1,7 @@
 import traceback
 
 from sqlalchemy import select
-from src.config import bot
+from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
@@ -103,6 +103,15 @@ class Newsletter:
 
                     answer = generated_text["choices"][0]["message"]["content"]
 
+                    talk_message = MessageHistory(
+                        tg_id=tgid,
+                        message=answer,
+                        role='assistant',
+                        type='text'
+                    )
+                    # Сохранение в MessageHistory текст поста
+                    session.add(talk_message)
+
                     audio = await TextToSpeech.get_speech_by_voice(voice, answer)
                     markup = AnswerRenderer.get_translate_caption_markup()
                     with AudioConverter(audio) as ogg_file:
@@ -113,14 +122,6 @@ class Newsletter:
                                              parse_mode=ParseMode.HTML,
                                              reply_markup=markup,
                                              reply_to_message_id=text_photo.message_id)
-                    talk_message = MessageHistory(
-                        tg_id=tgid,
-                        message=answer,
-                        role='assistant',
-                        type='text'
-                    )
-                    # Сохранение в MessageHistory текст поста
-                    session.add(talk_message)
                     # Удаляю файл ogg который мы отправили как войс месседж
                     # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
 

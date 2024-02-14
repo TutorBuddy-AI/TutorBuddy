@@ -1,6 +1,9 @@
 from aiogram.dispatcher import FSMContext
+from aiogram.types import ParseMode
 
 from src.config import dp, bot
+from src.utils.answer import AnswerRenderer
+from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.user import UserService
 
 from aiogram import types, md
@@ -18,13 +21,22 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Tutor Bot")
 
-    await bot.send_message(tg_id, get_choice_is_done())
+    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+
+    await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup)
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
-    await bot.send_message(query.message.chat.id, md.escape_md(check_text + "💬"))
     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
-    await bot.send_audio(query.message.chat.id, audio)
+    audio_markup = AnswerRenderer.get_translation_for_caption_standalone_markup()
+
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            query.message.chat.id,
+            types.InputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=audio_markup)
     await state.set_state(FormInitTalk.init_user_message)
 
 
@@ -34,19 +46,32 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
 
-    await bot.send_message(query.message.chat.id, get_choice_is_done())
+    markup = AnswerRenderer.get_translation_for_text_standalone_markup()
+    await bot.send_message(query.message.chat.id, get_choice_is_done(), reply_markup=markup)
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     name = user_info["name"]
-    greeting_nastya = get_greeting_anastasia()
-    await bot.send_message(query.message.chat.id, md.escape_md(f"Hi, {name} 😌" + get_greeting_anastasia()))
-
+    caption_text = f"Hi, {name} 😌" + get_greeting_anastasia()
     audio = await TextToSpeech(tg_id=tg_id, prompt=f"Hi, {name} " + get_greeting_anastasia()).get_speech()
-    await bot.send_audio(query.message.chat.id, audio)
+    audio_markup = AnswerRenderer.get_translation_for_caption_standalone_markup()
+
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            query.message.chat.id,
+            types.InputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{caption_text}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=audio_markup
+        )
 
     check_text = get_start_talk(False, name)
-    await bot.send_message(query.message.chat.id, md.escape_md(check_text + "💬"))
     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
-    await bot.send_audio(query.message.chat.id, audio)
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            query.message.chat.id,
+            types.InputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=audio_markup)
     await state.set_state(FormInitTalk.init_user_message)
 
 
@@ -54,7 +79,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
 async def start_talk(message: types.Message, state: FSMContext):
     text = await TalkInitializer(message.chat.id).generate_message()
 
-    await UserCreateMessage(
+    saved_message = await UserCreateMessage(
         tg_id=str(message.chat.id),
         prompt=text,
         type_message="text").save_to_database_message_history(
@@ -62,7 +87,16 @@ async def start_talk(message: types.Message, state: FSMContext):
             {"role": "assistant", "content": text}
         ]
     )
+    markup = AnswerRenderer.get_start_talk_markup_with_ids(saved_message[0].id)
 
-    await bot.send_message(message.chat.id, md.escape_md(text))
+    audio = await TextToSpeech(tg_id=message.chat.id, prompt=text).get_speech()
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            types.InputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{text}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup
+        )
     await state.finish()
 

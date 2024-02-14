@@ -50,17 +50,14 @@ class CommunicationHandler:
         answer = await self.prepare_answer(message_text, "audio")
         if answer.answer_text is not None:
             written_messages = await self.save_generated_text(message_text, answer.answer_text, "audio")
-            await MessageHelper().group_conversation_info_to_state(self.state, written_messages)
+        else:
+            written_messages = await self.save_generated_text(
+                self.message_text, "Oooops, something wrong. Try request again later...", "audio")
+        await MessageHelper().group_conversation_info_to_state(self.state, written_messages)
 
-        if answer.are_mistakes_provided:
-            concat_mistakes = "\n".join(list(answer.mistakes))
-
-            mistakes_info = await MessageMistakesHelper().group_message_mistakes_info(
-                await self.state.get_data(), self.message, concat_mistakes)
-
-            await MessageMistakesService().create_mistakes(mistakes_info)
-
-        render = AnswerRenderer(answer, message_text, self.message.message_id, "audio").render()
+        render = AnswerRenderer(
+            answer, message_text, self.message.message_id, "audio",
+            user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id).render()
 
         await self.render_audio_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)
@@ -73,9 +70,14 @@ class CommunicationHandler:
         answer = await self.prepare_answer(self.message_text, "text")
         if answer.answer_text is not None:
             written_messages = await self.save_generated_text(self.message_text, answer.answer_text, "text")
-            await MessageHelper().group_conversation_info_to_state(self.state, written_messages)
-        render = AnswerRenderer(answer, self.message_text, self.message.message_id,"text").render()
-
+        else:
+            written_messages = await self.save_generated_text(
+                self.message_text, "Oooops, something wrong. Try request again later...", "text")
+        await MessageHelper().group_conversation_info_to_state(self.state, written_messages)
+        render = AnswerRenderer(
+            answer, self.message_text, self.message.message_id, "text",
+            user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id
+        ).render()
         await self.render_text_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)
         await self.save_render_in_context(render)
@@ -204,7 +206,8 @@ class CommunicationHandler:
         state_data["sticker_sent"] = True
         await self.state.update_data(state_data)
 
-    async def save_generated_text(self, message_text: str, answer_text: str, message_type: str) -> List[MessageHistory]:
+    async def save_generated_text(
+            self, message_text: str, answer_text: str, message_type: str) -> List[MessageHistory]:
         user_service = UserCreateMessage(
             tg_id=str(self.chat_id),
             prompt=message_text,

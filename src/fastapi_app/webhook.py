@@ -63,6 +63,14 @@ async def receive_update(update: Dict, request: Request):
             data["source"] = source if source is not None else None
             data["tg_language"] = update_obj.message.from_user.language_code
             await context.update_data(data)
+        if update_obj.callback_query:
+            context = dp.current_state(
+                chat=update_obj.callback_query.from_user.id,
+                user=update_obj.callback_query.from_user.id)
+            data = await context.get_data()
+            data["ip_address"] = None
+            data["tg_language"] = update_obj.callback_query.from_user.language_code
+            await context.update_data(data)
         await dp.process_update(update_obj)
     except:
         traceback.print_exc()
