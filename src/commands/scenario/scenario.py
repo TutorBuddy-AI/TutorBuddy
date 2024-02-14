@@ -12,9 +12,10 @@ async def scenario_handler(query: types.CallbackQuery, state: FSMContext):
     # except:
     #     pass
 
-    await bot.send_message(
+    await bot.send_photo(
         query.message.chat.id,
-        md.escape_md(
+        photo=types.InputFile('./files/scenario.png'),
+        caption=md.escape_md(
             f"Choose a scenario to practice your English"
             f" in various possible situations! 🗣️"),
         reply_markup=await get_menu_scenario())
@@ -27,10 +28,11 @@ async def scenario_handler(message: types.Message, state: FSMContext):
     # except:
     #     pass
 
-    # await bot.send_message(message.chat.id, md.escape_md("Choose a scenario to practice your English"
+    # await bot.send_photo(message.chat.id, photo=types.InputFile('./file/scenario.png'), caption=md.escape_md("Choose a scenario to practice your English"
     #                                                      f" in various possible situations! 🗣️"),
     #                        reply_markup=await get_menu_scenario())
-    await bot.send_message(
+    await bot.send_photo(
         message.chat.id,
-        md.escape_md(
+        photo=types.InputFile('./files/scenario.png'),
+        caption=md.escape_md(
             "We are working on this functionality and it will be ready soon! See you!"))

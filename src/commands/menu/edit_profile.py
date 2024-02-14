@@ -26,7 +26,7 @@ async def edit_profile_handler(message: types.Message):
 
     edit_profile_kb.row(name, topic).row(native_language, english_level).row(user_topic, go_back)
 
-    await bot.send_message(message.chat.id, md.escape_md("What would you like to change?"),
+    await bot.send_photo(message.chat.id, photo=types.InputFile('./files/edit_profile.jpg'), caption=md.escape_md("What would you like to change?"),
                            reply_markup=edit_profile_kb)
 
 

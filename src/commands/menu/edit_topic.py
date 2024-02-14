@@ -14,7 +14,7 @@ from src.texts.texts import get_chose_some_more_topics, get_other_topics
 async def change_topic_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
-    await bot.send_message(message.chat.id, f"Which topic would you like to discuss instead? 🤓",
+    await bot.send_photo(message.chat.id, photo=types.InputFile('./files/topic.jpg'), caption=md.escape_md(f"Which topic would you like to discuss instead? 🤓"),
                            reply_markup=await get_choose_topic_keyboard())
 
 
