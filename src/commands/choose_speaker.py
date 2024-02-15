@@ -19,7 +19,7 @@ from src.utils.user import UserCreateMessage
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
-    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Tutor Bot")
+    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
@@ -79,7 +79,7 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
-    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Tutor Bot")
+    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
@@ -127,6 +127,11 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
 
 @dp.message_handler(state=FormInitTalk.init_user_message)
 async def start_talk(message: types.Message, state: FSMContext):
+    await start_small_talk(message, state)
+
+
+@dp.message_handler(state=FormInitTalk.init_user_message, content_types=types.ContentType.VOICE)
+async def start_talk_audio(message: types.Message, state: FSMContext):
     await start_small_talk(message, state)
 
 

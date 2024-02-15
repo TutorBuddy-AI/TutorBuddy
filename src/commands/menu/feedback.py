@@ -11,20 +11,24 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/feedback.jpg'), caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
-                                                               " Tell us what do you like or dislike about this bot and"
-                                                               " how can we improve it?"),
-                           reply_markup=await get_go_back_inline_keyboard())
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/feedback.jpg'),
+                         caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
+                                              " Tell us what do you like or dislike about this bot and"
+                                              " how can we improve it?\n"
+                                              "Please, send text message"),
+                         reply_markup=await get_go_back_inline_keyboard())
 
 
 @dp.message_handler(commands=["feedback"])
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_photo(message.chat.id,photo=types.InputFile('./files/feedback.jpg'), caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
-                                                         " Tell us what do you like or dislike about this bot and"
-                                                         " how can we improve it?"),
-                           reply_markup=await get_go_back_inline_keyboard())
+    await bot.send_photo(message.chat.id,photo=types.InputFile('./files/feedback.jpg'),
+                         caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
+                                              " Tell us what do you like or dislike about this bot and"
+                                              " how can we improve it?\n"
+                                              "Please, send text message"),
+                         reply_markup=await get_go_back_inline_keyboard())
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
