@@ -12,13 +12,16 @@ async def get_mistakes(message: types.Message, state: FSMContext):
     data = await MessageMistakesService().get_user_message_history_mistakes(tg_id=str(message.chat.id))
 
     current_index = 0
+    if len(data) != 0:
+        await state.update_data(mistakes=data)
+        await state.update_data(current_index=current_index)
+        await state.update_data(id_mistakes=message.message_id + 1)
 
-    await state.update_data(mistakes=data)
-    await state.update_data(current_index=current_index)
-    await state.update_data(id_mistakes=message.message_id + 1)
-
-    await send_data(message.chat.id, data[current_index], create_inline_keyboard(current_index, len(data)),
-                    message.message_id)
+        await send_data(message.chat.id, data[current_index], create_inline_keyboard(current_index, len(data)),
+                        message.message_id)
+    else:
+        await bot.send_message(message.chat.id,
+                               md.escape_md("You haven't ever requested to find mistakes in your messages."))
 
 
 def create_inline_keyboard(current_index, total_elements):
@@ -38,6 +41,7 @@ def create_inline_keyboard(current_index, total_elements):
 
 @dp.callback_query_handler(lambda query: query.data in ["prev", "next"])
 async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMContext):
+
     storage = await state.get_data()
 
     current_index = storage["current_index"]
@@ -55,10 +59,16 @@ async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMC
 
     await send_data(callback_query.message.chat.id, data[current_index],
                     create_inline_keyboard(current_index, len(data)), message_id)
+    try:
+        await bot.delete_message(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id)
+    except:
+        pass
 
 
 async def send_data(chat_id, data_element, keyboard, message_id):
     if data_element is None:
-        await bot.send_message(chat_id=chat_id, text=md.escape_md("You don't have any messages"), reply_markup=keyboard)
+        await bot.send_message(chat_id=chat_id, text=md.escape_md("You don't have any mistakes"), reply_markup=keyboard)
     else:
         await bot.send_message(chat_id=chat_id, text=md.escape_md(data_element['message']), reply_markup=keyboard)

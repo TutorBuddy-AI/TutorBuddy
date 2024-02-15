@@ -38,7 +38,7 @@ class CommunicationHandler:
     async def init(self):
         user_service = UserService()
         user_info = await user_service.get_user_info(tg_id=self.chat_id)
-        self.speaker = user_info["speaker"] if user_info["speaker"] else "Tutor Bot"
+        self.speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
 
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
@@ -121,7 +121,7 @@ class CommunicationHandler:
         additional_menu_message = None
         if user_speaker == 'Anastasia':
             audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "Tutor Bot":
+        elif user_speaker == "TutorBuddy":
             audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
         else:
             raise Exception("Unknown speaker")
@@ -153,14 +153,14 @@ class CommunicationHandler:
 
         if user_speaker == 'Anastasia':
             audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "Tutor Bot":
+        elif user_speaker == "TutorBuddy":
             audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
         else:
             raise Exception("Unknown speaker")
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(
-                self.chat_id, f"<i>🎙 Transcript</i>:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
+                self.chat_id, f"🎙 Transcript:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
                 reply_to_message_id=render.reply_to_message_id)
 
             with AudioConverter(audio) as ogg_file:

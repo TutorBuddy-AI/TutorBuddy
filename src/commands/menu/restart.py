@@ -26,5 +26,4 @@ async def restart_query_handler(query: CallbackQuery):
 
     await bot.send_message(
         query.message.chat.id, md.escape_md("Great, your profile is completely cleared."
-                                            " Click /start to log in again"),
-        reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton("/start")))
+                                            " Click /start to log in again"))

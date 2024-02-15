@@ -11,9 +11,11 @@ class TalkInitializer:
     def __init__(
             self,
             tg_id: str,
+            text=""
     ):
         self.tg_id = tg_id
         self.request_url = "https://api.openai.com/v1/chat/completions"
+        self.text = text
 
     async def generate_message(self) -> str:
         generated_text = await GenerateAI(request_url=self.request_url).send_request(
@@ -35,19 +37,23 @@ class TalkInitializer:
         user_info = await UserService().get_user_info(self.tg_id)
         mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
 
+        prompt_to_continue = (f"Regarding your question about how he's doing, the user replied '{self.text}'."
+                              f"Continue this dialog.")
+        prompt_to_insert = prompt_to_continue if self.text != "" else ""
         service_request = {
             "role": "system",
-            "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
-                       f" His English level is {mapped_level}, where 1 is the worst level of"
-                       f" English, and 4 is a good level of English. His goal is to study the English"
-                       f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
-                       f"You are his buddy in English practice and also his friend. "
-                       f"Please, chose one of topics and ask him something"
-                       f"Start you conversation with phrase like "
-                       f"'You have mentioned that you would like to discuss...', "
-                       f"'I would like to discuss...', 'Let's discuss', etc"
-                       f" Write your message using {mapped_level} English level, please"
+            "content": (f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
+                        f" His English level is {mapped_level}. His goal is to study the English"
+                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
+                        f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                        f"You are his buddy in English practice and also his friend. "
+                        f"{prompt_to_insert}"                       
+                        f"To continue dialog, please, chose one of topics and ask him something like are interested "
+                        f"in his opinion "
+                        f"Start you conversation with phrase like "
+                        f"'You have mentioned that you would like to discuss...', "
+                        f"'I would like to discuss...', 'Let's discuss', etc"
+                        f" Write your message using {mapped_level} English level, please")
         }
 
         extended_history = [service_request]

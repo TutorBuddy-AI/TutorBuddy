@@ -7,7 +7,7 @@ from src.commands.communication_handler import CommunicationHandler
 from src.config import dp, bot
 from aiogram.types import CallbackQuery, Message
 
-from src.utils.answer.answer_renderer import translation_data, mistakes_data
+from src.utils.answer.answer_renderer import translation_data, mistakes_data, AnswerRenderer
 from src.utils.message import MessageHelper
 from src.utils.message.message_service import MessageService
 from src.utils.message_hint.message_hint_creator import MessageHintCreator
@@ -71,7 +71,8 @@ async def handle_get_mistakes(query: CallbackQuery, callback_data: translation_d
 
     await MessageMistakesService().create_mistakes(mistakes_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text),
+                           reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
 
 
 @dp.callback_query_handler(translation_data.filter())

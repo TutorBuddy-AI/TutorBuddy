@@ -11,14 +11,12 @@ from src.keyboards import get_go_back_inline_keyboard
 async def edit_speaker_handler(message: types.Message):
     persona_kb = InlineKeyboardMarkup(row_width=1)
 
-    nastya = InlineKeyboardButton(text='👩🏻‍🚀 Choose Anastasia', callback_data='speaker_Anastasia')
-    bot_tutor = InlineKeyboardButton(text='🤖 Choose TutorBuddy', callback_data='speaker_Tutor Bot')
+    nastya = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='speaker_Anastasia')
+    bot_tutor = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='speaker_TutorBuddy')
 
     go_back = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
-
-
-    persona_kb.add(nastya).add(bot_tutor).add(go_back).add(AnswerRenderer.get_button_text_translation_standalone(for_user=True))
+    persona_kb.add(bot_tutor).add(nastya).add(go_back).add(AnswerRenderer.get_button_text_translation_standalone(for_user=True))
 
     await bot.send_message(message.chat.id, md.escape_md("Who would you like to talk with? 💌"),
                            reply_markup=persona_kb)

@@ -16,7 +16,7 @@ async def get_choose_native_language_keyboard(for_user=False) -> InlineKeyboardM
     german = InlineKeyboardButton(text='German 🇩🇪', callback_data='native_DE')
 
     french = InlineKeyboardButton(text='French 🇫🇷', callback_data='native_FR')
-    other = InlineKeyboardButton(text='Other', callback_data='other_language')
+    other = InlineKeyboardButton(text='Other ✍️🏻', callback_data='other_language')
 
     choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french, other).row(
             AnswerRenderer.get_button_text_translation_standalone(for_user=for_user))
@@ -34,7 +34,7 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
     travel = InlineKeyboardButton(text='Travel ✈️', callback_data='goal_travel')
     relocate = InlineKeyboardButton(text='Move abroad 🌎', callback_data='goal_relocate')
 
-    entertainment = InlineKeyboardButton(text='For fun 🗽', callback_data='goal_entertainment')
+    entertainment = InlineKeyboardButton(text='For fun 🎡', callback_data='goal_entertainment')
     love = InlineKeyboardButton(text='Love 💖️', callback_data='goal_love')
 
     friendship = InlineKeyboardButton(text='Friendship 👋🏻', callback_data='goal_friendship')
@@ -104,7 +104,7 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None, for_us
         health = InlineKeyboardButton(text='Health 🫁', callback_data='topic_health')
 
         movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
-        other = InlineKeyboardButton(text='Other ✍️🗒', callback_data='topic_other')
+        other = InlineKeyboardButton(text='Other ✍️', callback_data='topic_other')
 
         # news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
         # career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
@@ -129,11 +129,11 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None, for_us
 async def get_choose_bot_keyboard() -> InlineKeyboardMarkup:
     choose_bot_inline_kb = InlineKeyboardMarkup()
 
-    anastasia = InlineKeyboardButton(text='👩🏻‍🚀 Choose Anastasia', callback_data='continue_nastya')
+    anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='continue_nastya')
 
-    tutor_buddy = InlineKeyboardButton(text='🤖 Proceed with TutorBuddy', callback_data='continue_bot')
+    tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='continue_bot')
 
-    choose_bot_inline_kb.row(anastasia).row(tutor_buddy).row(
+    choose_bot_inline_kb.row(tutor_buddy).row(anastasia).row(
         AnswerRenderer.get_button_caption_translation_standalone())
 
     return choose_bot_inline_kb

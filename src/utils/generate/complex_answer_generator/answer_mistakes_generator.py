@@ -87,18 +87,19 @@ class AnswerMistakesGenerator:
             "answer": "{text_of_the_answer}", 
             "mistakes": ["{mistake1}", "{mistake2}"] 
             } 
-            text_of_the_answer should be replaced with the text of the answer for user,
             "mistakes" parameter should be replaced with the list of strings with the explanation of grammatical 
             and punctuation user's mistakes, that he made in his last message with suggested options to correct 
             those mistakes, if the last user's message is grammatically correct, doesn't have any punctuation 
             mistakes and all of words were used properly, the list may be empty. 
-            There should be nothing else in the text.
-            Please, let's keep the conversation friendly and engaging. 
-            Answer the user's questions and inquire about topics that interest them, 
-            as if you're chatting with a friend. 
+            text_of_the_answer should be replaced with the text of the answer for user,
+            Please, keep the conversation friendly and engaging. 
+            Answer the user's questions and inquire about topics that interest him, 
+            as if you're chatting with a friend to keep the conversation going. Don't allow the dialog to finish on you.
+            Entertain your interlocutor. 
             If the conversation shifts to a language other than English, kindly remind them to continue in English. 
             Always respond in English only.
             """ + f" Write your message using {mapped_level} English level, please"
+            "There should be nothing else in the text except this json"
         }
 
         extended_history.append(answer_request)

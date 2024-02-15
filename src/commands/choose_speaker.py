@@ -4,7 +4,8 @@ from aiogram.types import ParseMode
 from src.config import dp, bot
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.user import UserService
+from src.utils.transcriber import SpeechToText
+from src.utils.user import UserService, user_service
 
 from aiogram import types, md
 
@@ -19,7 +20,7 @@ from src.utils.user import UserCreateMessage
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
-    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Tutor Bot")
+    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
@@ -79,7 +80,7 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
-    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Tutor Bot")
+    await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
@@ -125,14 +126,32 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     await state.set_state(FormInitTalk.init_user_message)
 
 
-@dp.message_handler(state=FormInitTalk.init_user_message)
+@dp.message_handler(state=FormInitTalk.init_user_message, content_types=types.ContentType.TEXT)
 async def start_talk(message: types.Message, state: FSMContext):
-    await start_small_talk(message, state)
+    user_service = UserService()
+    user_info = await user_service.get_user_info(tg_id=message.chat.id)
+    speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait")
+    await start_small_talk(message, state, wait_message, message_text=message.text)
 
 
-async def start_small_talk(message: types.Message, state: FSMContext):
-    text = await TalkInitializer(message.chat.id).generate_message()
+@dp.message_handler(state=FormInitTalk.init_user_message, content_types=types.ContentType.VOICE)
+async def start_talk_audio(message: types.Message, state: FSMContext):
+    user_service = UserService()
+    user_info = await user_service.get_user_info(tg_id=message.chat.id)
+    speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait")
+    message_text = await SpeechToText(file_id=message.voice.file_id).get_text()
+    await bot.send_message(
+        message.chat.id, f"🎙 Transcript:\n<code>{message_text}</code>", parse_mode=ParseMode.HTML,
+        reply_to_message_id=message.message_id)
+    await start_small_talk(message, state, wait_message, message_text)
 
+
+async def start_small_talk(message: types.Message, state: FSMContext, wait_message: types.Message, message_text: str):
+    text = await TalkInitializer(message.chat.id, message_text).generate_message()
+    if not text:
+        text = "Oooops, something wrong. Try request again later..."
     saved_message = await UserCreateMessage(
         tg_id=str(message.chat.id),
         prompt=text,
@@ -150,7 +169,9 @@ async def start_small_talk(message: types.Message, state: FSMContext):
             types.InputFile(ogg_file),
             caption=f'<span class="tg-spoiler">{text}</span>',
             parse_mode=ParseMode.HTML,
-            reply_markup=markup
+            reply_markup=markup,
+            reply_to_message_id=message.message_id
         )
+    await bot.delete_message(message.chat.id, wait_message.message_id)
     await state.finish()
 
