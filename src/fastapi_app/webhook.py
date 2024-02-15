@@ -38,6 +38,7 @@ async def on_startup():
         BotCommand(command="/editprofile", description="✏ Edit profile"),
         BotCommand(command="/persona", description="👥 Choose a persona to chat"),
         BotCommand(command="/all_mistakes", description="🔴 Show all my mistakes"),
+        BotCommand(command="/cancel", description="🔧Cancel current state (use if something went wrong)"),
         BotCommand(command="/support", description="👨💻 Contact support"),
         BotCommand(command="/feedback", description="💬 Leave feedback"),
     ]
