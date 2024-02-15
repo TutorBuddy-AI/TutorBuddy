@@ -71,7 +71,7 @@ async def change_native_language_query_handler(query: CallbackQuery, state: FSMC
 
     await bot.send_message(query.message.chat.id, f"Current native language: {user_info['native_lang']}\n\n"
                                                   f"Choose the new native language",
-                           reply_markup=await get_choose_native_language_keyboard(for_user=True))
+                           reply_markup=await get_choose_native_language_keyboard(for_user=True, is_caption=False))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("native"), state=FormNativeLanguage.new_native_language)
@@ -126,8 +126,8 @@ async def change_english_level_query_handler(query: CallbackQuery, state: FSMCon
     await bot.send_message(query.message.chat.id, md.escape_md(f"Current english level (where 1 is the worst level of"
                                                                f" English, and 4 is a good level of English):"
                                                                f" {user_info['english_level']}\n\n"
-                                                               f"Choose your english leve"),
-                           reply_markup=await get_choose_english_level_keyboard(for_user=True))
+                                                               f"Choose your english level"),
+                           reply_markup=await get_choose_english_level_keyboard(for_user=True, is_caption=False))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("level"), state=FormEnglishLevel.new_english_level)

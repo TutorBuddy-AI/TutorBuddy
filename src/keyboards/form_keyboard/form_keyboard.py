@@ -3,7 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 from src.utils.answer import AnswerRenderer
 
 
-async def get_choose_native_language_keyboard(for_user=False) -> InlineKeyboardMarkup:
+async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -> InlineKeyboardMarkup:
     choose_native_language_inline_kb = InlineKeyboardMarkup(row_width=2)
 
     rus = InlineKeyboardButton(text='Russian 🇷🇺', callback_data='native_RU')
@@ -18,13 +18,18 @@ async def get_choose_native_language_keyboard(for_user=False) -> InlineKeyboardM
     french = InlineKeyboardButton(text='French 🇫🇷', callback_data='native_FR')
     other = InlineKeyboardButton(text='Other ✍️🏻', callback_data='other_language')
 
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user)
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
+
     choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french, other).row(
-            AnswerRenderer.get_button_text_translation_standalone(for_user=for_user))
+            translate_button)
 
     return choose_native_language_inline_kb
 
 
-async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
+async def get_choose_goal_keyboard(is_caption=True) -> InlineKeyboardMarkup:
     choose_goal_inline_kb = InlineKeyboardMarkup(row_width=2)
     business = InlineKeyboardButton(text='Business 💵', callback_data='goal_business')
 
@@ -42,18 +47,23 @@ async def get_choose_goal_keyboard() -> InlineKeyboardMarkup:
 
     other = InlineKeyboardButton(text='Other✍️🏻', callback_data='other_goal')
 
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone()
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone()
+
     (choose_goal_inline_kb
      .row(business, education)
      .row(career, relocate).row(travel, love)
      .row(friendship, network)
      .row(entertainment, other)
-     .row(AnswerRenderer.get_button_caption_translation_standalone())
+     .row(translate_button)
      )
 
     return choose_goal_inline_kb
 
 
-async def get_choose_english_level_keyboard(for_user=False) -> InlineKeyboardMarkup:
+async def get_choose_english_level_keyboard(for_user=False, is_caption=True) -> InlineKeyboardMarkup:
     choose_english_level_inline_kb = InlineKeyboardMarkup(row_width=1)
 
     level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases', callback_data='level_1')
@@ -64,13 +74,18 @@ async def get_choose_english_level_keyboard(for_user=False) -> InlineKeyboardMar
                                    callback_data='level_3')
     level_4 = InlineKeyboardButton(text='I express myself fluently in any situation', callback_data='level_4')
 
-    choose_english_level_inline_kb.row(level_1).row(level_2).row(level_3).row(level_4).row(
-        AnswerRenderer.get_button_text_translation_standalone(for_user=for_user))
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user)
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
+
+    choose_english_level_inline_kb.row(level_1).row(level_2).row(level_3).row(level_4).row(translate_button)
 
     return choose_english_level_inline_kb
 
 
-async def get_choose_topic_keyboard(callback_query: CallbackQuery = None, for_user=False) -> InlineKeyboardMarkup:
+async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
+                                    for_user=False, is_caption=True) -> InlineKeyboardMarkup:
     if callback_query:
         choose_topic_inline_kb = callback_query.message.reply_markup
 
@@ -120,20 +135,26 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None, for_us
             sports, health,
             movies, other
         )
-        choose_topic_inline_kb.row(done_button).row(
-            AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user))
+        if is_caption:
+            translate_button = AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user)
+        else:
+            translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
+        choose_topic_inline_kb.row(done_button).row(translate_button)
 
     return choose_topic_inline_kb
 
 
-async def get_choose_bot_keyboard() -> InlineKeyboardMarkup:
+async def get_choose_bot_keyboard(is_caption=True) -> InlineKeyboardMarkup:
     choose_bot_inline_kb = InlineKeyboardMarkup()
 
     anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='continue_nastya')
 
     tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='continue_bot')
 
-    choose_bot_inline_kb.row(tutor_buddy).row(anastasia).row(
-        AnswerRenderer.get_button_caption_translation_standalone())
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone()
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone()
+    choose_bot_inline_kb.row(tutor_buddy).row(anastasia).row(translate_button)
 
     return choose_bot_inline_kb

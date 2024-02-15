@@ -51,12 +51,13 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
     await bot.send_message(
         message.chat.id,
-        md.escape_md(
-            f"Let's get to know each other first\n\n"
-            f"Do you want me to call you '{message.from_user.first_name}' or do you prefer a different format?"),
+        f"Let's get to know each other first. "
+        f"Is it okay if I call you '{message.from_user.first_name}'?\n"
+        f"<i>Make sure your name is in English.</i>",
+        parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(f"{message.from_user.first_name} - good 👍", callback_data="name_ok")],
-            [InlineKeyboardButton("No, call me…✍️🏻", callback_data="not_me")],
+            [InlineKeyboardButton(f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
+            [InlineKeyboardButton("No, you'd better call me...", callback_data="not_me")],
             [AnswerRenderer.get_button_text_translation_standalone()]
         ])
     )
@@ -65,11 +66,17 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(lambda query: query.data == "name_ok", state=Form.name)
 async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
     name = query.from_user.first_name
+    await bot.send_message(
+        query.message.chat.id,
+        md.escape_md("That's great! Nice to meet you 😉"),
+        reply_markup=AnswerRenderer.get_markup_text_translation_standalone()
+    )
     async with state.proxy() as data:
         data["name"] = name
     await state.set_state(Form.native_language)
-    await bot.send_message(
-        query.message.chat.id, md.escape_md("What is your native language?"),
+    await bot.send_photo(
+        query.message.chat.id, photo=types.InputFile('./files/native_lang.png'),
+        caption=md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
 
 
@@ -79,7 +86,7 @@ async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     markup = AnswerRenderer.get_markup_text_translation_standalone()
     await bot.send_message(
         query.message.chat.id,
-        md.escape_md("I understand, in messengers we often improvise) What's the best way for me to address you?"),
+        md.escape_md("What should I call you then?"),
         reply_markup=markup
     )
 
@@ -88,10 +95,15 @@ async def process_not_me(query: types.CallbackQuery, state: FSMContext):
 async def process_get_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text
-
-    await state.set_state(Form.native_language)
     await bot.send_message(
-        message.chat.id, md.escape_md("What is your native language?"),
+        message.chat.id,
+        md.escape_md("That's great! Nice to meet you 😉"),
+        reply_markup=AnswerRenderer.get_markup_text_translation_standalone()
+    )
+    await state.set_state(Form.native_language)
+    await bot.send_photo(
+        message.chat.id, photo=types.InputFile('./files/native_lang.png'),
+        caption=md.escape_md("What is your native language?"),
         reply_markup=await get_choose_native_language_keyboard())
 
 
@@ -102,7 +114,8 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.goal)
 
     await bot.send_photo(
-        query.message.chat.id, photo=types.InputFile('./files/goal.png'), caption=md.escape_md("Why are you practicing English?"),
+        query.message.chat.id, photo=types.InputFile('./files/goal.png'),
+        caption=md.escape_md("Why are you practicing English?\nWhat's your goal🎯?"),
         reply_markup=await get_choose_goal_keyboard())
 
 
@@ -121,7 +134,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data["native_language"]=message.text
         await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'),
-                             caption=md.escape_md("Why are you practicing English?"),
+                             caption=md.escape_md("Why are you practicing English?\nWhat's your goal🎯?"),
                              reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
 
@@ -131,8 +144,9 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["goal"] = query.data.split("_")[1]
 
-    await bot.send_message(query.message.chat.id, md.escape_md(f"What is your English level?🧑🏽‍🏫👩🏻‍🏫"),
-                           reply_markup=await get_choose_english_level_keyboard())
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/eng_level.png'),
+                         caption=md.escape_md(f"What is your English level📶?"),
+                         reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
 
 
@@ -147,8 +161,9 @@ async def start_process_other_goal_handler(query: types.CallbackQuery, state: FS
 async def process_other_goal_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["goal"] = message.text
-    await bot.send_message(message.chat.id, md.escape_md(f"What is your English level?🧑🏽‍🏫👩🏻‍🏫"),
-                           reply_markup=await get_choose_english_level_keyboard())
+    await bot.send_photo(message.chat.id, photo=types.InputFile('./files/eng_level.png'),
+                         caption=md.escape_md(f"What is your English level📶?"),
+                         reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
 
 

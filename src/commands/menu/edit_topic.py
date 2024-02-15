@@ -24,13 +24,14 @@ async def change_topic_handler(query: CallbackQuery, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
     await bot.send_message(query.message.chat.id, md.escape_md(f"Which topic would you like to discuss instead? 🤓"),
-                           reply_markup=await get_choose_topic_keyboard(for_user=True))
+                           reply_markup=await get_choose_topic_keyboard(for_user=True, is_caption=False))
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=FormTopic.new_topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True))
+                                        reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True,
+                                                                                     is_caption=False))
 
 
 @dp.callback_query_handler(text="done", state=FormTopic.new_topic)
@@ -75,7 +76,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
 
     if topics_num < 1:
         await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
-                               reply_markup=await get_choose_topic_keyboard(for_user=True))
+                               reply_markup=await get_choose_topic_keyboard(for_user=True, is_caption=False))
     else:
         await process_topics(query, state, result_text, was_other)
 

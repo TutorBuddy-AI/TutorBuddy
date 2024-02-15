@@ -106,7 +106,7 @@ class CommunicationHandler:
     async def copy_audio_message(self, render: Render):
         state_data = await self.state.get_data()
         additional_menu_message = await self.bot.send_message(
-            self.chat_id, f"<i>🎙 Transcript</i>:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
+            self.chat_id, f"🎙 Transcript:\n<code>{render.message_text}</code>", parse_mode=ParseMode.HTML,
             reply_to_message_id=render.reply_to_message_id)
         answer_message = await self.bot.copy_message(
             self.chat_id, from_chat_id=self.chat_id, message_id=state_data["answer_message_id"],
