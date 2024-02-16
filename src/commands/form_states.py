@@ -49,16 +49,17 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
 @dp.callback_query_handler(text=["start"])
 async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
-    await bot.send_message(
+    await bot.send_photo(
         message.chat.id,
-        f"Let's get to know each other first. "
+        photo=types.InputFile('./files/choose_name.png'),
+        caption=f"Let's get to know each other first. "
         f"Is it okay if I call you '{message.from_user.first_name}'?\n"
         f"<i>Make sure your name is in English.</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
             [InlineKeyboardButton("No, you'd better call me...", callback_data="not_me")],
-            [AnswerRenderer.get_button_text_translation_standalone()]
+            [AnswerRenderer.get_button_caption_translation_standalone()]
         ])
     )
 
@@ -250,30 +251,29 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         caption=get_meet_bot_message(),
         reply_markup=caption_markup)
 
-    meet_bot_text = get_meet_bot_text()
-    audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
+    # meet_bot_text = get_meet_bot_text()
+    # audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
+    # with AudioConverter(audio) as ogg_file:
+    await bot.send_voice(
+        message.chat.id,
+        types.InputFile('./files/meet_bot.ogg'),
+        parse_mode=ParseMode.HTML
+    )
 
-    meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
-    audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
-
+    # meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
+    # audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    await asyncio.sleep(2)
     await bot.send_photo(
         message.chat.id,
         photo=types.InputFile('./files/meet_nastya.png'),
         caption=get_meet_nastya_message(user_info["call_name"]),
         reply_markup=caption_markup)
 
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
+    await bot.send_voice(
+        message.chat.id,
+        types.InputFile('./files/meet_nastya.ogg'),
+        parse_mode=ParseMode.HTML
+    )
 
     await bot.send_message(
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),

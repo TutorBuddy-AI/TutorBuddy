@@ -56,7 +56,7 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
 
 
 @dp.callback_query_handler(mistakes_data.filter())
-async def handle_get_mistakes(query: CallbackQuery, callback_data: translation_data):
+async def handle_get_mistakes(query: CallbackQuery, callback_data: mistakes_data):
     message = query.message
 
     user_message = await MessageService().get_message(str(message.chat.id), int(callback_data["user_message_id"]))
@@ -72,7 +72,8 @@ async def handle_get_mistakes(query: CallbackQuery, callback_data: translation_d
     await MessageMistakesService().create_mistakes(mistakes_info)
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text),
-                           reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
+                           reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True),
+                           reply_to_message_id=callback_data["user_message_tgid"])
 
 
 @dp.callback_query_handler(translation_data.filter())
@@ -81,7 +82,6 @@ async def handle_get_translation(query: CallbackQuery, callback_data: translatio
     Callback to translate message caption. Text is provided in query message,
     Message ids are provided in callback_data
     """
-    # ToDo add callback without of text in message
     message = query.message
 
     generated_text = await MessageTranslationCreator(
@@ -95,7 +95,7 @@ async def handle_get_translation(query: CallbackQuery, callback_data: translatio
 
     await MessageTranslationService().create_translation(helper_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
 @dp.callback_query_handler(text="request_text_translation_standalone", state="*")
@@ -111,7 +111,7 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
 @dp.callback_query_handler(text="request_caption_translation_standalone", state="*")
@@ -127,7 +127,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.caption, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
 @dp.callback_query_handler(text="request_text_translation_standalone_for_user", state="*")
@@ -143,7 +143,7 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
 @dp.callback_query_handler(text="request_caption_translation_standalone_for_user", state="*")
@@ -159,7 +159,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.caption, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
 # @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
