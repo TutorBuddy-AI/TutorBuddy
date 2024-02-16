@@ -55,8 +55,10 @@ def get_other_goal():
 
 def get_chose_some_topics():
     return md.escape_md(
-        "Choose some appealing topics (one or more). "
-        "It will help us to have interesting conversations and I will also share some relevant news! 🤩"
+        "Choose some appealing topics ✅"
+        "It will help us:\n"
+        "⚡️ to have interesting conversations\n"
+        "⚡️ and I will also share fresh news summaries 🤩"
     )
 
 

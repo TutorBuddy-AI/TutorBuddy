@@ -7,7 +7,7 @@ from src.utils.answer.answer import Answer
 from src.utils.answer.render import Render
 
 translation_data = CallbackData("translate", 'action', 'bot_message_id', "user_message_id")
-mistakes_data = CallbackData("mistakes", 'action', 'bot_message_id', "user_message_id")
+mistakes_data = CallbackData("mistakes", 'action', 'bot_message_id', "user_message_id", "user_message_tgid")
 
 
 class AnswerRenderer:
@@ -71,7 +71,8 @@ class AnswerRenderer:
             callback_data=mistakes_data.new(
                 action="request_mistakes",
                 bot_message_id=self.bot_message_id,
-                user_message_id=self.user_message_id
+                user_message_id=self.user_message_id,
+                user_message_tgid=self.reply_to_message_id
             )
         )
         get_translation_btn = InlineKeyboardButton(
