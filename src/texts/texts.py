@@ -4,7 +4,7 @@ from src.utils.payments.tariff_plans import get_tariff_plans
 
 def get_welcome_text_before_start():
     return md.text(
-        "Hi! This is your personal Tutor Buddy and I will help you to improve your English.\n\n"
+        "Hi! This is your personal TutorBuddy and I will help you to improve your English.\n\n"
         "By practicing English everyday with me, you will be able to:\n\n"
         "🚀 work or study abroad\n"
         "⚡️ excel at a job interview\n"
