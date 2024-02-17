@@ -135,7 +135,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data["native_language"]=message.text
         await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'),
-                             caption=md.escape_md("Why are you practicing English?\nWhat's your goal🎯?"),
+                             caption=md.escape_md("Why are you practicing English?\nWhat's your goal 🎯 ?"),
                              reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
 
@@ -146,7 +146,7 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
         data["goal"] = query.data.split("_")[1]
 
     await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/eng_level.png'),
-                         caption=md.escape_md(f"What is your English level📶?"),
+                         caption=md.escape_md(f"What is your English level 📶 ?"),
                          reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
 
@@ -163,7 +163,7 @@ async def process_other_goal_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["goal"] = message.text
     await bot.send_photo(message.chat.id, photo=types.InputFile('./files/eng_level.png'),
-                         caption=md.escape_md(f"What is your English level📶?"),
+                         caption=md.escape_md(f"What is your English level 📶 ?"),
                          reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
 

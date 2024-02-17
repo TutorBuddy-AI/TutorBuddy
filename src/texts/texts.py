@@ -14,7 +14,7 @@ def get_welcome_text_before_start():
 
 def get_welcome_text():
     return md.escape_md(
-        f"Hi! I'mTutor Buddy, your personal English language practice tutor 💭\n\n"
+        f"Hi! I'm TutorBuddy, your personal English language practice tutor 💭\n\n"
         "I know how difficult it is to speak English without practice and a native speaker around.\n\n"
         "In order to feel confident in dialogues in a foreign language you need to get between 600 and 1,000 hours of "
         "practice. Talking to me every day will make it fun and rewarding.\n\n"
@@ -55,10 +55,9 @@ def get_other_goal():
 
 def get_chose_some_topics():
     return md.escape_md(
-        "Choose some appealing topics ✅"
-        "It will help us:\n"
-        "⚡️ to have interesting conversations\n"
-        "⚡️ and I will also share fresh news summaries 🤩"
+        "Choose some appealing topics, so we will:\n"
+        "✅ have engaging conversations\n"
+        "✅ discuss relevant news summaries"
     )
 
 

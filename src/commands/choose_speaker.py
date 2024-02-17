@@ -4,6 +4,7 @@ from aiogram.types import ParseMode
 from src.config import dp, bot
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserService, user_service
 
@@ -82,9 +83,13 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="TutorBuddy")
+    await sticker_sender.send_fabulous()
+
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup)
+
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
@@ -106,6 +111,9 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     tg_id = query.message.chat.id
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
+
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_fabulous()
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 

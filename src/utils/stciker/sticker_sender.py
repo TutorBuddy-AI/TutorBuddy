@@ -27,3 +27,10 @@ class StickerSender:
             self.pack["you_rock"],
             reply_to_message_id=reply_to
         )
+
+    async def send_fabulous(self, reply_to=None):
+        await self.bot.send_sticker(
+            self.chat_id,
+            self.pack["fabulous"],
+            reply_to_message_id=reply_to
+        )
