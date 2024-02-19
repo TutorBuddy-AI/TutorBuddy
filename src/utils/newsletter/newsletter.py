@@ -74,7 +74,6 @@ class Newsletter:
                     post_translate_button = AnswerRenderer.get_button_caption_translation(
                         bot_message_id=post_message.id, user_message_id="")
                     # Отправка фото с текстом newsletter под ним
-                    bot.send_message()
                     text_photo = await bot.send_photo(
                         chat_id=int(tgid),
                         photo=types.InputFile(path_img),
