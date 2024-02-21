@@ -1,4 +1,6 @@
 from aiogram import md
+from aiogram.utils.markdown import bold
+
 from src.utils.payments.tariff_plans import get_tariff_plans
 
 
@@ -133,6 +135,17 @@ def get_meet_nastya_text(name):
 
 def get_meet_nastya_message(name):
     return md.escape_md(get_meet_nastya_text(name) + "💬")
+
+
+def get_first_summary(name):
+    return f"Hi, {name}! I want to keep you updated " \
+           f"of what is going on in the world, so " \
+           f"you can dive into context and expand " \
+           f"your vocabulary 🌎 I will send you " \
+           f"*fresh news summaries* from international sources on the topics of your choice, so we can discuss them and share opinions.\n" \
+           f"Later on I will also share summaries of videos and podcasts 🎧 Are you interested? 😎"
+
+
 
 # def get_models_text():
 #     return md.text(

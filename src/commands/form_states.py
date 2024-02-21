@@ -1,17 +1,22 @@
 import asyncio
+from src.database import session
+from sqlalchemy import select
 
+from keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_text_before_start, \
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text, \
-    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
+    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message, get_first_summary
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
+from src.database.models.message_history import MessageHistory
+from src.database.models.user import User
 
 from src.utils.user import UserService, UserHelper
 
@@ -279,3 +284,75 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),
         reply_markup=await get_choose_bot_keyboard())
     await state.finish()
+
+
+
+@dp.message_handler(text="test")
+async def summaries_choice(message: types.Message, state: FSMContext):
+    tg_id = str(message.chat.id)
+    user_service = UserService()
+    user_info = await user_service.get_user_info(tg_id=tg_id)
+    name = user_info["name"]
+
+    await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
+                         caption=get_first_summary(name),
+                         parse_mode=ParseMode.MARKDOWN,
+                         reply_markup=await get_keyboard_summary_choice(menu=False))
+
+    talk_message = MessageHistory(
+        tg_id=tg_id,
+        message=get_first_summary("name"),
+        role='assistant',
+        type='text'
+    )
+
+    session.add(talk_message)
+    await session.commit()
+    await session.close()
+
+    markup = AnswerRenderer.get_markup_caption_translation(
+        bot_message_id=talk_message.id, user_message_id="")
+
+    file_voice = './files/summary_choice_bot.opus'
+
+    if user_info["speaker"] == "Anastasia":
+        file_voice = './files/summary_choice_nastya.opus'
+
+    await bot.send_voice(
+        message.chat.id,
+        types.InputFile(file_voice),
+        parse_mode=ParseMode.HTML,
+        reply_markup=markup
+    )
+
+
+
+@dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
+async def handler_choice_summery(query: types.CallbackQuery, state: FSMContext):
+    query = select(User).where(User.tg_id == str(query.message.chat.id))
+    result = await session.execute(query)
+    user = result.scalars().first()
+
+    if query.data == "dispatch_summary_true":
+        user.dispatch_summary = True
+        await session.commit()
+
+        chat_id = query.message.chat.id
+        message_id = query.message.message_id
+
+        await bot.delete_message(chat_id, message_id)
+
+        text_true = "Cool! ✌🏻 You've mentioned that you are interested in movies! Here are some fresh news."
+        await bot.send_message(query.message.chat.id, md.escape_md(text_true))
+
+    else:
+        user.dispatch_summary = False
+        await session.commit()
+
+        text_false = "Got it! ✌🏻 In case you change your mind, go to Menu and choose 'Summaries', so you can still get the most fresh ones!"
+        await bot.send_message(query.message.chat.id, md.escape_md(text_false))
+
+
+
+
+

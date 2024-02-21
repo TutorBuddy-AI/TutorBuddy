@@ -54,13 +54,15 @@ class Newsletter:
             # Вызов метода, передавая topic, ожидаем лист из tg_id в str
             tg_id_list = await self.user_topic(daily_news.topic)
 
-            # Предварительно убрал с текста любые HTML теги, так как starlette сохраняет с ними
-            # Вывести текст с <p> и <br> просто ?возможно? (не проверял еще), но в caption точно не принимает их
             post_text = md(daily_news.message)
-                #          .replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
-                # "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", ""))
+
             for tgid in tg_id_list:
                 try:
+                    # проверка, надо ли отправлять пользователю summary
+                    dispath = await self.dispatch_summary(tgid)
+                    if dispath == False:
+                        pass
+
                     post_message = MessageHistory(
                         tg_id=tgid,
                         message=post_text,
@@ -87,17 +89,12 @@ class Newsletter:
                                 url=daily_news.url)
                         ).row(post_translate_button)
                     )
-                    # Удаляю файл ogg который мы отправили как войс месседж
-                    # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
-                    # Отправка голосового сообщение. Озвучка newsletter
-                    # Написал метод get_tranlate_markup где только кнопка translate, она пока не работает,
-                    # хотя callback тот же что и у обычной
+
                     with AudioConverter(audio) as ogg_file:
                         await bot.send_voice(int(tgid), types.InputFile(ogg_file))
                     # Задержка перед вопросом user
                     await asyncio.sleep(2)
 
-                    voice = await self.get_voice(tgid)
 
                     payload = await self.get_payload(tgid, post_text)
 
@@ -126,8 +123,6 @@ class Newsletter:
                                              parse_mode=ParseMode.HTML,
                                              reply_markup=markup,
                                              reply_to_message_id=text_photo.message_id)
-                    # Удаляю файл ogg который мы отправили как войс месседж
-                    # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
 
                 except Exception as e:
                    traceback.print_exc()
@@ -189,3 +184,9 @@ class Newsletter:
             "messages": extended_history,
             "max_tokens": 100
         }
+
+    async def dispatch_summary(self,tgid) -> bool:
+        query = select(User).where(User.tg_id == tgid)
+        result = await session.execute(query)
+        user = result.scalars().first()
+        return user.dispatch_summary

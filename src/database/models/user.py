@@ -60,6 +60,7 @@ class User(Base, TimestampMixin):
     native_lang = Column(String, nullable=True)
     teach_lang = Column(String, nullable=False, default="EN")
     topic = Column(String, nullable=True)
+    dispatch_summary = Column(Boolean, default=True)
     additional_topic = Column(String, nullable=True)
     english_level = Column(String, nullable=True)
 
