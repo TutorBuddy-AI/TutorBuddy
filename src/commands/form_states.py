@@ -287,7 +287,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
 
 
-@dp.message_handler(text="test")
+@dp.message_handler(commands=["test"])
 async def summaries_choice(message: types.Message, state: FSMContext):
     tg_id = str(message.chat.id)
     user_service = UserService()
