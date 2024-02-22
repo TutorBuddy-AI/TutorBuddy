@@ -16,24 +16,20 @@ class AudioConverterCash:
         self.output_files = {}
         self.audio_files = audio_files
         self.mode = mode
-
+        self.temp_files = []
 
     def convert_files_to_ogg(self):
-        print("CALL CASH")
-        output_directory = 'files/newsletter_voices'
-        if not os.path.exists(output_directory):
-            os.makedirs(output_directory)
-
+        temp_directory = tempfile.mkdtemp()
         converted_files = []
 
         try:
             for variable_name, audio_bytes in self.audio_files.items():
-                input_file = tempfile.NamedTemporaryFile(mode='w+b', delete=False)
+                input_file = tempfile.NamedTemporaryFile(dir=temp_directory, delete=False)
                 try:
                     # Создаем файлоподобный объект BytesIO из байтов аудио
                     input_file.write(audio_bytes.read())
 
-                    output_file_path = os.path.join(output_directory, f'{variable_name}.ogg')
+                    output_file_path = os.path.join(temp_directory, f'{variable_name}.ogg')
                     # Вызываем ffmpeg, передавая байты аудио через stdin
                     subprocess.run(
                         ['ffmpeg', '-y', '-i', f'{input_file.name}', '-c:a', 'libopus', output_file_path],
@@ -44,7 +40,6 @@ class AudioConverterCash:
                     self.output_files[variable_name] = input_file
 
                 except Exception as e:
-                    print(f'ERROR CONVERTER{e}')
                     logging.error(f"ERROR CONVERTER OGG: {e}")
                     raise
                 finally:

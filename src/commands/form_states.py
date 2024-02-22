@@ -288,6 +288,14 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await state.finish()
 
 
+@dp.message_handler(commands=["news"])
+async def test(message: types.Message, state: FSMContext):
+    print('CALL')
+    try:
+        await Newsletter().send_newsletter()
+    except Exception as e:
+        print(e)
+
 @dp.message_handler(commands=["test"])
 async def summaries_choice(message: types.Message, state: FSMContext):
     tg_id = str(message.chat.id)

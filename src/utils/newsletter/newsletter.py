@@ -1,12 +1,10 @@
 import traceback
-import shutil
 from sqlalchemy import select
 from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
 import logging
-from logging.handlers import RotatingFileHandler
 from aiogram import types
 from src.database.models.message_history import MessageHistory
 from src.database.models.setting import Setting
@@ -134,7 +132,11 @@ class Newsletter:
 
                 except Exception as e:
                    traceback.print_exc()
-            shutil.rmtree("files/newsletter_voices")
+
+            for file_path in converted_files:
+                if os.path.exists(file_path):
+                    os.unlink(file_path)
+
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -199,4 +201,7 @@ class Newsletter:
         query = select(Setting).where(Setting.tg_id == tgid)
         result = await session.execute(query)
         user = result.scalars().first()
-        return user.dispatch_summary
+        if user is not None:
+            return user.dispatch_summary
+        else:
+            print('error')
