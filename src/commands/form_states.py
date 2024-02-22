@@ -16,7 +16,7 @@ from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.message_history import MessageHistory
-from src.database.models.user import User
+from src.database.models.user_acces import User_acces
 
 from src.utils.user import UserService, UserHelper
 
@@ -24,6 +24,8 @@ from aiogram.dispatcher import FSMContext
 from aiogram import types, md
 from aiogram.types import InputFile, CallbackQuery
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+
+from src.utils.newsletter.newsletter import Newsletter
 
 
 async def clean_messages(chat_id: str, message_id: str):
@@ -58,8 +60,8 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
         message.chat.id,
         photo=types.InputFile('./files/choose_name.png'),
         caption=f"Let's get to know each other first. "
-        f"Is it okay if I call you '{message.from_user.first_name}'?\n"
-        f"<i>Make sure your name is in English.</i>",
+                f"Is it okay if I call you '{message.from_user.first_name}'?\n"
+                f"<i>Make sure your name is in English.</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
@@ -138,7 +140,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
         await bot.send_message(message.chat.id, get_incorrect_native_language_question())
     else:
         async with state.proxy() as data:
-            data["native_language"]=message.text
+            data["native_language"] = message.text
         await bot.send_photo(message.chat.id, photo=types.InputFile('./files/goal.png'),
                              caption=md.escape_md("Why are you practicing English?\nWhat's your goal 🎯 ?"),
                              reply_markup=await get_choose_goal_keyboard())
@@ -286,6 +288,13 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await state.finish()
 
 
+@dp.message_handler(commands=["news"])
+async def test(message: types.Message, state: FSMContext):
+    print('CALL')
+    try:
+        await Newsletter().send_newsletter()
+    except Exception as e:
+        print(e)
 
 @dp.message_handler(commands=["test"])
 async def summaries_choice(message: types.Message, state: FSMContext):
@@ -326,10 +335,9 @@ async def summaries_choice(message: types.Message, state: FSMContext):
     )
 
 
-
 @dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
 async def handler_choice_summery(query: types.CallbackQuery, state: FSMContext):
-    query = select(User).where(User.tg_id == str(query.message.chat.id))
+    query = select(User_acces).where(User_acces.tg_id == str(query.message.chat.id))
     result = await session.execute(query)
     user = result.scalars().first()
 
@@ -351,8 +359,3 @@ async def handler_choice_summery(query: types.CallbackQuery, state: FSMContext):
 
         text_false = "Got it! ✌🏻 In case you change your mind, go to Menu and choose 'Summaries', so you can still get the most fresh ones!"
         await bot.send_message(query.message.chat.id, md.escape_md(text_false))
-
-
-
-
-

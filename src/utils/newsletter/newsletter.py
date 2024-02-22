@@ -1,5 +1,5 @@
 import traceback
-
+import shutil
 from sqlalchemy import select
 from src.config import bot, dp
 from src.database import session, Transactional
@@ -9,7 +9,9 @@ import logging
 from logging.handlers import RotatingFileHandler
 from aiogram import types
 from src.database.models.message_history import MessageHistory
+from src.database.models.user_acces import User_acces
 from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.types import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
@@ -50,15 +52,19 @@ class Newsletter:
             url_img = img_list[0]['url']
             # Вытаскиваем img куда мы сохранили его в admin панеле
             path_img = url_img
-
             # Вызов метода, передавая topic, ожидаем лист из tg_id в str
             tg_id_list = await self.user_topic(daily_news.topic)
-
             post_text = md(daily_news.message)
+
+            audio_files = {
+                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+                'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+            }
+
+            converted_files = AudioConverterCash(audio_files).convert_files_to_ogg()
 
             for tgid in tg_id_list:
                 try:
-                    # проверка, надо ли отправлять пользователю summary
                     dispath = await self.dispatch_summary(tgid)
                     if dispath == False:
                         pass
@@ -72,11 +78,10 @@ class Newsletter:
                     # Сохранение в MessageHistory текст поста
                     session.add(post_message)
                     voice = await self.get_voice(tgid)
-                    audio = await TextToSpeech.get_speech_by_voice(voice, post_text)
+
                     post_translate_button = AnswerRenderer.get_button_caption_translation(
                         bot_message_id=post_message.id, user_message_id="")
                     # Отправка фото с текстом newsletter под ним
-                    bot.send_message()
                     text_photo = await bot.send_photo(
                         chat_id=int(tgid),
                         photo=types.InputFile(path_img),
@@ -90,11 +95,14 @@ class Newsletter:
                         ).row(post_translate_button)
                     )
 
-                    with AudioConverter(audio) as ogg_file:
-                        await bot.send_voice(int(tgid), types.InputFile(ogg_file))
-                    # Задержка перед вопросом user
-                    await asyncio.sleep(2)
+                    if voice == "Anastasia":
+                        file_path = converted_files[0]
+                    else:
+                        file_path = converted_files[1]
 
+                    await bot.send_voice(int(tgid), types.InputFile(file_path))
+
+                    await asyncio.sleep(3)
 
                     payload = await self.get_payload(tgid, post_text)
 
@@ -126,6 +134,7 @@ class Newsletter:
 
                 except Exception as e:
                    traceback.print_exc()
+            shutil.rmtree("files/newsletter_voices")
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -185,8 +194,9 @@ class Newsletter:
             "max_tokens": 100
         }
 
+
     async def dispatch_summary(self,tgid) -> bool:
-        query = select(User).where(User.tg_id == tgid)
+        query = select(User_acces).where(User_acces.tg_id == tgid)
         result = await session.execute(query)
         user = result.scalars().first()
         return user.dispatch_summary
