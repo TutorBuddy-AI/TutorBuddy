@@ -11,9 +11,9 @@ from sqlalchemy import (
 )
 
 
-class User_acces(Base, TimestampMixin):
-    __tablename__ = "user_acces"
+class Setting(Base, TimestampMixin):
+    __tablename__ = "setting"
     id = Column(Integer, primary_key=True, unique=True,
                 index=True, autoincrement=True)
-    tg_id = Column(String, unique=True)
+    tg_id = Column(String, ForeignKey('user.tg_id'))
     dispatch_summary = Column(Boolean, default=True)

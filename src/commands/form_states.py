@@ -16,7 +16,7 @@ from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.message_history import MessageHistory
-from src.database.models.user_acces import User_acces
+from src.database.models.setting import Setting
 
 from src.utils.user import UserService, UserHelper
 
@@ -288,14 +288,6 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await state.finish()
 
 
-@dp.message_handler(commands=["news"])
-async def test(message: types.Message, state: FSMContext):
-    print('CALL')
-    try:
-        await Newsletter().send_newsletter()
-    except Exception as e:
-        print(e)
-
 @dp.message_handler(commands=["test"])
 async def summaries_choice(message: types.Message, state: FSMContext):
     tg_id = str(message.chat.id)
@@ -337,7 +329,7 @@ async def summaries_choice(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
 async def handler_choice_summery(query: types.CallbackQuery, state: FSMContext):
-    query = select(User_acces).where(User_acces.tg_id == str(query.message.chat.id))
+    query = select(Setting).where(Setting.tg_id == str(query.message.chat.id))
     result = await session.execute(query)
     user = result.scalars().first()
 

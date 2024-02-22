@@ -9,7 +9,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from aiogram import types
 from src.database.models.message_history import MessageHistory
-from src.database.models.user_acces import User_acces
+from src.database.models.setting import Setting
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
 from src.utils.transcriber.text_to_speech import TextToSpeech
@@ -196,7 +196,7 @@ class Newsletter:
 
 
     async def dispatch_summary(self,tgid) -> bool:
-        query = select(User_acces).where(User_acces.tg_id == tgid)
+        query = select(Setting).where(Setting.tg_id == tgid)
         result = await session.execute(query)
         user = result.scalars().first()
         return user.dispatch_summary
