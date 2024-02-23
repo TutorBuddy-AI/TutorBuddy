@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
-from keyboards import get_go_back_inline_keyboard
+from src.keyboards import get_go_back_inline_keyboard
 from src.utils.answer import AnswerRenderer
 
 
@@ -165,15 +165,17 @@ async def get_keyboard_summary_choice(menu: bool) -> InlineKeyboardMarkup:
     if menu:
         keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
         accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
-        back = await get_go_back_inline_keyboard()
-        keyboard_summary_markup.add(accept, back)
+        go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+        keyboard_summary_markup.add(accept, go_back_btn, translate_button)
         return keyboard_summary_markup
 
     else:
         keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
         accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
         cancel = InlineKeyboardButton(text='No, thanks 😔', callback_data='dispatch_summary_false')
-        keyboard_summary_markup.add(accept, cancel)
+        keyboard_summary_markup.add(accept, cancel).add(translate_button)
         return keyboard_summary_markup
 
 

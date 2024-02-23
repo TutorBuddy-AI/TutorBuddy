@@ -1,4 +1,6 @@
 import traceback
+from typing import Optional
+
 from sqlalchemy import select
 from src.config import bot, dp
 from src.database import session, Transactional
@@ -8,6 +10,8 @@ import logging
 from aiogram import types
 from src.database.models.message_history import MessageHistory
 from src.database.models.setting import Setting
+from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
+from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
 from src.utils.transcriber.text_to_speech import TextToSpeech
@@ -129,6 +133,7 @@ class Newsletter:
                                              parse_mode=ParseMode.HTML,
                                              reply_markup=markup,
                                              reply_to_message_id=text_photo.message_id)
+                    await asyncio.sleep(3)
 
                 except Exception as e:
                    traceback.print_exc()
@@ -136,7 +141,6 @@ class Newsletter:
             for file_path in converted_files:
                 if os.path.exists(file_path):
                     os.unlink(file_path)
-
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -196,12 +200,49 @@ class Newsletter:
             "max_tokens": 100
         }
 
-
-    async def dispatch_summary(self,tgid) -> bool:
+    async def summary_on(self, tgid) -> Optional[bool]:
         query = select(Setting).where(Setting.tg_id == tgid)
         result = await session.execute(query)
         user = result.scalars().first()
         if user is not None:
-            return user.dispatch_summary
+            return user.summary_on
         else:
-            print('error')
+            return None
+
+    @staticmethod
+    async def summaries_choice(tg_id):
+        user_service = UserService()
+        user_info = await user_service.get_user_info(tg_id=tg_id)
+        name = user_info["name"]
+
+        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
+                             caption=get_first_summary(name),
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=await get_keyboard_summary_choice(menu=False))
+
+        talk_message = MessageHistory(
+            tg_id=tg_id,
+            message=get_first_summary("name"),
+            role='assistant',
+            type='text'
+        )
+
+        session.add(talk_message)
+        await session.commit()
+        await session.close()
+
+        markup = AnswerRenderer.get_markup_caption_translation(
+            bot_message_id=talk_message.id, user_message_id="")
+
+        file_voice = './files/summary_choice_bot.opus'
+
+        if user_info["speaker"] == "Anastasia":
+            file_voice = './files/summary_choice_nastya.opus'
+
+        await bot.send_voice(
+            tg_id,
+            types.InputFile(file_voice),
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup
+        )
+

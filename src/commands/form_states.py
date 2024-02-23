@@ -2,7 +2,7 @@ import asyncio
 from src.database import session
 from sqlalchemy import select
 
-from keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
+from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
@@ -14,11 +14,12 @@ from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.message_history import MessageHistory
 from src.database.models.setting import Setting
 
-from src.utils.user import UserService, UserHelper
+from src.utils.user import UserService, UserHelper, UserCreateMessage
 
 from aiogram.dispatcher import FSMContext
 from aiogram import types, md
@@ -288,67 +289,53 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await state.finish()
 
 
-
-@dp.message_handler(commands=["test"])
-async def summaries_choice(message: types.Message, state: FSMContext):
-    tg_id = str(message.chat.id)
-    user_service = UserService()
-    user_info = await user_service.get_user_info(tg_id=tg_id)
-    name = user_info["name"]
-
-    await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
-                         caption=get_first_summary(name),
-                         parse_mode=ParseMode.MARKDOWN,
-                         reply_markup=await get_keyboard_summary_choice(menu=False))
-
-    talk_message = MessageHistory(
-        tg_id=tg_id,
-        message=get_first_summary("name"),
-        role='assistant',
-        type='text'
-    )
-
-    session.add(talk_message)
-    await session.commit()
-    await session.close()
-
-    markup = AnswerRenderer.get_markup_caption_translation(
-        bot_message_id=talk_message.id, user_message_id="")
-
-    file_voice = './files/summary_choice_bot.opus'
-
-    if user_info["speaker"] == "Anastasia":
-        file_voice = './files/summary_choice_nastya.opus'
-
-    await bot.send_voice(
-        message.chat.id,
-        types.InputFile(file_voice),
-        parse_mode=ParseMode.HTML,
-        reply_markup=markup
-    )
-
-
 @dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
-async def handler_choice_summery(query: types.CallbackQuery, state: FSMContext):
-    query = select(Setting).where(Setting.tg_id == str(query.message.chat.id))
-    result = await session.execute(query)
+async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
+    chat_id = query.message.chat.id
+
+    select_query = select(Setting).where(Setting.tg_id == str(chat_id))
+    result = await session.execute(select_query)
     user = result.scalars().first()
 
-    if query.data == "dispatch_summary_true":
-        user.dispatch_summary = True
+    user_answer = True if query.data == "dispatch_summary_true" else False
+    if user:
+        user.summary_on = True
+        user.summary_answered = True
         await session.commit()
-
-        chat_id = query.message.chat.id
-        message_id = query.message.message_id
-
-        await bot.delete_message(chat_id, message_id)
-
-        text_true = "Cool! ✌🏻 You've mentioned that you are interested in movies! Here are some fresh news."
-        await bot.send_message(query.message.chat.id, md.escape_md(text_true))
-
     else:
-        user.dispatch_summary = False
+        session.add(Setting(tg_id=str(chat_id), summary_on=True, summary_answered=True))
         await session.commit()
-
-        text_false = "Got it! ✌🏻 In case you change your mind, go to Menu and choose 'Summaries', so you can still get the most fresh ones!"
+    if user_answer:
+        # ToDo change it
+        text_true = "Cool! ✌🏻 You've mentioned that you are interested in movies! Here are some fresh news."
+        # await bot.send_message(query.message.chat.id, md.escape_md(text_true))
+    else:
+        text_false = ("Got it! ✌🏻 In case you change your mind, "
+                      "go to Menu and choose 'Summaries', so you can still get the most fresh ones!")
         await bot.send_message(query.message.chat.id, md.escape_md(text_false))
+
+
+async def start_small_talk(tg_id):
+    text = await TalkInitializer(tg_id).generate_message()
+    if not text:
+        text = "Oooops, something wrong. Try request again later..."
+    saved_message = await UserCreateMessage(
+        tg_id=str(tg_id),
+        prompt=text,
+        type_message="text").save_to_database_message_history(
+        new_user_message_history=[
+            {"role": "assistant", "content": text}
+        ]
+    )
+    markup = AnswerRenderer.get_start_talk_markup_with_ids(saved_message[0].id)
+
+    audio = await TextToSpeech(tg_id=tg_id, prompt=text).get_speech()
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            tg_id,
+            types.InputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{text}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup,
+        )
+    await bot.delete_message(tg_id, wait_message.message_id)
