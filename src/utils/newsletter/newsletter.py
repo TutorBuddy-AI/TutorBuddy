@@ -14,6 +14,7 @@ from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choic
 from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
+from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.types import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
@@ -50,97 +51,111 @@ class Newsletter:
         all_news = result_news.scalars().all()
 
         for daily_news in all_news:
-            img_list = daily_news.image
-            url_img = img_list[0]['url']
-            # Вытаскиваем img куда мы сохранили его в admin панеле
-            path_img = url_img
-            # Вызов метода, передавая topic, ожидаем лист из tg_id в str
-            tg_id_list = await self.user_topic(daily_news.topic)
-            post_text = md(daily_news.message)
+            await self.send_single_article(daily_news)
 
-            audio_files = {
-                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-                'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
-            }
+    async def send_single_article(self, daily_news):
+        # Вызов метода, передавая topic, ожидаем лист из tg_id в str
+        tg_id_list = await self.user_topic(daily_news.topic)
+        post_text = md(daily_news.message)
 
-            converted_files = AudioConverterCash(audio_files).convert_files_to_ogg()
+        converted_files= []
+        audio_files = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+        }
 
-            for tgid in tg_id_list:
-                try:
-                    dispath = await self.dispatch_summary(tgid)
-                    if dispath == False:
-                        pass
+        converted_files = AudioConverterCash(audio_files).convert_files_to_ogg()
 
-                    post_message = MessageHistory(
-                        tg_id=tgid,
-                        message=post_text,
-                        role='assistant',
-                        type='text'
-                    )
-                    # Сохранение в MessageHistory текст поста
-                    session.add(post_message)
-                    voice = await self.get_voice(tgid)
-
-                    post_translate_button = AnswerRenderer.get_button_caption_translation(
-                        bot_message_id=post_message.id, user_message_id="")
-                    # Отправка фото с текстом newsletter под ним
-                    text_photo = await bot.send_photo(
-                        chat_id=int(tgid),
-                        photo=types.InputFile(path_img),
-                        caption=post_text,
-                        parse_mode=ParseMode.MARKDOWN,
-                        reply_markup=InlineKeyboardMarkup().row(
-                            InlineKeyboardButton(
-                                text='Original article ➡️📃',
-                                web_app=WebAppInfo(),
-                                url=daily_news.url)
-                        ).row(post_translate_button)
-                    )
-
-                    if voice == "Anastasia":
-                        file_path = converted_files[0]
-                    else:
-                        file_path = converted_files[1]
-
-                    await bot.send_voice(int(tgid), types.InputFile(file_path))
-
+        for tg_id in tg_id_list:
+            try:
+                if await SettingService.is_summary_on(tg_id):
+                    post_message = await self.send_summary(tg_id, daily_news, converted_files)
                     await asyncio.sleep(3)
 
-                    payload = await self.get_payload(tgid, post_text)
-
-                    generated_text = await GenerateAI(
-                        request_url="https://api.openai.com/v1/chat/completions").send_request(payload=payload)
-
-                    answer = generated_text["choices"][0]["message"]["content"]
-
-                    talk_message = MessageHistory(
-                        tg_id=tgid,
-                        message=answer,
-                        role='assistant',
-                        type='text'
-                    )
-                    # Сохранение в MessageHistory текст поста
-                    session.add(talk_message)
-                    voice = await self.get_voice(tgid)
-                    audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-                    markup = AnswerRenderer.get_markup_caption_translation(
-                        bot_message_id=talk_message.id, user_message_id="")
-                    with AudioConverter(audio) as ogg_file:
-                        # Отправка вопроса юзера по поводу newsletter голосовое сообщение
-                        await bot.send_voice(int(tgid),
-                                             types.InputFile(ogg_file),
-                                             caption=f'<span class="tg-spoiler">{answer}</span>',
-                                             parse_mode=ParseMode.HTML,
-                                             reply_markup=markup,
-                                             reply_to_message_id=text_photo.message_id)
+                    await self.send_opinion(tg_id, post_text, post_message.message_id)
                     await asyncio.sleep(3)
+                    # if self.is_summary_answered(tg_id):
+                    #     await self.summaries_choice(tg_id)
 
-                except Exception as e:
-                   traceback.print_exc()
+            except Exception as e:
+                traceback.print_exc()
 
-            for file_path in converted_files:
-                if os.path.exists(file_path):
-                    os.unlink(file_path)
+        await self.delete_audio_files(converted_files)
+
+    async def delete_audio_files(self, converted_files):
+        for file_path in converted_files:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+
+    async def send_summary(self, tg_id, daily_news, post_audio_files):
+        img_list = daily_news.image
+        url_img = img_list[0]['url']
+        # Вытаскиваем img куда мы сохранили его в admin панеле
+        path_img = url_img
+
+        post_text = md(daily_news.message)
+        post_message = MessageHistory(
+            tg_id=tg_id,
+            message=post_text,
+            role='assistant',
+            type='text'
+        )
+        # Сохранение в MessageHistory текст поста
+        session.add(post_message)
+        voice = await self.get_voice(tg_id)
+
+        post_translate_button = AnswerRenderer.get_button_caption_translation(
+            bot_message_id=post_message.id, user_message_id="")
+        # Отправка фото с текстом newsletter под ним
+        post_message = await bot.send_photo(
+            chat_id=int(tg_id),
+            photo=types.InputFile(path_img),
+            caption=post_text,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup().row(
+                InlineKeyboardButton(
+                    text='Original article ➡️📃',
+                    web_app=WebAppInfo(),
+                    url=daily_news.url)
+            ).row(post_translate_button)
+        )
+
+        if voice == "Anastasia":
+            file_path = post_audio_files[0]
+        else:
+            file_path = post_audio_files[1]
+
+        await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        return post_message
+
+    async def send_opinion(self, tg_id, post_text, post_message_id):
+        payload = await self.get_payload(tg_id, post_text)
+
+        generated_text = await GenerateAI(
+            request_url="https://api.openai.com/v1/chat/completions").send_request(payload=payload)
+
+        answer = generated_text["choices"][0]["message"]["content"]
+
+        talk_message = MessageHistory(
+            tg_id=tg_id,
+            message=answer,
+            role='assistant',
+            type='text'
+        )
+        # Сохранение в MessageHistory текст поста
+        session.add(talk_message)
+        voice = await self.get_voice(tg_id)
+        audio = await TextToSpeech.get_speech_by_voice(voice, answer)
+        markup = AnswerRenderer.get_markup_caption_translation(
+            bot_message_id=talk_message.id, user_message_id="")
+        with AudioConverter(audio) as ogg_file:
+            # Отправка вопроса юзера по поводу newsletter голосовое сообщение
+            await bot.send_voice(int(tg_id),
+                                 types.InputFile(ogg_file),
+                                 caption=f'<span class="tg-spoiler">{answer}</span>',
+                                 parse_mode=ParseMode.HTML,
+                                 reply_markup=markup,
+                                 reply_to_message_id=post_message_id)
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -199,15 +214,6 @@ class Newsletter:
             "messages": extended_history,
             "max_tokens": 100
         }
-
-    async def summary_on(self, tgid) -> Optional[bool]:
-        query = select(Setting).where(Setting.tg_id == tgid)
-        result = await session.execute(query)
-        user = result.scalars().first()
-        if user is not None:
-            return user.summary_on
-        else:
-            return None
 
     @staticmethod
     async def summaries_choice(tg_id):

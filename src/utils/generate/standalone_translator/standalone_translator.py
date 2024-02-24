@@ -36,7 +36,7 @@ class StandaloneTranslator:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 400
+            "max_tokens": 100
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:

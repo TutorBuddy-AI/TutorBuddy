@@ -299,43 +299,20 @@ async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
 
     user_answer = True if query.data == "dispatch_summary_true" else False
     if user:
-        user.summary_on = True
+        user.summary_on = user_answer
         user.summary_answered = True
         await session.commit()
     else:
-        session.add(Setting(tg_id=str(chat_id), summary_on=True, summary_answered=True))
+        session.add(Setting(tg_id=str(chat_id), summary_on=user_answer, summary_answered=True))
         await session.commit()
     if user_answer:
-        # ToDo change it
-        text_true = "Cool! ✌🏻 You've mentioned that you are interested in movies! Here are some fresh news."
-        # await bot.send_message(query.message.chat.id, md.escape_md(text_true))
+        text_true = ("Deal! Looking forward to discuss the most up-to-date news ⚡ "
+                     "In case you change your mind, you may refuse to receive summaries anytime: "
+                     "go to Menu and choose 'Summaries'.")
+        await bot.send_message(query.message.chat.id, md.escape_md(text_true),
+                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
     else:
         text_false = ("Got it! ✌🏻 In case you change your mind, "
                       "go to Menu and choose 'Summaries', so you can still get the most fresh ones!")
-        await bot.send_message(query.message.chat.id, md.escape_md(text_false))
-
-
-async def start_small_talk(tg_id):
-    text = await TalkInitializer(tg_id).generate_message()
-    if not text:
-        text = "Oooops, something wrong. Try request again later..."
-    saved_message = await UserCreateMessage(
-        tg_id=str(tg_id),
-        prompt=text,
-        type_message="text").save_to_database_message_history(
-        new_user_message_history=[
-            {"role": "assistant", "content": text}
-        ]
-    )
-    markup = AnswerRenderer.get_start_talk_markup_with_ids(saved_message[0].id)
-
-    audio = await TextToSpeech(tg_id=tg_id, prompt=text).get_speech()
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            tg_id,
-            types.InputFile(ogg_file),
-            caption=f'<span class="tg-spoiler">{text}</span>',
-            parse_mode=ParseMode.HTML,
-            reply_markup=markup,
-        )
-    await bot.delete_message(tg_id, wait_message.message_id)
+        await bot.send_message(query.message.chat.id, md.escape_md(text_false),
+                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))

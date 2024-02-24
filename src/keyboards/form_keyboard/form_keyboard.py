@@ -179,3 +179,19 @@ async def get_keyboard_summary_choice(menu: bool) -> InlineKeyboardMarkup:
         return keyboard_summary_markup
 
 
+async def get_keyboard_cancel_news_subs() -> InlineKeyboardMarkup:
+    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+    continue_btn = InlineKeyboardButton(text='Continue 🥳', callback_data='go_back')
+    stop_subs_btn = InlineKeyboardButton(text='Stop 😔', callback_data='dispatch_summary_false')
+    translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+    keyboard_summary_markup.row(translate_button).row(continue_btn, stop_subs_btn)
+    return keyboard_summary_markup
+
+
+async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
+    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+    accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
+    go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
+    translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+    keyboard_summary_markup.row(translate_button).row(accept, go_back_btn)
+    return keyboard_summary_markup
