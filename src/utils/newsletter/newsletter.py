@@ -24,16 +24,6 @@ import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
 from markdownify import markdownify as md
-# log_directory = '/home/ubuntu/AI-TutorBuddy-bot/src/utils/newsletter/logs'
-# log_file_path = os.path.join(log_directory, 'newsletter.log')
-# if not os.path.exists(log_directory):
-#     os.makedirs(log_directory)
-# logging.basicConfig(level=logging.ERROR)
-# file_handler = RotatingFileHandler(log_file_path, maxBytes=1024 * 1024, backupCount=5)
-# file_handler.setLevel(logging.ERROR)
-# formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-# file_handler.setFormatter(formatter)
-# logging.getLogger('').addHandler(file_handler)
 
 
 class Newsletter:
