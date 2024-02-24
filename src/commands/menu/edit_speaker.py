@@ -1,13 +1,14 @@
 from aiogram import types, md
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
+from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.config import dp, bot
 from src.keyboards import get_go_back_inline_keyboard
 
 
-@dp.message_handler(commands=["persona"])
+@dp.message_handler(IsRegister(), commands=["persona"])
 async def edit_speaker_handler(message: types.Message):
     persona_kb = InlineKeyboardMarkup(row_width=1)
 
@@ -20,6 +21,12 @@ async def edit_speaker_handler(message: types.Message):
 
     await bot.send_message(message.chat.id, md.escape_md("Who would you like to talk with? 💌"),
                            reply_markup=persona_kb)
+
+
+@dp.message_handler(IsNotRegister(), commands=["persona"])
+async def edit_profile_handler(message: types.Message):
+    translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
+    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 

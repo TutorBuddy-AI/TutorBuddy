@@ -3,20 +3,28 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, CallbackQuery
 
 from src.config import dp, bot
+from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_topic_keyboard
 from src.states import FormTopic
+from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_chose_some_more_topics, get_other_topics
 
 
-@dp.message_handler(commands=["changetopic"])
+@dp.message_handler(IsRegister(), commands=["changetopic"])
 async def change_topic_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
     await bot.send_photo(message.chat.id, photo=types.InputFile('./files/topic.jpg'),
                          caption=md.escape_md(f"Which topic would you like to discuss instead? 🤓"),
                          reply_markup=await get_choose_topic_keyboard(for_user=True))
+
+
+@dp.message_handler(IsNotRegister(), commands=["changetopic"])
+async def edit_profile_handler(message: types.Message):
+    translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
+    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
 
 
 @dp.callback_query_handler(lambda query: query.data == "change_topic")

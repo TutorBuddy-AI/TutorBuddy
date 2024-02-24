@@ -1,4 +1,4 @@
-from src.database.models import User, MessageHistory
+from src.database.models import User, MessageHistory, Setting
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
 from src.utils.generate.question_history import SupportHistory
@@ -134,4 +134,5 @@ class UserService:
         await SupportHistory().delete_user_questions_history(tg_id)
         await FeedbackHistory().delete_user_feedbacks_history(tg_id)
         await session.execute(delete(MessageHistory).where(MessageHistory.tg_id == tg_id))
+        await session.execute(delete(Setting).where(Setting.tg_id == tg_id))
         await session.execute(delete(User).where(User.tg_id == tg_id))
