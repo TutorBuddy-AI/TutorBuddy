@@ -48,7 +48,6 @@ class Newsletter:
         tg_id_list = await self.user_topic(daily_news.topic)
         post_text = md(daily_news.message)
 
-        converted_files= []
         audio_files = {
             'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
             'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
