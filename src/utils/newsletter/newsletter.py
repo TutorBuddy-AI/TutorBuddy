@@ -13,7 +13,7 @@ from src.database.models.setting import Setting
 from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
+from src.utils.audio_converter.audio_converter_cache import AudioConverterCache
 from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.types import ParseMode
@@ -53,7 +53,7 @@ class Newsletter:
             'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
         }
 
-        converted_files = AudioConverterCash(audio_files).convert_files_to_ogg()
+        converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
         for tg_id in tg_id_list:
             try:
