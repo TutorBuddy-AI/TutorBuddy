@@ -284,7 +284,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
     await bot.send_message(
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),
-        reply_markup=await get_choose_bot_keyboard())
+        reply_markup=await get_choose_bot_keyboard(is_caption=False))
     await state.finish()
 
 
