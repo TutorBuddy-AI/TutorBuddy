@@ -1,5 +1,5 @@
 from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 from aiogram.dispatcher.filters import Text
 
 from src.config import dp, bot
@@ -14,6 +14,6 @@ async def process_cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
 
-    await state.finish()
+    await state.clear()
 
     await bot.send_message(message.chat.id, md.escape_md('Cancelled'), reply_markup=await get_keyboard_remove())

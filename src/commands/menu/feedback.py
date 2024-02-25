@@ -1,5 +1,5 @@
 from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
 from src.filters import IsNotRegister
@@ -50,7 +50,7 @@ async def feedback_query_handler(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
 
     await FeedbackHistory().add_feedback(tg_id=str(message.chat.id), message=state_data['new_value'])
-    await state.finish()
+    await state.clear()
 
     await bot.send_message(message.chat.id, md.escape_md("Message sent successfully. Thank you!"),
                            reply_markup=await get_go_back_inline_keyboard())

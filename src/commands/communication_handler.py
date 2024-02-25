@@ -1,11 +1,11 @@
 from typing import List, Optional
 
 from aiogram import Bot
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram import md
 from aiogram import types
-from aiogram.types import ParseMode
+from aiogram.enums.parse_mode import ParseMode
 
 from src.database.models import MessageHistory
 from src.utils.answer import AnswerRenderer

@@ -1,5 +1,5 @@
 from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
 from src.filters.is_not_register_filter import IsRegister

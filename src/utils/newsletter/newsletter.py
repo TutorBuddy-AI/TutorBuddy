@@ -16,7 +16,7 @@ from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cash import AudioConverterCash
 from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from aiogram.types import ParseMode
+from aiogram.enums.parse_mode import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types.web_app_info import WebAppInfo

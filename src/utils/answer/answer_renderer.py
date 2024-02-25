@@ -1,13 +1,28 @@
 import json
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.callback_data import CallbackData
+from aiogram.filters.callback_data import CallbackData
 
 from src.utils.answer.answer import Answer
 from src.utils.answer.render import Render
 
-translation_data = CallbackData("translate", 'action', 'bot_message_id', "user_message_id")
-mistakes_data = CallbackData("mistakes", 'action', 'bot_message_id', "user_message_id", "user_message_tgid")
+
+class TranslationData(CallbackData, prefix="translate"):
+    action: str
+    bot_message_id: str
+    user_message_id: str
+
+
+class MistakesData(CallbackData, prefix="mistakes"):
+    action: str
+    bot_message_id: str
+    user_message_id: str
+    user_message_tgid: str
+
+
+
+# translation_data = CallbackData("translate", 'action', 'bot_message_id', "user_message_id")
+# mistakes_data = CallbackData("mistakes", 'action', 'bot_message_id', "user_message_id", "user_message_tgid")
 
 
 class AnswerRenderer:
@@ -41,7 +56,7 @@ class AnswerRenderer:
         #         f"🔴 My mistakes",
         #         callback_data="request_mistakes")
         return InlineKeyboardButton(
-            f"🔴 My mistakes",
+            text=f"🔴 My mistakes",
             callback_data="request_mistakes")
 
     def get_user_message_markup(self, num_mistakes: int = 0) -> InlineKeyboardMarkup:
@@ -67,21 +82,21 @@ class AnswerRenderer:
         #     '💡 Hint',
         #     callback_data="request_hint")
         get_mistake_btn = InlineKeyboardButton(
-            '🔴 Mistakes',
-            callback_data=mistakes_data.new(
+            text='🔴 Mistakes',
+            callback_data=MistakesData(
                 action="request_mistakes",
                 bot_message_id=self.bot_message_id,
                 user_message_id=self.user_message_id,
                 user_message_tgid=self.reply_to_message_id
-            )
+            ).pack()
         )
         get_translation_btn = InlineKeyboardButton(
-            '📖 Translate',
-            callback_data=translation_data.new(
+            text='📖 Translate',
+            callback_data=TranslationData(
                 action="request_caption_translation",
                 bot_message_id=self.bot_message_id,
                 user_message_id=self.user_message_id
-            )
+            ).pack()
         )
         bot_message_markup.row(get_translation_btn, get_mistake_btn)
         return bot_message_markup
@@ -110,12 +125,12 @@ class AnswerRenderer:
     @staticmethod
     def get_button_caption_translation(bot_message_id: str, user_message_id: str):
         get_translation_btn = InlineKeyboardButton(
-            '📖 Translate',
-            callback_data=translation_data.new(
+            text='📖 Translate',
+            callback_data=TranslationData(
                 action="request_caption_translation",
                 bot_message_id=bot_message_id,
                 user_message_id=user_message_id
-            )
+            ).pack()
         )
 
         return get_translation_btn
@@ -125,12 +140,12 @@ class AnswerRenderer:
         bot_message_markup = InlineKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
         get_translation_btn = InlineKeyboardButton(
-            '📖 Translate',
-            callback_data=translation_data.new(
+            text='📖 Translate',
+            callback_data=TranslationData(
                 action="request_caption_translation",
                 bot_message_id=bot_message_id,
                 user_message_id=user_message_id
-            ))
+            ).pack())
 
         bot_message_markup.row(get_translation_btn)
         return bot_message_markup
@@ -138,13 +153,13 @@ class AnswerRenderer:
     @staticmethod
     def get_button_text_translation_standalone(for_user=False):
         return InlineKeyboardButton(
-            '📖 Translate',
+            text='📖 Translate',
             callback_data=f"""request_text_translation_standalone{"_for_user" if for_user else ""}""")
 
     @staticmethod
     def get_button_caption_translation_standalone(for_user=False):
         return InlineKeyboardButton(
-            '📖 Translate',
+            text='📖 Translate',
             callback_data=f"""request_caption_translation_standalone{"_for_user" if for_user else ""}""")
 
     @staticmethod
@@ -167,15 +182,13 @@ class AnswerRenderer:
 
     @staticmethod
     def get_start_talk_markup_with_ids(bot_message_id) -> InlineKeyboardMarkup:
-        bot_message_markup = InlineKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
-
         get_translation_btn = InlineKeyboardButton(
-            '📖 Translate',
-            callback_data=translation_data.new(
+            text='📖 Translate',
+            callback_data=TranslationData(
                 action="request_caption_translation",
                 bot_message_id=bot_message_id,
                 user_message_id=""
-            )
+            ).pack()
         )
-        bot_message_markup.row(get_translation_btn)
+        bot_message_markup = InlineKeyboardMarkup(inline_keyboard=[[get_translation_btn]]) # row_width=1, resize_keyboard=True, one_time_keyboard=True)
         return bot_message_markup

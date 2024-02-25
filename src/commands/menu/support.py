@@ -1,5 +1,5 @@
 from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
 from src.filters import IsNotRegister
@@ -39,7 +39,7 @@ async def support_query_handler(message: types.Message, state: FSMContext):
 
     await SupportHistory().add_questions(tg_id=str(message.chat.id), message=state_data['new_value'])
 
-    await state.finish()
+    await state.clear()
 
     await bot.send_message(message.chat.id, md.escape_md("Message sent successfully."
                                                          " The manager will definitely contact you. Thank you!"),

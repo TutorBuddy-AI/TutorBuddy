@@ -1,5 +1,5 @@
 from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 from src.config import dp, bot
@@ -15,8 +15,6 @@ from src.texts.texts import get_incorrect_native_language_question, get_other_na
 @dp.message_handler(IsRegister(), commands=["editprofile"])
 async def edit_profile_handler(message: types.Message):
 
-    edit_profile_kb = InlineKeyboardMarkup(row_width=2)
-
     name = InlineKeyboardButton(text='Name', callback_data='change_name')
     topic = InlineKeyboardButton(text='Topics', callback_data='change_topic')
 
@@ -28,7 +26,10 @@ async def edit_profile_handler(message: types.Message):
 
     translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
 
-    edit_profile_kb.row(name, topic).row(native_language, english_level).row(user_topic, go_back).row(translate_button)
+    edit_profile_kb = InlineKeyboardMarkup(inline_keyboard=[[name, topic],
+                                                            [native_language, english_level],
+                                                            [user_topic, go_back],
+                                                            [translate_button]])
 
     await bot.send_photo(message.chat.id, photo=types.InputFile('./files/edit_profile.jpg'),
                          caption=md.escape_md("What would you like to change?"),
@@ -61,7 +62,7 @@ async def changed_name_query_handler(message: types.Message, state: FSMContext):
     name = data["name"]
 
     await UserService().change_callname(tg_id=str(message.chat.id), new_callname=name)
-    await state.finish()
+    await state.clear()
 
     await bot.send_message(message.from_user.id, "The name has been successfully changed\n"
                                                  f"Current name: {name}",
@@ -94,7 +95,7 @@ async def changed_native_language_query_handler(query: CallbackQuery, state: FSM
                                                   f"Current native language: {state_data['native_language']}",
                            reply_markup=await get_go_back_inline_keyboard())
 
-    await state.finish()
+    await state.clear()
 
 
 @dp.callback_query_handler(lambda query: query.data == "other_language", state=FormNativeLanguage.new_native_language)
@@ -119,7 +120,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
                                                 f"Current native language: {message.text}",
                                reply_markup=await get_go_back_inline_keyboard())
 
-        await state.finish()
+        await state.clear()
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -152,7 +153,7 @@ async def changed_english_level_query_handler(query: CallbackQuery, state: FSMCo
                                                                f" {state_data['english_level']}"),
                            reply_markup=await get_go_back_inline_keyboard())
 
-    await state.finish()
+    await state.clear()
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

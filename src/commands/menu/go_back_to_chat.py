@@ -1,13 +1,16 @@
 from src.config import dp, bot
 
+from aiogram import F
 from aiogram.types import CallbackQuery
-from aiogram.dispatcher import FSMContext
-from aiogram import md
+from aiogram.fsm.context import FSMContext
+from aiogram import md, Router
 
 from src.utils.answer import AnswerRenderer
 
+go_back_router = Router(name=__name__)
 
-@dp.callback_query_handler(text="go_back", state="*")
+
+@go_back_router.callback_query(F.text == "go_back", F.state == "*")
 async def go_back_query_handler(query: CallbackQuery, state: FSMContext):
 
     await bot.send_message(query.message.chat.id, md.escape_md("Great!\nSend me message below ⬇"),
@@ -17,5 +20,5 @@ async def go_back_query_handler(query: CallbackQuery, state: FSMContext):
     if current_state is None:
         return
 
-    await state.finish()
+    await state.clear()
 

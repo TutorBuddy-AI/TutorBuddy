@@ -122,4 +122,4 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
             f"Current topics: {state_data['topic']} {state_data['additional_topic']}"),
         reply_markup=await get_go_back_inline_keyboard())
 
-    await state.finish()
+    await state.clear()

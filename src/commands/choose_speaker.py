@@ -1,5 +1,5 @@
-from aiogram.dispatcher import FSMContext
-from aiogram.types import ParseMode
+from aiogram.fsm.context import FSMContext
+from aiogram.enums.parse_mode import ParseMode
 
 from src.config import dp, bot
 from src.utils.answer import AnswerRenderer
@@ -8,7 +8,7 @@ from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserService, user_service
 
-from aiogram import types, md
+from aiogram import types, md, F
 
 from src.states.form import FormInitTalk
 from src.texts.texts import get_choice_is_done, get_start_talk, get_greeting_anastasia
@@ -77,7 +77,7 @@ from src.utils.user import UserCreateMessage
 #     await state.set_state(FormInitTalk.init_user_message)
 
 
-@dp.callback_query_handler(text="continue_bot")
+@dp.callback_query_handler(F.text == "continue_bot")
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
@@ -181,5 +181,5 @@ async def start_small_talk(message: types.Message, state: FSMContext, wait_messa
             reply_to_message_id=message.message_id
         )
     await bot.delete_message(message.chat.id, wait_message.message_id)
-    await state.finish()
+    await state.clear()
 

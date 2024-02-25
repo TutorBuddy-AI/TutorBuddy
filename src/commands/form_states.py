@@ -2,31 +2,29 @@ import asyncio
 from src.database import session
 from sqlalchemy import select
 
-from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
-from src.config import dp, bot
+from src.config import bot
 from src.states import Form
 from src.filters import IsNotRegister
-from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_text_before_start, \
-    get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
-    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text, \
-    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message, get_first_summary
+from src.texts.texts import get_welcome_text, get_meet_nastya_text, \
+    get_other_native_language_question, get_incorrect_native_language_question, \
+    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, \
+    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from src.database.models.message_history import MessageHistory
 from src.database.models.setting import Setting
 
 from src.utils.user import UserService, UserHelper, UserCreateMessage
 
-from aiogram.dispatcher import FSMContext
-from aiogram import types, md
-from aiogram.types import InputFile, CallbackQuery
-from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.fsm.context import FSMContext
+from aiogram import types, md, Router, F
+from aiogram.types import InputFile
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.enums.parse_mode import ParseMode
 
-from src.utils.newsletter.newsletter import Newsletter
+form_router = Router(name=__name__)
 
 
 async def clean_messages(chat_id: str, message_id: str):
@@ -36,7 +34,7 @@ async def clean_messages(chat_id: str, message_id: str):
         pass
 
 
-@dp.message_handler(IsNotRegister())
+@form_router.message(IsNotRegister())
 async def process_start_register_user(message: types.Message, state: FSMContext):
     """
     Function to explain bot idea for new users
@@ -54,7 +52,7 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
     await process_start_acquaintance(message, state)
 
 
-@dp.callback_query_handler(text=["start"])
+@form_router.callback_query(F.text == ["start"])
 async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
     await bot.send_photo(
@@ -65,14 +63,14 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
                 f"<i>Make sure your name is in English.</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
-            [InlineKeyboardButton("No, you'd better call me...", callback_data="not_me")],
+            [InlineKeyboardButton(text=f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
+            [InlineKeyboardButton(text="No, you'd better call me...", callback_data="not_me")],
             [AnswerRenderer.get_button_caption_translation_standalone()]
         ])
     )
 
 
-@dp.callback_query_handler(lambda query: query.data == "name_ok", state=Form.name)
+@form_router.callback_query(F.query.data == "name_ok", F.state == Form.name)
 async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
     name = query.from_user.first_name
     await bot.send_message(
@@ -89,7 +87,7 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
         reply_markup=await get_choose_native_language_keyboard())
 
 
-@dp.callback_query_handler(lambda query: query.data == "not_me", state=Form.name)
+@form_router.callback_query(F.query.data == "not_me", F.state == Form.name)
 async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.other_name)
     markup = AnswerRenderer.get_markup_text_translation_standalone()
@@ -100,7 +98,7 @@ async def process_not_me(query: types.CallbackQuery, state: FSMContext):
     )
 
 
-@dp.message_handler(state=Form.other_name)
+@form_router.message(F.state == Form.other_name)
 async def process_get_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["name"] = message.text
@@ -116,7 +114,7 @@ async def process_get_name(message: types.Message, state: FSMContext):
         reply_markup=await get_choose_native_language_keyboard())
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("native"), state=Form.native_language)
+@form_router.callback_query(F.query.data.startswith("native"), F.state == Form.native_language)
 async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["native_language"] = query.data.split("_")[1]
@@ -128,14 +126,14 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
         reply_markup=await get_choose_goal_keyboard())
 
 
-@dp.callback_query_handler(lambda query: query.data == "other_language", state=Form.native_language)
+@form_router.callback_query(F.query.data == "other_language", F.state == Form.native_language)
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_native_language_question(),
                            reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(Form.other_language)
 
 
-@dp.message_handler(state=Form.other_language)
+@form_router.message(F.state == Form.other_language)
 async def process_other_language(message: types.Message, state: FSMContext):
     if not message.text.isalpha():
         await bot.send_message(message.chat.id, get_incorrect_native_language_question())
@@ -148,7 +146,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
         await state.set_state(Form.goal)
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("goal"), state=Form.goal)
+@form_router.callback_query(F.query.data.startswith("goal"), F.state == Form.goal)
 async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["goal"] = query.data.split("_")[1]
@@ -159,14 +157,14 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.english_level)
 
 
-@dp.callback_query_handler(lambda query: query.data == "other_goal", state=Form.goal)
+@form_router.callback_query(F.query.data == "other_goal", F.state == Form.goal)
 async def start_process_other_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_goal(),
                            reply_markup=AnswerRenderer.get_markup_text_translation_standalone())
     await state.set_state(Form.other_goal)
 
 
-@dp.message_handler(state=Form.other_goal)
+@form_router.message(F.state == Form.other_goal)
 async def process_other_goal_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["goal"] = message.text
@@ -176,7 +174,7 @@ async def process_other_goal_handler(message: types.Message, state: FSMContext):
     await state.set_state(Form.english_level)
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("level"), state=Form.english_level)
+@form_router.callback_query(F.query.data.startswith("level"), F.state == Form.english_level)
 async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["english_level"] = query.data.split("_")[1]
@@ -188,13 +186,13 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
                          reply_markup=await get_choose_topic_keyboard())
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=Form.topic)
+@form_router.callback_query(F.query.data.startswith("topic"), F.state == Form.topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                         reply_markup=await get_choose_topic_keyboard(callback_query))
 
 
-@dp.callback_query_handler(text="done", state=Form.topic)
+@form_router.callback_query(F.text == "done", F.state == Form.topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""
@@ -230,7 +228,7 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
         await create_user_setup_speaker_choice(query.message, state)
 
 
-@dp.message_handler(state=Form.additional_topic)
+@form_router.message(F.state == Form.additional_topic)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["additional_topic"] = message.text
@@ -285,10 +283,10 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await bot.send_message(
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),
         reply_markup=await get_choose_bot_keyboard())
-    await state.finish()
+    await state.clear()
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
+@form_router.callback_query(F.query.data.startswith('dispatch_summary_'))
 async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
     chat_id = query.message.chat.id
 

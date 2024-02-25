@@ -1,10 +1,13 @@
-from aiogram import md
-from aiogram.utils.exceptions import BadRequest
+from aiogram import md, Router
+from aiogram.exceptions import TelegramBadRequest
+
 
 from src.config import dp, bot
 
+error_router = Router(name=__name__)
 
-@dp.errors_handler()
+
+@error_router.errors()
 async def error_handler(update, error: Exception) -> None:
     await dp.current_state().finish()
     if str(error) == "Voice_messages_forbidden":

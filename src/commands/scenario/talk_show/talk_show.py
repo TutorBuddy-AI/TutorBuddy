@@ -1,6 +1,6 @@
 import asyncio
 
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
 from src.states.scenario import TalkShowForm
@@ -577,7 +577,7 @@ async def process_get_other_job(message: types.Message, state: FSMContext):
 
     job = data.get("job")
 
-    await state.finish()
+    await state.clear()
 
     question_text = await _genarate_text(
         tg_id=str(message.chat.id),
