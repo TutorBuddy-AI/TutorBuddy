@@ -32,7 +32,7 @@ class AudioConverter:
             input_file.write(self.audio_bytes.read())
             # Вызываем ffmpeg, передавая байты аудио через stdin
             subprocess.run(
-                ['ffmpeg', '-y', '-i', f'{input_file.name}', '-c:a', 'libopus', f'{self.output_file.name}'],
+                ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', f'{input_file.name}', '-c:a', 'libopus', f'{self.output_file.name}'],
                 check=True,
                 capture_output=False
             )

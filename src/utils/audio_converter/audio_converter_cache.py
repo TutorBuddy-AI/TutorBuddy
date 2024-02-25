@@ -11,7 +11,7 @@ class ConversionType(Enum):
     Mp3ToOgg = 1
 
 
-class AudioConverterCash:
+class AudioConverterCache:
     def __init__(self, audio_files, mode=ConversionType.Mp3ToOgg):
         self.output_files = {}
         self.audio_files = audio_files
@@ -32,7 +32,7 @@ class AudioConverterCash:
                     output_file_path = os.path.join(temp_directory, f'{variable_name}.ogg')
                     # Вызываем ffmpeg, передавая байты аудио через stdin
                     subprocess.run(
-                        ['ffmpeg', '-y', '-i', f'{input_file.name}', '-c:a', 'libopus', output_file_path],
+                        ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', f'{input_file.name}', '-c:a', 'libopus', output_file_path],
                         check=True,
                         capture_output=False
                     )
