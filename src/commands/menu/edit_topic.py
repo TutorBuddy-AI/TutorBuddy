@@ -1,8 +1,8 @@
-from aiogram import types, md
-from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardMarkup, CallbackQuery
+from aiogram import types, md, Router, F
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery
 
-from src.config import dp, bot
+from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_topic_keyboard
@@ -11,8 +11,10 @@ from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_chose_some_more_topics, get_other_topics
 
+edit_topic_router = Router(name=__name__)
 
-@dp.message_handler(IsRegister(), commands=["changetopic"])
+
+@edit_topic_router.message(IsRegister(), F.commands == ["changetopic"])
 async def change_topic_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
@@ -21,13 +23,13 @@ async def change_topic_handler(message: types.Message, state: FSMContext):
                          reply_markup=await get_choose_topic_keyboard(for_user=True))
 
 
-@dp.message_handler(IsNotRegister(), commands=["changetopic"])
+@edit_topic_router.message(IsNotRegister(), F.commands == ["changetopic"])
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
 
 
-@dp.callback_query_handler(lambda query: query.data == "change_topic")
+@edit_topic_router.callback_query(F.query.data == "change_topic")
 async def change_topic_handler(query: CallbackQuery, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
@@ -35,14 +37,14 @@ async def change_topic_handler(query: CallbackQuery, state: FSMContext):
                            reply_markup=await get_choose_topic_keyboard(for_user=True, is_caption=False))
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith("topic"), state=FormTopic.new_topic)
+@edit_topic_router.callback_query(F.query.data.startswith("topic"), F.state == FormTopic.new_topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
                                         reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True,
                                                                                      is_caption=False))
 
 
-@dp.callback_query_handler(text="done", state=FormTopic.new_topic)
+@edit_topic_router.callback_query(F.text == "done", F.state == FormTopic.new_topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""
@@ -64,7 +66,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
         await process_topics(query, state, result_text, was_other)
 
 
-@dp.callback_query_handler(text="done", state=FormTopic.new_topic)
+@edit_topic_router.callback_query(F.text == "done", F.state == FormTopic.new_topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""
@@ -102,7 +104,7 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
         await create_user_setup_speaker_choice(query.message, state)
 
 
-@dp.message_handler(state=FormTopic.new_additional_topic)
+@edit_topic_router.message(F.state == FormTopic.new_additional_topic)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["additional_topic"] = message.text

@@ -1,4 +1,4 @@
-from src.config import dp, bot
+from src.config import bot
 
 from aiogram import F
 from aiogram.types import CallbackQuery

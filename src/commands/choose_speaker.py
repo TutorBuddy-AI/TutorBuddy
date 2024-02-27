@@ -1,17 +1,17 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.enums.parse_mode import ParseMode
 
-from src.config import dp, bot
+from src.config import bot
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserService
 
-from aiogram import types, md, F
+from aiogram import types, F, Router
 
 from src.states.form import FormInitTalk
-from src.texts.texts import get_choice_is_done, get_start_talk, get_greeting_anastasia
+from src.texts.texts import get_choice_is_done, get_start_talk
 from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
@@ -76,8 +76,10 @@ from src.utils.user import UserCreateMessage
 #             reply_markup=audio_markup)
 #     await state.set_state(FormInitTalk.init_user_message)
 
+choose_speaker_router = Router(name=__name__)
 
-@dp.callback_query_handler(F.text == "continue_bot")
+
+@choose_speaker_router.callback_query(F.text == "continue_bot")
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
@@ -105,7 +107,7 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     await state.set_state(FormInitTalk.init_user_message)
 
 
-@dp.callback_query_handler(text="continue_nastya")
+@choose_speaker_router.callback_query(F.text == "continue_nastya")
 async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
@@ -133,7 +135,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     await state.set_state(FormInitTalk.init_user_message)
 
 
-@dp.message_handler(state=FormInitTalk.init_user_message, content_types=types.ContentType.TEXT)
+@choose_speaker_router.message(F.state == FormInitTalk.init_user_message, F.content_types == types.ContentType.TEXT)
 async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_info(tg_id=message.chat.id)
@@ -142,7 +144,7 @@ async def start_talk(message: types.Message, state: FSMContext):
     await start_small_talk(message, state, wait_message, message_text=message.text)
 
 
-@dp.message_handler(state=FormInitTalk.init_user_message, content_types=types.ContentType.VOICE)
+@choose_speaker_router.message(F.state == FormInitTalk.init_user_message, F.content_types == types.ContentType.VOICE)
 async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_info(tg_id=message.chat.id)

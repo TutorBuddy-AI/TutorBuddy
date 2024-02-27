@@ -1,13 +1,14 @@
-from aiogram import types, md
+from aiogram import types, md, F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.dispatcher.filters import Text
 
-from src.config import dp, bot
+from src.config import bot
 from src.keyboards import get_keyboard_remove
 
+cancel_router = Router(name=__name__)
 
-@dp.message_handler(state="*", commands="cancel")
-@dp.message_handler(Text(equals="cancel", ignore_case=True), state="*")
+
+@cancel_router.message(F.state == "*", F.commands == "cancel")
+@cancel_router.message(F.text.lower() == "cancel", F.state == "*")
 async def process_cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
 

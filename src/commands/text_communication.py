@@ -4,7 +4,7 @@ import re
 
 from aiogram.fsm.context import FSMContext
 from src.commands.communication_handler import CommunicationHandler
-from src.config import dp, bot
+from src.config import bot
 from aiogram.types import CallbackQuery, Message
 
 from src.utils.answer.answer_renderer import TranslationData, MistakesData, AnswerRenderer
@@ -131,7 +131,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
-@text_comm_router.callback_query(text="request_text_translation_standalone_for_user", state="*")
+@text_comm_router.callback_query(F.text == "request_text_translation_standalone_for_user", F.state == "*")
 async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message text, when user is not logged in
@@ -147,7 +147,7 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
     await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
-@text_comm_router.callback_query(text="request_caption_translation_standalone_for_user", state="*")
+@text_comm_router.callback_query(F.text == "request_caption_translation_standalone_for_user", F.state == "*")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message caption, when user is not logged in
@@ -185,7 +185,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 #     await bot.send_message(message.chat.id, md.escape_md(generated_text))
 
 
-@text_comm_router.callback_query(text="request_paraphrase")
+@text_comm_router.callback_query(F.text == "request_paraphrase")
 async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
 
@@ -210,7 +210,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     await handler.render_answer(await handler.load_render_from_context())
 
 
-@text_comm_router.message(content_types=types.ContentType.VIDEO)
+@text_comm_router.message(F.content_types == types.ContentType.VIDEO)
 async def handle_video_message(message: Message):
     sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
     await sticker_sender.send_you_rock_sticker()

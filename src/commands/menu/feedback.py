@@ -1,7 +1,7 @@
-from aiogram import types, md
+from aiogram import types, md, Router, F
 from aiogram.fsm.context import FSMContext
 
-from src.config import dp, bot
+from src.config import bot
 from src.filters import IsNotRegister
 from src.filters.is_not_register_filter import IsRegister
 from src.keyboards import get_go_back_inline_keyboard
@@ -9,8 +9,10 @@ from src.states import FormFeedback
 from src.utils.answer import AnswerRenderer
 from src.utils.generate.feedback_loop import FeedbackHistory
 
+feedback_router = Router(name=__name__)
 
-@dp.callback_query_handler(text="give_feedback")
+
+@feedback_router.callback_query(F.text == "give_feedback")
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
@@ -22,7 +24,7 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
                          reply_markup=await get_go_back_inline_keyboard())
 
 
-@dp.message_handler(IsRegister(), commands=["feedback"])
+@feedback_router.message(IsRegister(), F.commands == ["feedback"])
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
@@ -34,7 +36,7 @@ async def feedback_handler(message: types.Message, state: FSMContext):
                          reply_markup=await get_go_back_inline_keyboard())
 
 
-@dp.message_handler(IsNotRegister(), commands=["feedback"])
+@feedback_router.message(IsNotRegister(), F.commands == ["feedback"])
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
@@ -42,7 +44,7 @@ async def edit_profile_handler(message: types.Message):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-@dp.message_handler(state=FormFeedback.message)
+@feedback_router.message(F.state == FormFeedback.message)
 async def feedback_query_handler(message: types.Message, state: FSMContext):
 
     await state.update_data(new_value=message.text)
