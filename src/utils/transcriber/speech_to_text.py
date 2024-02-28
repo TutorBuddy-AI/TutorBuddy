@@ -23,6 +23,7 @@ class SpeechToText:
             return None
 
     async def download_file(self) -> BytesIO:
-        voice = await bot.get_file(self.file_id)
+        voice_file = await bot.get_file(self.file_id)
+        file_path = voice_file.file_path
 
-        return await bot.download_file_by_id(voice.file_id)
+        return await bot.download_file(file_path)

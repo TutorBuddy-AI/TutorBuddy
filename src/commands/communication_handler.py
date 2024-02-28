@@ -3,8 +3,8 @@ from typing import List, Optional
 from aiogram import Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from aiogram import md
-from aiogram import types
+# from aiogram import types
+from aiogram.types.input_file import FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 
 from src.database.models import MessageHistory
@@ -16,7 +16,6 @@ from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.generate.communication import CommunicationGenerate
 from src.utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from src.utils.message import MessageHelper
-from src.utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
 from src.utils.transcriber import TextToSpeechEleven
 from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from src.utils.stciker.sticker_sender import StickerSender
@@ -130,7 +129,7 @@ class CommunicationHandler:
             with AudioConverter(audio) as ogg_file:
                 answer_message = await self.bot.send_voice(
                     self.chat_id,
-                    types.InputFile(ogg_file),
+                    FSInputFile(ogg_file, "voice"),
                     caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                     parse_mode=ParseMode.HTML,
                     reply_markup=render.bot_message_markup,
@@ -141,7 +140,7 @@ class CommunicationHandler:
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(self.chat_id,
-                                          types.InputFile(ogg_file),
+                                          FSInputFile(ogg_file, "voice"),
                                           caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                                           parse_mode=ParseMode.HTML,
                                           reply_to_message_id=render.reply_to_message_id)
@@ -166,7 +165,7 @@ class CommunicationHandler:
             with AudioConverter(audio) as ogg_file:
                 answer_message = await self.bot.send_voice(
                                        self.chat_id,
-                                       types.InputFile(ogg_file),
+                                       FSInputFile(ogg_file, "voice"),
                                        caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                                        parse_mode=ParseMode.HTML,
                                        reply_markup=render.bot_message_markup,
@@ -178,7 +177,7 @@ class CommunicationHandler:
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(
-                    self.chat_id, types.InputFile(ogg_file),
+                    self.chat_id, FSInputFile(ogg_file, "voice"),
                     reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
 

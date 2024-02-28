@@ -33,9 +33,10 @@ from src.commands.audio_communication import audio_comm_router
 
 app = FastAPI()
 
-dp.include_routers(go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
-                   edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-                   summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router)
+dp.include_routers(text_comm_router, audio_comm_router)
+                   # go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+                   # edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
+                   # summaries_router, cancel_router, edit_profile_router)
 
 
 @app.on_event("startup")
@@ -80,21 +81,22 @@ async def receive_update(update: Dict, request: Request):
     try:
         if update_obj.message:
             # source = update_obj.message.get_args()
-            context = dp.current_state(chat=update_obj.message.chat.id, user=update_obj.message.chat.id)
+            context = dp.fsm.resolve_context(
+                bot=bot, chat_id=update_obj.message.chat.id, user_id=update_obj.message.from_user.id
+            )
             data = await context.get_data()
             data["ip_address"] = None
             # data["source"] = source if source is not None else None
             data["tg_language"] = update_obj.message.from_user.language_code
             await context.update_data(data)
         if update_obj.callback_query:
-            context = dp.current_state(
-                chat=update_obj.callback_query.from_user.id,
-                user=update_obj.callback_query.from_user.id)
+            context = dp.fsm.resolve_context(
+                bot=bot, chat_id=update_obj.callback_query.from_user.id, user_id=update_obj.callback_query.from_user.id)
             data = await context.get_data()
             data["ip_address"] = None
             data["tg_language"] = update_obj.callback_query.from_user.language_code
             await context.update_data(data)
-        await dp.process_update(update_obj)
+        await dp.feed_update(bot, update_obj)
     except:
         traceback.print_exc()
     finally:
