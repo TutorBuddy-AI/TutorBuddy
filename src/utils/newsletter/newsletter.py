@@ -48,17 +48,14 @@ class Newsletter:
         tg_id_list = await self.user_topic(daily_news.topic)
         post_text = md(daily_news.message)
 
-        converted_files = []
-        # audio_files = {
-        #     'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-        #     'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
-        # }
-        #
-        # converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
+        audio_files = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+        }
 
-        #for tg_id in tg_id_list:
-        tg_id = "222768891"
-        for i in range(10):
+        converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
+
+        for tg_id in tg_id_list:
             try:
                 if await SettingService.is_summary_on(tg_id):
                     post_message = await self.send_summary(tg_id, daily_news, converted_files)
@@ -112,12 +109,12 @@ class Newsletter:
             ).row(post_translate_button)
         )
 
-        # if voice == "Anastasia":
-        #     file_path = post_audio_files[0]
-        # else:
-        #     file_path = post_audio_files[1]
-        #
-        # await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        if voice == "Anastasia":
+            file_path = post_audio_files[0]
+        else:
+            file_path = post_audio_files[1]
+
+        await bot.send_voice(int(tg_id), types.InputFile(file_path))
         return post_message
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
@@ -137,17 +134,17 @@ class Newsletter:
         # Сохранение в MessageHistory текст поста
         session.add(talk_message)
         voice = await self.get_voice(tg_id)
-        # audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-        # markup = AnswerRenderer.get_markup_caption_translation(
-        #     bot_message_id=talk_message.id, user_message_id="")
-        # with AudioConverter(audio) as ogg_file:
-        #     # Отправка вопроса юзера по поводу newsletter голосовое сообщение
-        #     await bot.send_voice(int(tg_id),
-        #                          types.InputFile(ogg_file),
-        #                          caption=f'<span class="tg-spoiler">{answer}</span>',
-        #                          parse_mode=ParseMode.HTML,
-        #                          reply_markup=markup,
-        #                          reply_to_message_id=post_message_id)
+        audio = await TextToSpeech.get_speech_by_voice(voice, answer)
+        markup = AnswerRenderer.get_markup_caption_translation(
+            bot_message_id=talk_message.id, user_message_id="")
+        with AudioConverter(audio) as ogg_file:
+            # Отправка вопроса юзера по поводу newsletter голосовое сообщение
+            await bot.send_voice(int(tg_id),
+                                 types.InputFile(ogg_file),
+                                 caption=f'<span class="tg-spoiler">{answer}</span>',
+                                 parse_mode=ParseMode.HTML,
+                                 reply_markup=markup,
+                                 reply_to_message_id=post_message_id)
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -232,15 +229,15 @@ class Newsletter:
         markup = AnswerRenderer.get_markup_caption_translation(
             bot_message_id=talk_message.id, user_message_id="")
 
-        # file_voice = './files/summary_choice_bot.opus'
-        #
-        # if user_info["speaker"] == "Anastasia":
-        #     file_voice = './files/summary_choice_nastya.opus'
-        #
-        # await bot.send_voice(
-        #     tg_id,
-        #     types.InputFile(file_voice),
-        #     parse_mode=ParseMode.HTML,
-        #     reply_markup=markup
-        # )
+        file_voice = './files/summary_choice_bot.opus'
+
+        if user_info["speaker"] == "Anastasia":
+            file_voice = './files/summary_choice_nastya.opus'
+
+        await bot.send_voice(
+            tg_id,
+            types.InputFile(file_voice),
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup
+        )
 
