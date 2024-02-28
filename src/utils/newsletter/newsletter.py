@@ -121,7 +121,7 @@ class Newsletter:
         payload = await self.get_payload(tg_id, post_text)
 
         generated_text = await GenerateAI(
-            request_url="https://api.openai.com/v1/chat/completions").send_request(payload=payload)
+            request_url="https://api.openai.com/v1/chat/completions").request_gpt(payload=payload)
 
         answer = generated_text["choices"][0]["message"]["content"]
 
