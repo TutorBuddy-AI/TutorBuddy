@@ -178,6 +178,7 @@ class Newsletter:
                 f"ask your interlocutor about his/her opinion about this article. "
                 f"Continue discussing this article with him/her, "
                 f"briefly respond to his/her messages and always ask a logical question to continue the dialogue."
+                f"don’t put user response in your answer, don’t name the paragraphs"
         }
         logging.error(translate_request)
 

@@ -94,7 +94,8 @@ class AnswerMistakesGenerator:
             text_of_the_answer should be replaced with the text of the answer for user,
             Please, keep the conversation friendly and engaging. 
             Answer the user's questions and inquire about topics that interest him, 
-            as if you're chatting with a friend to keep the conversation going. Don't allow the dialog to finish on you.
+            as if you're chatting with a friend to keep the conversation going.Always conclude your responses with a relevant question to ensure the conversation continues on an engaging note. 
+            Don't allow the dialog to finish on you.
             Entertain your interlocutor. 
             If the conversation shifts to a language other than English, kindly remind them to continue in English. 
             Always respond in English only.
