@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.config import bot
@@ -12,7 +13,7 @@ from src.utils.generate.feedback_loop import FeedbackHistory
 feedback_router = Router(name=__name__)
 
 
-@feedback_router.callback_query(F.text == "give_feedback")
+@feedback_router.callback_query(F.data == "give_feedback")
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
@@ -24,7 +25,7 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
                          reply_markup=await get_go_back_inline_keyboard())
 
 
-@feedback_router.message(IsRegister(), F.commands == ["feedback"])
+@feedback_router.message(IsRegister(), Command("feedback"))
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
@@ -36,7 +37,7 @@ async def feedback_handler(message: types.Message, state: FSMContext):
                          reply_markup=await get_go_back_inline_keyboard())
 
 
-@feedback_router.message(IsNotRegister(), F.commands == ["feedback"])
+@feedback_router.message(IsNotRegister(), Command("feedback"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

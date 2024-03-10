@@ -1,6 +1,7 @@
 from aiogram import types, md, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.filters import Command
 
 from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
@@ -14,7 +15,7 @@ from src.texts.texts import get_incorrect_native_language_question, get_other_na
 edit_profile_router = Router(name=__name__)
 
 
-@edit_profile_router.message(IsRegister(), F.commands == ["editprofile"])
+@edit_profile_router.message(IsRegister(), Command("editprofile"))
 async def edit_profile_handler(message: types.Message):
 
     name = InlineKeyboardButton(text='Name', callback_data='change_name')
@@ -38,7 +39,7 @@ async def edit_profile_handler(message: types.Message):
                          reply_markup=edit_profile_kb)
 
 
-@edit_profile_router.message(IsNotRegister(), F.commands == ["editprofile"])
+@edit_profile_router.message(IsNotRegister(), Command("editprofile"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

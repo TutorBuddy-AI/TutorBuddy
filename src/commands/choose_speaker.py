@@ -17,7 +17,7 @@ from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
 
 
-# @dp.callback_query_handler(text="continue_bot")
+# @dp.callback_query_handler(F.data == "continue_bot")
 # async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
 #     tg_id = query.message.chat.id
 #     user_service = UserService()
@@ -42,7 +42,7 @@ from src.utils.user import UserCreateMessage
 #     await state.set_state(FormInitTalk.init_user_message)
 #
 #
-# @dp.callback_query_handler(text="continue_nastya")
+# @dp.callback_query_handler(F.data == "continue_nastya")
 # async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
 #     tg_id = query.message.chat.id
 #     user_service = UserService()
@@ -79,7 +79,7 @@ from src.utils.user import UserCreateMessage
 choose_speaker_router = Router(name=__name__)
 
 
-@choose_speaker_router.callback_query(F.text == "continue_bot")
+@choose_speaker_router.callback_query(F.data == "continue_bot")
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()
@@ -107,7 +107,7 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     await state.set_state(FormInitTalk.init_user_message)
 
 
-@choose_speaker_router.callback_query(F.text == "continue_nastya")
+@choose_speaker_router.callback_query(F.data == "continue_nastya")
 async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id
     user_service = UserService()

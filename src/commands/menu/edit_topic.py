@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
@@ -14,7 +15,7 @@ from src.texts.texts import get_chose_some_more_topics, get_other_topics
 edit_topic_router = Router(name=__name__)
 
 
-@edit_topic_router.message(IsRegister(), F.commands == ["changetopic"])
+@edit_topic_router.message(IsRegister(), Command("changetopic"))
 async def change_topic_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormTopic.new_topic)
 
@@ -23,7 +24,7 @@ async def change_topic_handler(message: types.Message, state: FSMContext):
                          reply_markup=await get_choose_topic_keyboard(for_user=True))
 
 
-@edit_topic_router.message(IsNotRegister(), F.commands == ["changetopic"])
+@edit_topic_router.message(IsNotRegister(), Command("changetopic"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
@@ -44,7 +45,7 @@ async def process_topic_handler(callback_query: types.CallbackQuery):
                                                                                      is_caption=False))
 
 
-@edit_topic_router.callback_query(F.text == "done", F.state == FormTopic.new_topic)
+@edit_topic_router.callback_query(F.data == "done", F.state == FormTopic.new_topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""
@@ -66,7 +67,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
         await process_topics(query, state, result_text, was_other)
 
 
-@edit_topic_router.callback_query(F.text == "done", F.state == FormTopic.new_topic)
+@edit_topic_router.callback_query(F.data == "done", F.state == FormTopic.new_topic)
 async def process_done_command(query: types.CallbackQuery, state: FSMContext):
     keyboard = query.message.reply_markup.inline_keyboard
     result_text = ""

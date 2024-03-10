@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.config import bot
@@ -12,7 +13,7 @@ from src.utils.setting.setting_service import SettingService
 summaries_router = Router(name=__name__)
 
 
-@summaries_router.message(IsRegister(), F.commands == ["summaries"])
+@summaries_router.message(IsRegister(), Command("summaries"))
 async def summaries_handler(message: types.Message, state: FSMContext):
     tg_id = message.chat.id
     await bot.send_message(
@@ -36,7 +37,7 @@ async def summaries_handler(message: types.Message, state: FSMContext):
             reply_markup=await get_keyboard_resume_news_subs())
 
 
-@summaries_router.message(IsNotRegister(), F.commands == ["summaries"])
+@summaries_router.message(IsNotRegister(), Command("summaries"))
 async def summaries_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

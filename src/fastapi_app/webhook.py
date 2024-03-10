@@ -4,8 +4,6 @@ from aiogram.types import BotCommand
 
 from src.config import config
 from src.config import dp, bot
-# from src.commands.form_states import process_start_register_user, process_get_name  # Magic Import - don't touch
-# from src.states import Form  # Magic Import - don't touch
 from src.utils.newsletter.newsletter import Newsletter
 from aiogram import types
 
@@ -33,10 +31,9 @@ from src.commands.audio_communication import audio_comm_router
 
 app = FastAPI()
 
-dp.include_routers(text_comm_router, audio_comm_router)
-                   # go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
-                   # edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-                   # summaries_router, cancel_router, edit_profile_router)
+dp.include_routers(go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+                   edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
+                   summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router)
 
 
 @app.on_event("startup")

@@ -38,7 +38,7 @@ async def choose_job_menu_scenario(query: types.CallbackQuery, state: FSMContext
                            reply_markup=await get_choose_job_menu_talk_show_scenario())
 
 
-@dp.callback_query_handler(state=TalkShowForm.job)
+@dp.callback_query_handler(F.state == TalkShowForm.job)
 async def process_get_job(query: types.CallbackQuery, state: FSMContext):
     await bot.send_chat_action(chat_id=query.message.chat.id, action='typing')
     try:

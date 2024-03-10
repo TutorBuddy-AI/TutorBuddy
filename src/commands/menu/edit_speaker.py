@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
@@ -10,7 +11,7 @@ from src.keyboards import get_go_back_inline_keyboard
 edit_speaker_router = Router(name=__name__)
 
 
-@edit_speaker_router.message(IsRegister(), F.commands == ["persona"])
+@edit_speaker_router.message(IsRegister(), Command("persona"))
 async def edit_speaker_handler(message: types.Message):
 
     nastya = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='speaker_Anastasia')
@@ -24,7 +25,7 @@ async def edit_speaker_handler(message: types.Message):
                            reply_markup=persona_kb)
 
 
-@edit_speaker_router.message(IsNotRegister(), F.commands == ["persona"])
+@edit_speaker_router.message(IsNotRegister(), Command("persona"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

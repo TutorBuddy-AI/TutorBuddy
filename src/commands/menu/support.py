@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.config import bot
@@ -12,7 +13,7 @@ from src.utils.generate.question_history.question_history import SupportHistory
 support_router = Router(name=__name__)
 
 
-@support_router.message(IsRegister(), F.commands == ["support"])
+@support_router.message(IsRegister(), Command("support"))
 async def support_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormSupport.message)
 
@@ -24,7 +25,7 @@ async def support_handler(message: types.Message, state: FSMContext):
         reply_markup=await get_go_back_inline_keyboard())
 
 
-@support_router.message(IsNotRegister(), F.commands == ["support"])
+@support_router.message(IsNotRegister(), Command("support"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

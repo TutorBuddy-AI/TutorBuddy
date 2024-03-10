@@ -1,4 +1,5 @@
 from aiogram import types, md
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
@@ -23,7 +24,7 @@ async def scenario_handler(query: types.CallbackQuery, state: FSMContext):
         reply_markup=await get_menu_scenario())
 
 
-@dp.message_handler(IsRegister(), commands=["scenario"])
+@dp.message_handler(IsRegister(), Command("scenario"))
 async def scenario_handler(message: types.Message, state: FSMContext):
     # try:
     #     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)

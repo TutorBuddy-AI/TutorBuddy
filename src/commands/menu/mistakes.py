@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -11,7 +12,7 @@ from src.utils.message_history_mistakes import MessageMistakesService
 mistakes_router = Router(name=__name__)
 
 
-@mistakes_router.message(IsRegister(), F.commands == ["all_mistakes"])
+@mistakes_router.message(IsRegister(), Command("all_mistakes"))
 async def get_mistakes(message: types.Message, state: FSMContext):
 
     data = await MessageMistakesService().get_user_message_history_mistakes(tg_id=str(message.chat.id))
@@ -29,7 +30,7 @@ async def get_mistakes(message: types.Message, state: FSMContext):
                                md.escape_md("You haven't ever requested to find mistakes in your messages."))
 
 
-@mistakes_router.message(IsNotRegister(), F.commands == ["feedback"])
+@mistakes_router.message(IsNotRegister(), Command("feedback"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
     await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)

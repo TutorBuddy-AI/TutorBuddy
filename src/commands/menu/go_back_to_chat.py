@@ -10,7 +10,7 @@ from src.utils.answer import AnswerRenderer
 go_back_router = Router(name=__name__)
 
 
-@go_back_router.callback_query(F.text == "go_back", F.state == "*")
+@go_back_router.callback_query(F.data == "go_back", F.state == "*")
 async def go_back_query_handler(query: CallbackQuery, state: FSMContext):
 
     await bot.send_message(query.message.chat.id, md.escape_md("Great!\nSend me message below ⬇"),

@@ -9,7 +9,7 @@ from src.config import config
 import json
 
 id_bot_voice = "SQbRRoMNiJau4LetNtC3"
-id_nastya_voice = "j561qvFxyYEptWwufeRi"
+id_nastya_voice = "LC58oHYbe1EOt8kPZizM"
 model = "eleven_multilingual_v2"
 request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
 
