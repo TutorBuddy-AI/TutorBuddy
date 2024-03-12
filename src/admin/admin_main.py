@@ -11,7 +11,7 @@ from sqlalchemy import select, desc, text, delete
 
 from src.admin.config_admin import (
     fake_users_db, app, templates,
-    SECRET_KEY, ALGORITHM, create_jwt_token, image_directory
+    SECRET_KEY_ADMIN, ALGORITHM, create_jwt_token, image_directory
 )
 
 from src.admin.model_pydantic import NewsletterData
@@ -34,7 +34,7 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
 
         token = token.split("Bearer ")[-1]
 
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY_ADMIN, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None or username not in fake_users_db:
             return False
