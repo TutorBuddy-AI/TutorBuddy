@@ -1,0 +1,119 @@
+.sub-sidebar {
+    min-height: 100vh;
+    width: 300px;
+    background-color: #F5F5F5;
+    padding-top: 20px;
+    position: fixed;
+    top: 60px;
+    left: 250px;
+    overflow-y: auto;
+}
+
+.title-container {
+    background-color: #F5F5F5;
+}
+
+.user-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-y: auto;
+    max-height: calc(100vh - 40px);
+    padding-bottom: 20px;
+}
+
+.user-block {
+    display: flex;
+    align-items: flex-start;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.user-block:hover {
+    background-color: #C0C0C0;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.user-info p {
+    margin: 0;
+    text-align: left;
+}
+
+.dialog-block {
+    min-height: 100vh;
+    width: 550px;
+    background-color: #f5f5f5;
+    padding-top: 20px;
+    position: absolute;
+    top: 60px;
+    left: 550px;
+}
+
+
+.message {
+    margin-bottom: 5px;
+    padding: 10px;
+    border-radius: 15px;
+    max-width: 70%;
+    position: relative;
+    clear: both;
+}
+
+.message-time {
+    font-size: 0.8em;
+    color: #888;
+    align-self: flex-end;
+}
+
+
+.user-message {
+    background-color: #e3ffca;
+    text-align: right;
+    float: right;
+}
+
+.assistant-message {
+    background-color: #fdffff;
+    text-align: left;
+    float: left;
+}
+
+.message::before {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+
+input[type="checkbox"] {
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+
+input[type="checkbox"]:not(:checked) {
+    border-color: #ccc;
+}
+
+input[type="checkbox"]:focus {
+    border-color: #9c27b0;
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.5);
+}
+
+input[type="checkbox"]:checked {
+    border-color: #9c27b0;
+}
+
+input[type="checkbox"]:checked + label::before {
+    display: inline-block;
+    background-color: #9c27b0;
+}
+

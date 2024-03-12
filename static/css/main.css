@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+}
+
+#topbar a {
+    text-decoration: none;
+    color: #9c27b0;
+}
+
+#topbar a:hover {
+    color: rgba(156, 39, 176, 0.5); /* Add a subtle background color on hover */
+}
+
+#topbar a:active {
+    color: rgba(156, 39, 176, 0.5); /* Add a different color when the link is active (clicked) */
+}
+
+#topbar {
+    height: 60px;
+    background-color: #f5f5f5;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 2;
+}
+
+#topbar h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+#topbar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+#sidebar-container {
+    display: flex;
+    width: 100vw;
+    margin-top: 60px;
+}
+
+#sidebar {
+    min-height: 100vh;
+    width: 250px;
+    background-color: #ffffff;
+    padding-top: 20px;
+    position: fixed;
+    top: 60px;
+    left: 0;
+}
+
+#sidebar a {
+    padding: 15px;
+    text-decoration: none;
+    font-size: 18px;
+    color: black;
+    display: block;
+    transition: 0.3s;
+}
+
+#sidebar a:hover {
+    background-color: #C0C0C0;
+}
+
+#content {
+    flex: 1;
+    margin-left: 250px;
+    padding: 20px;
+}
+
+
+.sub-sidebar {
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-in {
+    opacity: 1 !important;
+}

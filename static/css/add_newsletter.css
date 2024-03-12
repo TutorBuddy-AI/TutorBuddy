@@ -1,0 +1,61 @@
+.add-newsletter-block {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #F5F5F5;
+    position: fixed;
+    top: 60px;
+    left: 250px;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+
+#addNewsletterForm input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 50px;
+}
+
+#addNewsletterForm textarea {
+    resize: vertical;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+label[for="image"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    color: #333;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+label[for="image"]:hover {
+    background-color: #d0d0d0;
+}
+
+
+#resultContainer {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.success-add-newsletter {
+    color: #4caf50;
+}
+
+.error-add-newsletter {
+    color: #f44336;
+}

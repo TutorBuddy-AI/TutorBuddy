@@ -13,7 +13,6 @@ class DailyNews(Base, TimestampMixin):
     message = Column(String, nullable=True)
     topic = Column(String, nullable=True)
     url = Column(String, nullable=True)
-    type = Column(Unicode, nullable=False, default=DailyNewsEnum)
     path_to_data = Column(String, nullable=True)
 
     image = Column(
