@@ -259,28 +259,28 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         caption=get_meet_bot_message(),
         reply_markup=caption_markup)
 
-    meet_bot_text = get_meet_bot_text()
-    audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
-
-    meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
-    audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
-    await bot.send_photo(
-        message.chat.id,
-        photo=types.InputFile('./files/meet_nastya.png'),
-        caption=get_meet_nastya_message(user_info["call_name"]),
-        reply_markup=caption_markup)
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
+    # meet_bot_text = get_meet_bot_text()
+    # audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
+    # with AudioConverter(audio) as ogg_file:
+    #     await bot.send_voice(
+    #         message.chat.id,
+    #         types.InputFile(ogg_file),
+    #         parse_mode=ParseMode.HTML
+    #     )
+    #
+    # meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
+    # audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    # await bot.send_photo(
+    #     message.chat.id,
+    #     photo=types.InputFile('./files/meet_nastya.png'),
+    #     caption=get_meet_nastya_message(user_info["call_name"]),
+    #     reply_markup=caption_markup)
+    # with AudioConverter(audio) as ogg_file:
+    #     await bot.send_voice(
+    #         message.chat.id,
+    #         types.InputFile(ogg_file),
+    #         parse_mode=ParseMode.HTML
+    #     )
 
     await bot.send_message(
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),

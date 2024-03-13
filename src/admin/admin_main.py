@@ -1,7 +1,7 @@
 from datetime import datetime
 import base64
 import os
-
+from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -9,16 +9,16 @@ from jose import JWTError, jwt
 
 from sqlalchemy import select, desc, text, delete
 
+from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (
     fake_users_db, app, templates,
-    SECRET_KEY_ADMIN, ALGORITHM, create_jwt_token, image_directory
+    SECRET_KEY_ADMIN, ALGORITHM, create_jwt_token, image_directory, generate_token_and_redirect
 )
 
-from src.admin.model_pydantic import NewsletterData
+from src.admin.model_pydantic import NewsletterData, ChangePassword
 from src.database.models import User, MessageHistory, DailyNews
 
 from src.database import session
-
 
 
 """Docs /docs"""
@@ -36,7 +36,10 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
 
         payload = jwt.decode(token, SECRET_KEY_ADMIN, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        if username is None or username not in fake_users_db:
+        query = select(Admin).where(Admin.username == username)
+        result = await session.execute(query)
+        admin = result.scalars().first()
+        if username is None or username != admin.username:
             return False
     except JWTError:
         return False
@@ -49,7 +52,7 @@ async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token))
     """html admin
     """
     if not is_valid:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin.html", {"request": request})
 
 @app.post("/admin")
@@ -441,16 +444,41 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), request: Reque
     username = form_data.username
     password = form_data.password
 
-    if username in fake_users_db and fake_users_db[username]["password"] == password:
-        token_data = {"sub": username}
-        token = create_jwt_token(token_data)
-        response = RedirectResponse(url="/admin")
-        response.set_cookie(key="Authorization", value=f"Bearer {token}")
-        return response
+    query = select(Admin).where(Admin.username == username)
+    result = await session.execute(query)
+    admin = result.scalars().first()
+
+    if admin.username == username and pwd_context.verify(password, admin.password):
+        return await generate_token_and_redirect(username)
     else:
-        error_message = "Неверные учетные данные. Пожалуйста, проверьте ваше имя пользователя и пароль."
+        error_message = "Invalid username or password"
         return templates.TemplateResponse("login.html", {"request": request, "error_message": error_message})
 
+@app.post("/change_password")
+async def change_password(username: str = Form(...),
+                          new_password: str = Form(...),
+                          confirm_password: str = Form(...),request: Request = None):
+    """
+    Смена пароля.
+    """
+    query = select(Admin).where(Admin.username == username)
+    result = await session.execute(query)
+    admin = result.scalars().first()
+    if admin and new_password == confirm_password:
+        hashed_password = pwd_context.hash(new_password)
+        admin.password = hashed_password
+        await session.commit()
+        return await generate_token_and_redirect(username)
+    error_message_change_password = "Username or passwords do not match"
+    return templates.TemplateResponse("login.html", {"error_message": error_message_change_password, "request": request})
+
+@app.get("/logout")
+async def logout(request: Request):
+    """
+    Выход.
+    """
+    response = RedirectResponse(url="/")
+    return response
 
 if __name__ == "__main__":
     import uvicorn

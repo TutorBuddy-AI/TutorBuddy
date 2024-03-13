@@ -6,3 +6,9 @@ class NewsletterData(BaseModel):
     message: str
     image: bytes
 
+class ChangePassword(BaseModel):
+    username: str
+    new_password: str
+    confirm_password: str
+
+

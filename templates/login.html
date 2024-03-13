@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="static/img/tutorbuddy_welcome.png" type="image/x-icon">
     <link rel="stylesheet" href="static/css/login.css">
+    <script src="/static/js/forgot_password.js?v=1.0"></script>
     <title>Login</title>
 </head>
 <body>
-    <div class="login-container">
+    <div id="login-container" class="login-container">
         <h1>Login</h1>
         <div class="container">
             <form method="post" action="/login">
@@ -21,11 +22,39 @@
                 <button type="submit">Login</button>
             </form>
 
+            <span onclick="showForgotPasswordForm()" style="text-decoration: underline; cursor: pointer; display: inline-block; margin-top: 15px;">Forgot your password?</span>
+
             {% if error_message %}
             <p style="color: red;">{{ error_message }}</p>
             {% endif %}
 
         </div>
     </div>
+
+    <!-- Форма для смены пароля -->
+        <div id="forgot-password-form" class="forgot-password-container">
+            <h1>Change Password</h1>
+            <div class="container">
+                <form method="post" action="/change_password">
+                    <label for="username">Username:</label>
+                    <input type="text" name="username" id="username_" required>
+
+                    <label for="new_password">New Password:</label>
+                    <input type="password" name="new_password" id="new_password" required>
+
+                    <label for="confirm_password">Repeat New Password:</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required>
+
+                    <button type="submit">Change Password</button>
+
+                    {% if error_message_change_password %}
+                        <p style="color: red;">{{ error_message_change_password }}</p>
+                    {% endif %}
+
+                </form>
+            </div>
+        </div>
 </body>
+
+
 </html>
