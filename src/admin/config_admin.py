@@ -24,11 +24,13 @@ fake_users_db = {
 dotenv_path = Path('.env.local')
 load_dotenv(dotenv_path=dotenv_path)
 
+# Общие для всех пользователей настройки конфигурации
 SECRET_KEY_ADMIN = os.environ.get("SECRET_KEY_ADMIN")
 ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN")
 
-
+#Подключение к базе в зависимости от username
+DATABASE_URL=os.environ.get("DATABASE_URL")
 
 def create_jwt_token(data: dict):
     """

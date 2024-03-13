@@ -10,9 +10,8 @@ from jose import JWTError, jwt
 from sqlalchemy import select, desc, text, delete
 
 from src.database.models.admin import Admin, pwd_context
-from src.admin.config_admin import (
-    fake_users_db, app, templates,
-    SECRET_KEY_ADMIN, ALGORITHM, create_jwt_token, image_directory, generate_token_and_redirect
+from src.admin.config_admin import ( app, templates,
+    SECRET_KEY_ADMIN, ALGORITHM, image_directory, generate_token_and_redirect
 )
 
 from src.admin.model_pydantic import NewsletterData, ChangePassword
