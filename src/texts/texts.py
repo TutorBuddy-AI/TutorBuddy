@@ -58,8 +58,8 @@ def get_other_goal():
 def get_chose_some_topics():
     return (
         "Choose some appealing topics, so we will:\n"
-        "✅ have engaging conversations\n"
-        "✅ discuss relevant news summaries"
+        "⚡️ have engaging conversations\n"
+        "⚡️ discuss relevant news summaries"
     )
 
 
@@ -146,6 +146,11 @@ def get_first_summary(name):
            f"Later on I will also share summaries of videos and podcasts 🎧 Are you interested? 😎"
 
 
+def get_pin_message(translate: bool):
+    if translate:
+        return md.escape_md('Кстати, чтобы не потерять наш чат, предлагаю закрепить его в ленте 😉 Это можно сделать просто нажав на него в ленте чатов и выбрав "Закрепить" 📌')
+    else:
+        return md.escape_md("By the way, I'm afraid you can lose our chat and your opportunity to become a fluent speaker. Make me your first priority! All you need to do is to open your chat list, long press our chat and tap 'pin', so you will see it on top! 📌")
 
 # def get_models_text():
 #     return md.text(

@@ -6,12 +6,16 @@ from src.database import session
 from sqlalchemy import select
 
 from src.config import bot
+from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_welcome_text, get_meet_nastya_text, \
     get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, \
     get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
+from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_welcome_text, get_other_native_language_question, get_incorrect_native_language_question, \
+    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
+    get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
@@ -19,8 +23,12 @@ from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.setting import Setting
 
-from src.utils.user import UserService, UserHelper, UserCreateMessage
+from src.utils.user import UserService, UserHelper
 
+from aiogram.dispatcher import FSMContext
+from aiogram import types, md
+from aiogram.types import InputFile
+from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.fsm.context import FSMContext
 from aiogram import types, md, Router, F
 from aiogram.types import InputFile, FSInputFile
@@ -234,7 +242,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         parse_mode=ParseMode.HTML,
         reply_markup=great_markup)
     await asyncio.sleep(1)
-
+    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     await bot.send_photo(
         message.chat.id,
@@ -270,6 +278,8 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await bot.send_message(
         message.chat.id, text="Who would you like to talk to?", parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_bot_keyboard(is_caption=False))
+
+    await bot.delete_message(message.chat.id, wait_message.message_id)
     await state.clear()
 
 

@@ -23,6 +23,7 @@ from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseC
 from src.utils.stciker.sticker_sender import StickerSender
 
 from src.utils.user import UserService
+from src.texts.texts import get_pin_message
 
 text_comm_router = Router(name=__name__)
 
@@ -86,7 +87,8 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
     Message ids are provided in callback_data
     """
     message = query.message
-
+    user_info = await UserService().get_user_info(tg_id=message.chat.id)
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker']} thinks… Please wait")
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text(message.caption)
@@ -98,6 +100,7 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
 
     await MessageTranslationService().create_translation(helper_info)
 
+    await bot.delete_message(message.chat.id, wait_message.message_id)
     await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
@@ -165,6 +168,11 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
+@dp.callback_query_handler(text="pin_message_translate", state="*")
+async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
+    message = query.message
+    await bot.send_message(message.chat.id, get_pin_message(translate=True), reply_to_message_id=message.message_id)
+
 # @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
 # async def handle_get_translation_for_message(query: CallbackQuery, state: FSMContext):
 #     """
@@ -214,17 +222,20 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
 @text_comm_router.message(F.video)
 async def handle_video_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @text_comm_router.message(F.sticker)
 async def handle_sticker_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @text_comm_router.message(F.video_note)
 async def handle_video_note_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()

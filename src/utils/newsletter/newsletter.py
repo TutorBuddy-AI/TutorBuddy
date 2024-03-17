@@ -121,7 +121,7 @@ class Newsletter:
         payload = await self.get_payload(tg_id, post_text)
 
         generated_text = await GenerateAI(
-            request_url="https://api.openai.com/v1/chat/completions").send_request(payload=payload)
+            request_url="https://api.openai.com/v1/chat/completions").request_gpt(payload=payload)
 
         answer = generated_text["choices"][0]["message"]["content"]
 
@@ -192,6 +192,7 @@ class Newsletter:
                 f"ask your interlocutor about his/her opinion about this article. "
                 f"Continue discussing this article with him/her, "
                 f"briefly respond to his/her messages and always ask a logical question to continue the dialogue."
+                f"don’t put user response in your answer, don’t name the paragraphs"
         }
         logging.error(translate_request)
 

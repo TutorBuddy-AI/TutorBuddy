@@ -7,6 +7,7 @@ from aiogram.types import Message
 from aiogram.types.input_file import FSInputFile
 from aiogram.enums.parse_mode import ParseMode
 
+from src.commands.notification import send_pin_message
 from src.database.models import MessageHistory
 from src.utils.answer import AnswerRenderer
 from src.utils.answer.answer import Answer
@@ -77,6 +78,11 @@ class CommunicationHandler:
             answer, self.message_text, self.message.message_id, "text",
             user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id
         ).render()
+
+        message_history = await UserService().count_message_history(self.chat_id)
+        await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
+
+
         await self.render_text_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)
         await self.save_render_in_context(render)
