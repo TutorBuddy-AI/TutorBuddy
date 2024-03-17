@@ -7,6 +7,7 @@ from src.commands.communication_handler import CommunicationHandler
 from src.config import bot
 from aiogram.types import CallbackQuery, Message
 
+from src.filters.is_not_register_filter import IsRegister
 from src.utils.answer.answer_renderer import TranslationData, MistakesData, AnswerRenderer
 from src.utils.message import MessageHelper
 from src.utils.message.message_service import MessageService
@@ -26,7 +27,7 @@ from src.utils.user import UserService
 text_comm_router = Router(name=__name__)
 
 
-@text_comm_router.message(F.text)
+@text_comm_router.message(IsRegister(), F.text)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
     handler = CommunicationHandler(message, state, bot)
     await handler.init()
@@ -50,7 +51,7 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
 
     await MessageHintService().create_message_hint(helper_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
     await asyncio.sleep(3)
 
     await handler.render_answer(await handler.load_render_from_context())
@@ -148,7 +149,7 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
     await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
-@text_comm_router.callback_query(F.data == "request_caption_translation_standalone_for_user", F.state == "*")
+@text_comm_router.callback_query(F.data == "request_caption_translation_standalone_for_user")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message caption, when user is not logged in
@@ -183,7 +184,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 #
 #     await MessageTranslationService().create_translation(helper_info)
 #
-#     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+#     await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
 
 
 @text_comm_router.callback_query(F.data == "request_paraphrase")
@@ -204,7 +205,7 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
     await MessageParaphraseService().create_message_paraphrase(helper_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
 
     await asyncio.sleep(3)
 

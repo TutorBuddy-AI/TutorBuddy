@@ -1,6 +1,8 @@
 from aiogram import types, md, Router, F
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 
 from src.config import bot
 from src.filters import IsNotRegister
@@ -17,8 +19,8 @@ feedback_router = Router(name=__name__)
 async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/feedback.jpg'),
-                         caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
+    await bot.send_photo(query.message.chat.id, photo=FSInputFile('./files/feedback.jpg'),
+                         caption=("TutorBuddy team is always glad to hear your feedback!"
                                               " Tell us what do you like or dislike about this bot and"
                                               " how can we improve it?\n"
                                               "Please, send text message"),
@@ -29,23 +31,25 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
 async def feedback_handler(message: types.Message, state: FSMContext):
     await state.set_state(FormFeedback.message)
 
-    await bot.send_photo(message.chat.id, photo=types.InputFile('./files/feedback.jpg'),
-                         caption=md.escape_md("TutorBuddy team is always glad to hear your feedback!"
-                                              " Tell us what do you like or dislike about this bot and"
-                                              " how can we improve it?\n"
-                                              "Please, send text message"),
+    await bot.send_photo(message.chat.id, photo=FSInputFile('./files/feedback.jpg'),
+                         caption="TutorBuddy team is always glad to hear your feedback!"
+                                 " Tell us what do you like or dislike about this bot and"
+                                 " how can we improve it?\n"
+                                 "Please, send text message",
+                         parse_mode=ParseMode.HTML,
                          reply_markup=await get_go_back_inline_keyboard())
 
 
 @feedback_router.message(IsNotRegister(), Command("feedback"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
-    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
+    await bot.send_message(message.chat.id, "Please, register first", parse_mode=ParseMode.HTML,
+                           reply_markup=translate_markup)
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-@feedback_router.message(F.state == FormFeedback.message)
+@feedback_router.message(FormFeedback.message)
 async def feedback_query_handler(message: types.Message, state: FSMContext):
 
     await state.update_data(new_value=message.text)
@@ -55,5 +59,5 @@ async def feedback_query_handler(message: types.Message, state: FSMContext):
     await FeedbackHistory().add_feedback(tg_id=str(message.chat.id), message=state_data['new_value'])
     await state.clear()
 
-    await bot.send_message(message.chat.id, md.escape_md("Message sent successfully. Thank you!"),
+    await bot.send_message(message.chat.id, "Message sent successfully. Thank you!", parse_mode=ParseMode.HTML,
                            reply_markup=await get_go_back_inline_keyboard())

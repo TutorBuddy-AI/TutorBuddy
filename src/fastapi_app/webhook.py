@@ -2,6 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
+from src.commands.start import start_router
 from src.config import config
 from src.config import dp, bot
 from src.utils.newsletter.newsletter import Newsletter
@@ -33,7 +34,8 @@ app = FastAPI()
 
 dp.include_routers(go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
                    edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-                   summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router)
+                   summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
+                   start_router)
 
 
 @app.on_event("startup")
@@ -84,6 +86,7 @@ async def receive_update(update: Dict, request: Request):
             data = await context.get_data()
             data["ip_address"] = None
             # data["source"] = source if source is not None else None
+            data["source"] = None
             data["tg_language"] = update_obj.message.from_user.language_code
             await context.update_data(data)
         if update_obj.callback_query:

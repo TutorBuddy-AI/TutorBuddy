@@ -1,6 +1,8 @@
 from aiogram import types, md, Router, F
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 
 from src.config import bot
 from src.filters import IsNotRegister
@@ -19,21 +21,23 @@ async def support_handler(message: types.Message, state: FSMContext):
 
     await bot.send_photo(
         message.chat.id,
-        photo=types.InputFile('./files/support.png'),
-        caption=md.escape_md("TutorBuddy team is always on duty!"
-                             " 🦸🏻‍️🦸🏽‍️ What is the problem?"),
+        photo=FSInputFile('./files/support.png'),
+        caption="TutorBuddy team is always on duty!"
+                " 🦸🏻‍️🦸🏽‍️ What is the problem?",
+        parse_mode=ParseMode.HTML,
         reply_markup=await get_go_back_inline_keyboard())
 
 
 @support_router.message(IsNotRegister(), Command("support"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
-    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
+    await bot.send_message(message.chat.id, text="Please, register first",
+                           parse_mode=ParseMode.HTML, reply_markup=translate_markup)
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-@support_router.message(F.state == FormSupport.message)
+@support_router.message(FormSupport.message)
 async def support_query_handler(message: types.Message, state: FSMContext):
 
     await state.update_data(new_value=message.text)
@@ -44,6 +48,8 @@ async def support_query_handler(message: types.Message, state: FSMContext):
 
     await state.clear()
 
-    await bot.send_message(message.chat.id, md.escape_md("Message sent successfully."
-                                                         " The manager will definitely contact you. Thank you!"),
+    await bot.send_message(message.chat.id,
+                           "Message sent successfully."
+                           " The manager will definitely contact you. Thank you!",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=await get_go_back_inline_keyboard())

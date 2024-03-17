@@ -18,7 +18,7 @@ from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.enums.parse_mode import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from aiogram.types.web_app_info import WebAppInfo
 import asyncio
 from src.utils.generate import GenerateAI
@@ -98,7 +98,7 @@ class Newsletter:
         # Отправка фото с текстом newsletter под ним
         post_message = await bot.send_photo(
             chat_id=int(tg_id),
-            photo=types.InputFile(path_img),
+            photo=FSInputFile(path_img),
             caption=post_text,
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup().row(
@@ -114,7 +114,7 @@ class Newsletter:
         else:
             file_path = post_audio_files[1]
 
-        await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        await bot.send_voice(int(tg_id), FSInputFile(file_path))
         return post_message
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
@@ -140,7 +140,7 @@ class Newsletter:
         with AudioConverter(audio) as ogg_file:
             # Отправка вопроса юзера по поводу newsletter голосовое сообщение
             await bot.send_voice(int(tg_id),
-                                 types.InputFile(ogg_file),
+                                 FSInputFile(ogg_file),
                                  caption=f'<span class="tg-spoiler">{answer}</span>',
                                  parse_mode=ParseMode.HTML,
                                  reply_markup=markup,
@@ -210,7 +210,7 @@ class Newsletter:
         user_info = await user_service.get_user_info(tg_id=tg_id)
         name = user_info["name"]
 
-        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
+        await bot.send_photo(int(tg_id), photo=FSInputFile('./files/summary.jpg'),
                              caption=get_first_summary(name),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=await get_keyboard_summary_choice(menu=False))
@@ -236,7 +236,7 @@ class Newsletter:
 
         await bot.send_voice(
             tg_id,
-            types.InputFile(file_voice),
+            FSInputFile(file_voice),
             parse_mode=ParseMode.HTML,
             reply_markup=markup
         )

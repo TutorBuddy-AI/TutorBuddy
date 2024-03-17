@@ -1,4 +1,5 @@
 from aiogram import types, md, Router, F
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
@@ -21,22 +22,26 @@ async def edit_speaker_handler(message: types.Message):
     persona_kb = InlineKeyboardMarkup(inline_keyboard=[
         [bot_tutor], [nastya], [go_back], [AnswerRenderer.get_button_text_translation_standalone(for_user=True)]])
 
-    await bot.send_message(message.chat.id, md.escape_md("Who would you like to talk with? 💌"),
+    await bot.send_message(message.chat.id, "Who would you like to talk with? 💌",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=persona_kb)
 
 
 @edit_speaker_router.message(IsNotRegister(), Command("persona"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
-    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
+    await bot.send_message(message.chat.id, text="Please, register first", parse_mode=ParseMode.HTML,
+                           reply_markup=translate_markup)
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
 
-@edit_speaker_router.callback_query(F.query.data.startswith("speaker"))
+@edit_speaker_router.callback_query(F.data.startswith("speaker"))
 async def change_speaker_query_handler(query: CallbackQuery):
     await UserService().change_speaker(tg_id=str(query.message.chat.id), new_speaker=query.data.split('_')[1])
-    await bot.send_message(query.message.chat.id, md.escape_md(f"Great! Your current person is"
-                                                               f" {query.data.split('_')[1]}"),
+    await bot.send_message(query.message.chat.id,
+                           f"Great! Your current person is"
+                           f" {query.data.split('_')[1]}",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=await get_go_back_inline_keyboard())
 

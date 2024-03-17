@@ -1,6 +1,8 @@
 from aiogram import types, md
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile
 
 from src.config import dp, bot
 from src.filters.is_not_register_filter import IsRegister
@@ -17,10 +19,11 @@ async def scenario_handler(query: types.CallbackQuery, state: FSMContext):
 
     await bot.send_photo(
         query.message.chat.id,
-        photo=types.InputFile('./files/scenario.png'),
-        caption=md.escape_md(
+        photo=FSInputFile('./files/scenario.png'),
+        caption=
             f"Choose a scenario to practice your English"
-            f" in various possible situations! 🗣️"),
+            f" in various possible situations! 🗣️",
+        parse_mode=ParseMode.HTML,
         reply_markup=await get_menu_scenario())
 
 
@@ -37,8 +40,8 @@ async def scenario_handler(message: types.Message, state: FSMContext):
     translate_markup = AnswerRenderer.get_markup_caption_translation_standalone(for_user=True)
     await bot.send_photo(
         message.chat.id,
-        photo=types.InputFile('./files/scenario.png'),
-        caption=md.escape_md(
-            "We are working on this functionality and it will be ready soon! See you!"),
+        photo=FSInputFile('./files/scenario.png'),
+        caption="We are working on this functionality and it will be ready soon! See you!",
+        parse_mode=ParseMode.HTML,
         reply_markup=translate_markup
     )

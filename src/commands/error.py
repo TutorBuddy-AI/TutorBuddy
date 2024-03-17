@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from aiogram import md, Router, F
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
@@ -17,6 +20,7 @@ async def clean_context(chat_id: int, user_id: int):
 
 @error_router.error()
 async def error_handler(event: ErrorEvent) -> None:
+    logging.info(traceback.print_exception(event.exception))
     update = event.update
     if str(event.exception) == "Voice_messages_forbidden":
         if update.message:
