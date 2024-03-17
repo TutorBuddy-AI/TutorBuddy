@@ -18,7 +18,7 @@ class TalkInitializer:
         self.text = text
 
     async def generate_message(self) -> str:
-        generated_text = await GenerateAI(request_url=self.request_url).send_request(
+        generated_text = await GenerateAI(request_url=self.request_url).request_gpt(
             payload=await self.get_combine_data())
 
         if generated_text is not None:

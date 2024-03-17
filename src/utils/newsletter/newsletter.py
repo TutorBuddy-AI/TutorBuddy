@@ -1,4 +1,5 @@
 import traceback
+from typing import Optional
 
 from sqlalchemy import select
 from src.config import bot, dp
@@ -6,10 +7,14 @@ from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
 import logging
-from logging.handlers import RotatingFileHandler
 from aiogram import types
 from src.database.models.message_history import MessageHistory
+from src.database.models.setting import Setting
+from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
+from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.audio_converter.audio_converter_cache import AudioConverterCache
+from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from aiogram.types import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
@@ -19,16 +24,6 @@ import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
 from markdownify import markdownify as md
-# log_directory = '/home/ubuntu/AI-TutorBuddy-bot/src/utils/newsletter/logs'
-# log_file_path = os.path.join(log_directory, 'newsletter.log')
-# if not os.path.exists(log_directory):
-#     os.makedirs(log_directory)
-# logging.basicConfig(level=logging.ERROR)
-# file_handler = RotatingFileHandler(log_file_path, maxBytes=1024 * 1024, backupCount=5)
-# file_handler.setLevel(logging.ERROR)
-# formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-# file_handler.setFormatter(formatter)
-# logging.getLogger('').addHandler(file_handler)
 
 
 class Newsletter:
@@ -46,91 +41,110 @@ class Newsletter:
         all_news = result_news.scalars().all()
 
         for daily_news in all_news:
-            img_list = daily_news.image
-            url_img = img_list[0]['url']
-            # Вытаскиваем img куда мы сохранили его в admin панеле
-            path_img = url_img
+            await self.send_single_article(daily_news)
 
-            # Вызов метода, передавая topic, ожидаем лист из tg_id в str
-            tg_id_list = await self.user_topic(daily_news.topic)
+    async def send_single_article(self, daily_news):
+        # Вызов метода, передавая topic, ожидаем лист из tg_id в str
+        tg_id_list = await self.user_topic(daily_news.topic)
+        post_text = md(daily_news.message)
 
-            # Предварительно убрал с текста любые HTML теги, так как starlette сохраняет с ними
-            # Вывести текст с <p> и <br> просто ?возможно? (не проверял еще), но в caption точно не принимает их
-            post_text = md(daily_news.message)
-                #          .replace("<p>", "").replace("</p>", "").replace("<strong>", "").replace(
-                # "</strong>", "").replace("<br>", "").replace("<div>", "").replace("</div>", ""))
-            for tgid in tg_id_list:
-                try:
-                    post_message = MessageHistory(
-                        tg_id=tgid,
-                        message=post_text,
-                        role='assistant',
-                        type='text'
-                    )
-                    # Сохранение в MessageHistory текст поста
-                    session.add(post_message)
-                    voice = await self.get_voice(tgid)
-                    audio = await TextToSpeech.get_speech_by_voice(voice, post_text)
-                    post_translate_button = AnswerRenderer.get_button_caption_translation(
-                        bot_message_id=post_message.id, user_message_id="")
-                    # Отправка фото с текстом newsletter под ним
-                    bot.send_message()
-                    text_photo = await bot.send_photo(
-                        chat_id=int(tgid),
-                        photo=types.InputFile(path_img),
-                        caption=post_text,
-                        parse_mode=ParseMode.MARKDOWN,
-                        reply_markup=InlineKeyboardMarkup().row(
-                            InlineKeyboardButton(
-                                text='Original article ➡️📃',
-                                web_app=WebAppInfo(),
-                                url=daily_news.url)
-                        ).row(post_translate_button)
-                    )
-                    # Удаляю файл ogg который мы отправили как войс месседж
-                    # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
-                    # Отправка голосового сообщение. Озвучка newsletter
-                    # Написал метод get_tranlate_markup где только кнопка translate, она пока не работает,
-                    # хотя callback тот же что и у обычной
-                    with AudioConverter(audio) as ogg_file:
-                        await bot.send_voice(int(tgid), types.InputFile(ogg_file))
-                    # Задержка перед вопросом user
-                    await asyncio.sleep(2)
+        audio_files = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+        }
 
-                    voice = await self.get_voice(tgid)
+        converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
-                    payload = await self.get_payload(tgid, post_text)
+        for tg_id in tg_id_list:
+            try:
+                if await SettingService.is_summary_on(tg_id):
+                    post_message = await self.send_summary(tg_id, daily_news, converted_files)
+                    await asyncio.sleep(3)
 
-                    generated_text = await GenerateAI(
-                        request_url="https://api.openai.com/v1/chat/completions").send_request(payload=payload)
+                    await self.send_opinion(tg_id, post_text, post_message.message_id)
+                    await asyncio.sleep(3)
+                    # if self.is_summary_answered(tg_id):
+                    #     await self.summaries_choice(tg_id)
 
-                    answer = generated_text["choices"][0]["message"]["content"]
+            except Exception as e:
+                traceback.print_exc()
 
-                    talk_message = MessageHistory(
-                        tg_id=tgid,
-                        message=answer,
-                        role='assistant',
-                        type='text'
-                    )
-                    # Сохранение в MessageHistory текст поста
-                    session.add(talk_message)
-                    voice = await self.get_voice(tgid)
-                    audio = await TextToSpeech.get_speech_by_voice(voice, answer)
-                    markup = AnswerRenderer.get_markup_caption_translation(
-                        bot_message_id=talk_message.id, user_message_id="")
-                    with AudioConverter(audio) as ogg_file:
-                        # Отправка вопроса юзера по поводу newsletter голосовое сообщение
-                        await bot.send_voice(int(tgid),
-                                             types.InputFile(ogg_file),
-                                             caption=f'<span class="tg-spoiler">{answer}</span>',
-                                             parse_mode=ParseMode.HTML,
-                                             reply_markup=markup,
-                                             reply_to_message_id=text_photo.message_id)
-                    # Удаляю файл ogg который мы отправили как войс месседж
-                    # (думаю можно сделать без сохранение в проекте,а сразу передать но не получилось)
+        await self.delete_audio_files(converted_files)
 
-                except Exception as e:
-                   traceback.print_exc()
+    async def delete_audio_files(self, converted_files):
+        for file_path in converted_files:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+
+    async def send_summary(self, tg_id, daily_news, post_audio_files):
+        img_list = daily_news.image
+        url_img = img_list[0]['url']
+        # Вытаскиваем img куда мы сохранили его в admin панеле
+        path_img = url_img
+
+        post_text = md(daily_news.message)
+        post_message = MessageHistory(
+            tg_id=tg_id,
+            message=post_text,
+            role='assistant',
+            type='text'
+        )
+        # Сохранение в MessageHistory текст поста
+        session.add(post_message)
+        voice = await self.get_voice(tg_id)
+
+        post_translate_button = AnswerRenderer.get_button_caption_translation(
+            bot_message_id=post_message.id, user_message_id="")
+        # Отправка фото с текстом newsletter под ним
+        post_message = await bot.send_photo(
+            chat_id=int(tg_id),
+            photo=types.InputFile(path_img),
+            caption=post_text,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup().row(
+                InlineKeyboardButton(
+                    text='Original article ➡️📃',
+                    web_app=WebAppInfo(),
+                    url=daily_news.url)
+            ).row(post_translate_button)
+        )
+
+        if voice == "Anastasia":
+            file_path = post_audio_files[0]
+        else:
+            file_path = post_audio_files[1]
+
+        await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        return post_message
+
+    async def send_opinion(self, tg_id, post_text, post_message_id):
+        payload = await self.get_payload(tg_id, post_text)
+
+        generated_text = await GenerateAI(
+            request_url="https://api.openai.com/v1/chat/completions").request_gpt(payload=payload)
+
+        answer = generated_text["choices"][0]["message"]["content"]
+
+        talk_message = MessageHistory(
+            tg_id=tg_id,
+            message=answer,
+            role='assistant',
+            type='text'
+        )
+        # Сохранение в MessageHistory текст поста
+        session.add(talk_message)
+        voice = await self.get_voice(tg_id)
+        audio = await TextToSpeech.get_speech_by_voice(voice, answer)
+        markup = AnswerRenderer.get_markup_caption_translation(
+            bot_message_id=talk_message.id, user_message_id="")
+        with AudioConverter(audio) as ogg_file:
+            # Отправка вопроса юзера по поводу newsletter голосовое сообщение
+            await bot.send_voice(int(tg_id),
+                                 types.InputFile(ogg_file),
+                                 caption=f'<span class="tg-spoiler">{answer}</span>',
+                                 parse_mode=ParseMode.HTML,
+                                 reply_markup=markup,
+                                 reply_to_message_id=post_message_id)
 
     async def user_topic(self, topic) -> list:
         '''Выборка из тех кому надо отправить рассылку по topic пользователя'''
@@ -190,3 +204,41 @@ class Newsletter:
             "messages": extended_history,
             "max_tokens": 100
         }
+
+    @staticmethod
+    async def summaries_choice(tg_id):
+        user_service = UserService()
+        user_info = await user_service.get_user_info(tg_id=tg_id)
+        name = user_info["name"]
+
+        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
+                             caption=get_first_summary(name),
+                             parse_mode=ParseMode.MARKDOWN,
+                             reply_markup=await get_keyboard_summary_choice(menu=False))
+
+        talk_message = MessageHistory(
+            tg_id=tg_id,
+            message=get_first_summary("name"),
+            role='assistant',
+            type='text'
+        )
+
+        session.add(talk_message)
+        await session.commit()
+        await session.close()
+
+        markup = AnswerRenderer.get_markup_caption_translation(
+            bot_message_id=talk_message.id, user_message_id="")
+
+        file_voice = './files/summary_choice_bot.opus'
+
+        if user_info["speaker"] == "Anastasia":
+            file_voice = './files/summary_choice_nastya.opus'
+
+        await bot.send_voice(
+            tg_id,
+            types.InputFile(file_voice),
+            parse_mode=ParseMode.HTML,
+            reply_markup=markup
+        )
+

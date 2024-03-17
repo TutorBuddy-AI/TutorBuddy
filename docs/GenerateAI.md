@@ -15,9 +15,10 @@
 **Параметры и аргументы:**
 - `payload` (любой): Данные для генерации текста.
 
-**Пример использования:** 
+**Пример использования:**
+
 ```python
-await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").send_request(payload={"prompt": "Hello"})
+await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").request_gpt(payload={"prompt": "Hello"})
 ```
 **Возвращаемое значение:** Любой
 
@@ -30,8 +31,10 @@ await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").send_
 - `model` (строка): Модель для преобразования речи.
 
 **Пример использования:**
+
 ```python
-await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").generator.send_request_speech_to_text(audio_bytes=audio_data, model="model")
+await GenerateAI(request_url="https://api.openai.com/v1/chat/completions").generator.send_form(audio_bytes=audio_data,
+                                                                                               model="model")
 ```
 **Возвращаемое значение:** Текст, полученный в результате преобразования речи в текст.
 

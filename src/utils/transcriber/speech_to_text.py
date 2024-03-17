@@ -14,7 +14,7 @@ class SpeechToText:
         self.file_id = file_id
 
     async def get_text(self) -> str:
-        generated_text = await GenerateAI(request_url=self.request_url).send_request_speech_to_text(
+        generated_text = await GenerateAI(request_url=self.request_url).request_stt(
             audio_bytes=await self.download_file(), model="whisper-1")
 
         if generated_text is not None:
