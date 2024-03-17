@@ -52,5 +52,12 @@ async def feedback_query_handler(message: types.Message, state: FSMContext):
     await FeedbackHistory().add_feedback(tg_id=str(message.chat.id), message=state_data['new_value'])
     await state.finish()
 
+    url_telegram = f"https://t.me/{message.chat.username}"
+    message_group = f"<b>From 💬 feedback</b>\n" \
+                    f"<b>User:</b> {url_telegram}\n" \
+                    f"<b>Message:</b> <i>{message.text}</i>"
+
+    await bot.send_message('-1001938775399', message_group, parse_mode=types.ParseMode.HTML)
+
     await bot.send_message(message.chat.id, md.escape_md("Message sent successfully. Thank you!"),
                            reply_markup=await get_go_back_inline_keyboard())
