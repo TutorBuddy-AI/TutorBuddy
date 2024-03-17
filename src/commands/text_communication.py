@@ -23,6 +23,7 @@ from src.utils.stciker.sticker_sender import StickerSender
 from aiogram.utils.callback_data import CallbackData
 
 from src.utils.user import UserService
+from src.texts.texts import get_pin_message
 
 
 @dp.message_handler(content_types=types.ContentType.TEXT)
@@ -162,6 +163,10 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 
     await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
+@dp.callback_query_handler(text="pin_message_translate", state="*")
+async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
+    message = query.message
+    await bot.send_message(message.chat.id, get_pin_message(translate=True), reply_to_message_id=message.message_id)
 
 # @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
 # async def handle_get_translation_for_message(query: CallbackQuery, state: FSMContext):

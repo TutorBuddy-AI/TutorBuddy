@@ -5,7 +5,7 @@ from src.utils.generate.question_history import SupportHistory
 from src.utils.generate.feedback_loop import FeedbackHistory
 
 from src.utils.message_history_mistakes import MessageMistakesService
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, text
 from src.utils.message_hint import MessageHintService
 from src.utils.message_translation import MessageTranslationService
 from src.utils.paraphrasing import MessageParaphraseService
@@ -68,6 +68,11 @@ class UserService:
         results = list(reversed([{'role': row.role, 'content': row.message} for row in result]))
 
         return results
+
+    async def count_message_history(self, tg_id) -> int:
+        query = text("SELECT COUNT(*) AS message_count FROM message_history WHERE tg_id = :tg_id")
+        result = await session.execute(query, {"tg_id": str(tg_id)})
+        return result.scalar()
 
     async def is_exist(
             self,
