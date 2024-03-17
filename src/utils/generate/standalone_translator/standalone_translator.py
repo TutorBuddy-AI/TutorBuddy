@@ -21,7 +21,7 @@ class StandaloneTranslator:
 
     async def translate(self) -> str:
         payload = await self.get_combine_data()
-        generated_text = await GenerateAI(request_url=self.request_url).send_request(payload=payload)
+        generated_text = await GenerateAI(request_url=self.request_url).request_gpt(payload=payload)
 
         if generated_text:
             return generated_text["choices"][0]["message"]["content"]
@@ -36,7 +36,7 @@ class StandaloneTranslator:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 400
+            "max_tokens": 100
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:

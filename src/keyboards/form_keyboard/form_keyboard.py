@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
+from src.keyboards import get_go_back_inline_keyboard
 from src.utils.answer import AnswerRenderer
 
 
@@ -158,3 +159,39 @@ async def get_choose_bot_keyboard(is_caption=True) -> InlineKeyboardMarkup:
     choose_bot_inline_kb.row(tutor_buddy).row(anastasia).row(translate_button)
 
     return choose_bot_inline_kb
+
+
+async def get_keyboard_summary_choice(menu: bool) -> InlineKeyboardMarkup:
+    if menu:
+        keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+        accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
+        go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+        keyboard_summary_markup.add(accept, go_back_btn, translate_button)
+        return keyboard_summary_markup
+
+    else:
+        keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+        translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+        accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
+        cancel = InlineKeyboardButton(text='No, thanks 😔', callback_data='dispatch_summary_false')
+        keyboard_summary_markup.add(accept, cancel).add(translate_button)
+        return keyboard_summary_markup
+
+
+async def get_keyboard_cancel_news_subs() -> InlineKeyboardMarkup:
+    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+    continue_btn = InlineKeyboardButton(text='Continue 🥳', callback_data='go_back')
+    stop_subs_btn = InlineKeyboardButton(text='Stop 😔', callback_data='dispatch_summary_false')
+    translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+    keyboard_summary_markup.row(translate_button).row(continue_btn, stop_subs_btn)
+    return keyboard_summary_markup
+
+
+async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
+    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
+    accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
+    go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
+    translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
+    keyboard_summary_markup.row(translate_button).row(accept, go_back_btn)
+    return keyboard_summary_markup

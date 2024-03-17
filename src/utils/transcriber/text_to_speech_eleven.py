@@ -9,7 +9,7 @@ from src.config import config
 import json
 
 id_bot_voice = "SQbRRoMNiJau4LetNtC3"
-id_nastya_voice = "UBqdLUcTSGqrfr5Cui2M"
+id_nastya_voice = "j561qvFxyYEptWwufeRi"
 model = "eleven_multilingual_v2"
 request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
 
@@ -18,6 +18,7 @@ headers = {
     "Content-Type": "application/json",
     "xi-api-key": config.ELEVENLABS_API
 }
+
 
 class TextToSpeechEleven:
     def __init__(
@@ -51,6 +52,7 @@ class TextToSpeechEleven:
                     print(f"Response: {response}")
                     return BytesIO(await response.read())
                 else:
+                    print(f"Response: {response}")
                     return None
 
     @staticmethod

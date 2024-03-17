@@ -3,6 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 
 from src.config import dp, bot
+from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
 from src.states import FormName, FormNativeLanguage, FormEnglishLevel
@@ -11,7 +12,7 @@ from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
 
 
-@dp.message_handler(commands=["editprofile"])
+@dp.message_handler(IsRegister(), commands=["editprofile"])
 async def edit_profile_handler(message: types.Message):
 
     edit_profile_kb = InlineKeyboardMarkup(row_width=2)
@@ -32,6 +33,12 @@ async def edit_profile_handler(message: types.Message):
     await bot.send_photo(message.chat.id, photo=types.InputFile('./files/edit_profile.jpg'),
                          caption=md.escape_md("What would you like to change?"),
                          reply_markup=edit_profile_kb)
+
+
+@dp.message_handler(IsNotRegister(), commands=["editprofile"])
+async def edit_profile_handler(message: types.Message):
+    translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
+    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#

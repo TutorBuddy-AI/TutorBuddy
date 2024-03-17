@@ -11,6 +11,7 @@ from src.commands.menu.mistakes import dp
 from src.commands.menu.restart import dp
 from src.commands.menu.support import dp
 from src.commands.menu.feedback import dp
+from src.commands.menu.summaries import dp
 
 from src.commands.cacncel_state import dp
 

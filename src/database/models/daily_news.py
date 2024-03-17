@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Unicode
+from sqlalchemy import Column, Integer, String, Unicode, Boolean
 from src.database import Base
 from src.database.mixins import TimestampMixin
 from sqlalchemy_file import FileField, ImageField

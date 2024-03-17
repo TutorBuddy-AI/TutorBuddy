@@ -84,7 +84,8 @@ async def handle_get_translation(query: CallbackQuery, callback_data: translatio
     Message ids are provided in callback_data
     """
     message = query.message
-
+    user_info = await UserService().get_user_info(tg_id=message.chat.id)
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker']} thinks… Please wait")
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text(message.caption)
@@ -95,7 +96,7 @@ async def handle_get_translation(query: CallbackQuery, callback_data: translatio
         user_message_id, bot_message_id, message, generated_text)
 
     await MessageTranslationService().create_translation(helper_info)
-
+    await bot.delete_message(message.chat.id, wait_message.message_id)
     await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
 
 
@@ -216,17 +217,20 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentType.VIDEO)
 async def handle_video_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @dp.message_handler(content_types=types.ContentType.STICKER)
 async def handle_sticker_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @dp.message_handler(content_types=types.ContentType.VIDEO_NOTE)
 async def handle_video_note_message(message: Message):
-    sticker_sender = StickerSender(bot, message.chat.id, speaker="Anastasia")
+    user_info = await UserService().get_user_info(message.chat.id)
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()

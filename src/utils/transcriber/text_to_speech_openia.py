@@ -25,7 +25,7 @@ class TextToSpeechOpenAI:
         self.tg_id = tg_id
 
     async def get_speech(self) -> BytesIO:
-        generated_audio = await GenerateAI(request_url=request_url).send_request(
+        generated_audio = await GenerateAI(request_url=request_url).request_tts(
             payload=await self.get_combine_data())
 
         if generated_audio is not None:
@@ -35,7 +35,7 @@ class TextToSpeechOpenAI:
 
     @staticmethod
     async def get_speech_for_text(text) -> BytesIO:
-        generated_audio = await GenerateAI(request_url=request_url).send_request(
+        generated_audio = await GenerateAI(request_url=request_url).request_tts(
             payload=await TextToSpeechOpenAI.get_combine_data_simple(text))
 
         if generated_audio is not None:
