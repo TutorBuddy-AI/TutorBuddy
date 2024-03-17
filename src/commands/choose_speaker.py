@@ -17,66 +17,6 @@ from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
 
 
-# @dp.callback_query_handler(text="continue_bot")
-# async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
-#     tg_id = query.message.chat.id
-#     user_service = UserService()
-#     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
-#
-#     markup = AnswerRenderer.get_markup_text_translation_standalone()
-#
-#     await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup)
-#
-#     user_info = await user_service.get_user_info(tg_id=str(tg_id))
-#     check_text = get_start_talk(True, user_info["name"])
-#     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
-#     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
-#
-#     with AudioConverter(audio) as ogg_file:
-#         await bot.send_voice(
-#             query.message.chat.id,
-#             types.InputFile(ogg_file),
-#             caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
-#             parse_mode=ParseMode.HTML,
-#             reply_markup=audio_markup)
-#     await state.set_state(FormInitTalk.init_user_message)
-#
-#
-# @dp.callback_query_handler(text="continue_nastya")
-# async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
-#     tg_id = query.message.chat.id
-#     user_service = UserService()
-#     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
-#
-#     markup = AnswerRenderer.get_markup_text_translation_standalone()
-#     await bot.send_message(query.message.chat.id, get_choice_is_done(), reply_markup=markup)
-#     user_info = await user_service.get_user_info(tg_id=str(tg_id))
-#     name = user_info["name"]
-#     caption_text = f"Hi, {name} 😌" + get_greeting_anastasia()
-#     audio = await TextToSpeech(tg_id=tg_id, prompt=f"Hi, {name} " + get_greeting_anastasia()).get_speech()
-#     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
-#
-#     with AudioConverter(audio) as ogg_file:
-#         await bot.send_voice(
-#             query.message.chat.id,
-#             types.InputFile(ogg_file),
-#             caption=f'<span class="tg-spoiler">{caption_text}</span>',
-#             parse_mode=ParseMode.HTML,
-#             reply_markup=audio_markup
-#         )
-#
-#     check_text = get_start_talk(False, name)
-#     audio = await TextToSpeech(tg_id=tg_id, prompt=check_text).get_speech()
-#     with AudioConverter(audio) as ogg_file:
-#         await bot.send_voice(
-#             query.message.chat.id,
-#             types.InputFile(ogg_file),
-#             caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
-#             parse_mode=ParseMode.HTML,
-#             reply_markup=audio_markup)
-#     await state.set_state(FormInitTalk.init_user_message)
-
-
 @dp.callback_query_handler(text="continue_bot")
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
     tg_id = query.message.chat.id

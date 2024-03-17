@@ -2,27 +2,20 @@ import asyncio
 from src.database import session
 from sqlalchemy import select
 
-from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
-from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_text_before_start, \
-    get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
-    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text, \
-    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message, get_first_summary
-from src.texts.texts import get_welcome_text, get_other_native_language_question, get_incorrect_native_language_question, \
+from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_welcome_text, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
     get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from src.database.models.message_history import MessageHistory
 from src.database.models.setting import Setting
 
-from src.utils.user import UserService, UserHelper, UserCreateMessage
+from src.utils.user import UserService, UserHelper
 
 from aiogram.dispatcher import FSMContext
 from aiogram import types, md
@@ -292,30 +285,30 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     await state.finish()
 
 
-@dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
-async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
-    chat_id = query.message.chat.id
-
-    select_query = select(Setting).where(Setting.tg_id == str(chat_id))
-    result = await session.execute(select_query)
-    user = result.scalars().first()
-
-    user_answer = True if query.data == "dispatch_summary_true" else False
-    if user:
-        user.summary_on = user_answer
-        user.summary_answered = True
-        await session.commit()
-    else:
-        session.add(Setting(tg_id=str(chat_id), summary_on=user_answer, summary_answered=True))
-        await session.commit()
-    if user_answer:
-        text_true = ("Deal! Looking forward to discuss the most up-to-date news ⚡ "
-                     "In case you change your mind, you may refuse to receive summaries anytime: "
-                     "go to Menu and choose 'Summaries'.")
-        await bot.send_message(query.message.chat.id, md.escape_md(text_true),
-                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
-    else:
-        text_false = ("Got it! ✌🏻 In case you change your mind, "
-                      "go to Menu and choose 'Summaries', so you can still get the most fresh ones!")
-        await bot.send_message(query.message.chat.id, md.escape_md(text_false),
-                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
+# @dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
+# async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
+#     chat_id = query.message.chat.id
+#
+#     select_query = select(Setting).where(Setting.tg_id == str(chat_id))
+#     result = await session.execute(select_query)
+#     user = result.scalars().first()
+#
+#     user_answer = True if query.data == "dispatch_summary_true" else False
+#     if user:
+#         user.summary_on = user_answer
+#         user.summary_answered = True
+#         await session.commit()
+#     else:
+#         session.add(Setting(tg_id=str(chat_id), summary_on=user_answer, summary_answered=True))
+#         await session.commit()
+#     if user_answer:
+#         text_true = ("Deal! Looking forward to discuss the most up-to-date news ⚡ "
+#                      "In case you change your mind, you may refuse to receive summaries anytime: "
+#                      "go to Menu and choose 'Summaries'.")
+#         await bot.send_message(query.message.chat.id, md.escape_md(text_true),
+#                                reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
+#     else:
+#         text_false = ("Got it! ✌🏻 In case you change your mind, "
+#                       "go to Menu and choose 'Summaries', so you can still get the most fresh ones!")
+#         await bot.send_message(query.message.chat.id, md.escape_md(text_false),
+#                                reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
