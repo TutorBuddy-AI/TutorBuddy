@@ -92,28 +92,28 @@ function displayNewsletter(newsletter) {
     NewsletterInfoBlock.appendChild(titleElement);
 
     const messageIdElement = document.createElement('p');
-    messageIdElement.textContent = `ID: ${newsletter.id}`;
+    messageIdElement.innerHTML = `ID: ${newsletter.id}`;
 
     const title_infoElement = document.createElement('p');
-    title_infoElement.textContent = `title: ${newsletter.title}`;
+    title_infoElement.innerHTML = `title: ${newsletter.title}`;
 
     const messageElement = document.createElement('p');
-    messageElement.textContent = `Message: ${newsletter.message}`;
+    messageElement.innerHTML = `Message: ${newsletter.message}`;
 
     const pathToDataElement = document.createElement('p');
-    pathToDataElement.textContent = `Path to Data: ${newsletter.path_to_data}`;
+    pathToDataElement.innerHTML = `Path to Data: ${newsletter.path_to_data}`;
 
     const topicElement = document.createElement('p');
-    topicElement.textContent = `Topic: ${newsletter.topic}`;
+    topicElement.innerHTML= `Topic: ${newsletter.topic}`;
 
     const publication_dateElement = document.createElement('p');
-    publication_dateElement.textContent = `publication_date: ${newsletter.publication_date}`;
+    publication_dateElement.innerHTML = `publication_date: ${newsletter.publication_date}`;
 
     const editionElement = document.createElement('p');
-    editionElement.textContent = `edition: ${newsletter.edition}`;
+    editionElement.innerHTML = `edition: ${newsletter.edition}`;
 
     const urlElement = document.createElement('p');
-    urlElement.textContent = `URL: ${newsletter.url}`;
+    urlElement.innerHTML = `URL: ${newsletter.url}`;
 
     const imageElement = document.createElement('img');
     imageElement.src = newsletter.path_to_data;
@@ -137,8 +137,8 @@ function displayNewsletter(newsletter) {
     NewsletterInfoBlock.appendChild(sendButton);
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
-    NewsletterInfoBlock.appendChild(messageElement);
     NewsletterInfoBlock.appendChild(title_infoElement);
+    NewsletterInfoBlock.appendChild(messageElement);
     NewsletterInfoBlock.appendChild(pathToDataElement);
     NewsletterInfoBlock.appendChild(topicElement);
     NewsletterInfoBlock.appendChild(publication_dateElement);

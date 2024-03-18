@@ -130,3 +130,14 @@ button.delete-button {
 .modal-content button:hover {
   opacity: 0.8;
 }
+
+
+.tg-spoiler, .tg-spoiler a {
+  color: grey;
+  background-color: grey;
+  transition: color 0.3s;
+}
+
+.tg-spoiler:hover, .tg-spoiler:hover a {
+  color: black;
+}

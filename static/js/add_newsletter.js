@@ -12,27 +12,27 @@ async function openSubAddNewsletter() {
             <div>
                 <form id="addNewsletterForm">
                     <label for="topic">Тема:</label>
-                    <input type="text" id="topic" name="topic" required>
+                    <div contenteditable="true" id="topic" name="topic" required></div>
 
                     <label for="url">URL:</label>
-                    <input type="text" id="url" name="url" required>
+                    <div contenteditable="true" id="url" name="url" required></div>
 
                     <label for="title">Заголовок:</label>
-                    <input type="text" id="title" name="title" required>
+                    <div contenteditable="true" id="title" name="title" required></div>
 
                     <label for="message">Сообщение:</label>
-                    <textarea id="message" name="message" rows="10" cols="50" required></textarea>
+                    <div contenteditable="true" id="message" name="message" required></div>
 
                     <label for="edition">Издание(Необязательно):</label>
-                    <input type="text" id="edition" name="edition">
+                    <div contenteditable="true" id="edition" name="edition"></div>
 
                     <label for="publication_date">Дата публикации(Необязательно):</label>
-                    <input type="text" id="publication_date" name="publication_date">
+                    <div contenteditable="true" id="publication_date" name="publication_date"></div>
 
                     <label for="image">Изображение:</label>
                     <input type="file" id="image" name="image" accept="image/*">
 
-                    <input type="submit" value="Отправить">
+                    <input type="submit" value="Сохранить">
                 </form>
                 <div id="resultContainer"></div>
             </div>
@@ -45,13 +45,13 @@ async function openSubAddNewsletter() {
         document.getElementById('addNewsletterForm').addEventListener('submit', async function (event) {
             event.preventDefault();
 
-            const topic = document.getElementById('topic').value;
-            const url = document.getElementById('url').value;
-            const title = document.getElementById('title').value;
-            const message = document.getElementById('message').value;
-            const edition = document.getElementById('edition').value;
-            const publication_date = document.getElementById('publication_date').value;
-            const imageInput = document.getElementById('image');
+        const topic = document.getElementById('topic').innerHTML;
+        const url = document.getElementById('url').innerHTML;
+        const title = document.getElementById('title').innerHTML;
+        const message = document.getElementById('message').innerHTML;
+        const edition = document.getElementById('edition').innerHTML;
+        const publication_date = document.getElementById('publication_date').innerHTML;
+        const imageInput = document.getElementById('image');
 
 
             if (imageInput.files.length > 0) {
@@ -78,7 +78,7 @@ async function openSubAddNewsletter() {
                         publication_date: publication_date,
                         image: imageBase64,
                     };
-
+                    console.log(requestData)
                     try {
                         const response = await fetch('/save-newsletter', {
                             method: 'POST',
@@ -112,3 +112,114 @@ async function openSubAddNewsletter() {
         });
     }
 }
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    let isButtonsShown = false; // Флаг для отслеживания, показаны ли уже кнопки
+    let selectionButtonsContainer = null; // Контейнер для кнопок
+
+    // Функция для применения стилей к выделенному тексту
+    function applyStyle(style, value) {
+        document.execCommand(style, false, value);
+    }
+
+    // Функция для применения tg-spoiler к выделенному тексту
+    function applyTgSpoiler(value) {
+        const tgSpoilerHTML = `<span class="tg-spoiler">${value}</span>`;
+        document.execCommand('insertHTML', false, tgSpoilerHTML);
+    }
+
+
+
+    // Обработчик события выделения текста
+    document.addEventListener('selectionchange', function () {
+        const selection = window.getSelection();
+        const isContentEditable = selection.anchorNode && selection.anchorNode.parentElement && selection.anchorNode.parentElement.getAttribute('contenteditable') === 'true';
+
+        console.log('Is content editable:', isContentEditable);
+
+        if (isContentEditable && selection.toString().length > 0 && !isButtonsShown) {
+            // Показываем кнопки только если что-то выделено это внутри контейнера с contenteditable и кнопки еще не были показаны
+            selectionButtonsContainer = document.createElement('div');
+            selectionButtonsContainer.className = 'selection-buttons-container';
+
+            // Создаем кнопку "B" (жирный)
+            const boldButton = document.createElement('button');
+            boldButton.textContent = 'B';
+            boldButton.style.fontWeight = 'bold';
+            boldButton.addEventListener('click', function () {
+                applyStyle('bold');
+            });
+            selectionButtonsContainer.appendChild(boldButton);
+
+            // Создаем кнопку "I" (курсив)
+            const italicButton = document.createElement('button');
+            italicButton.textContent = 'I';
+            italicButton.style.fontStyle = 'italic';
+            italicButton.addEventListener('click', function () {
+                applyStyle('italic');
+            });
+            italicButton.style.marginLeft = '10px';
+            selectionButtonsContainer.appendChild(italicButton);
+
+
+            // Создаем кнопку "A" (подчеркнутый)
+            const underlineButton = document.createElement('button');
+            underlineButton.textContent = 'A';
+            underlineButton.style.textDecoration = 'underline';
+            underlineButton.addEventListener('click', function () {
+                applyStyle('underline');
+            });
+            underlineButton.style.marginLeft = '10px';
+            selectionButtonsContainer.appendChild(underlineButton);
+
+
+            // Создаем кнопку "S" (зачеркнутый)
+            const strikeButton = document.createElement('button');
+            strikeButton.textContent = 'S';
+            strikeButton.addEventListener('click', function () {
+                applyStyle('strikeThrough');
+            });
+            strikeButton.style.textDecoration = 'line-through';
+            strikeButton.style.marginLeft = '10px';
+            selectionButtonsContainer.appendChild(strikeButton);
+
+
+            // Создаем кнопку "tg-spoiler" (tg-spoiler)
+            const TgSpoilerButton = document.createElement('button');
+            TgSpoilerButton.textContent = 'tg-spoiler';
+            TgSpoilerButton.addEventListener('click', function () {
+                const selection = window.getSelection();
+                const selectedText = selection.toString();
+                applyTgSpoiler(selectedText);
+            });
+            TgSpoilerButton.style.marginLeft = '10px';
+            selectionButtonsContainer.appendChild(TgSpoilerButton);
+
+
+            // Устанавливаем позицию контейнера с кнопками под выделенным текстом
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+
+            selectionButtonsContainer.style.position = 'absolute';
+            selectionButtonsContainer.style.top = `${rect.bottom}px`;
+            selectionButtonsContainer.style.left = `${rect.left}px`;
+
+
+            document.body.appendChild(selectionButtonsContainer);
+
+            isButtonsShown = true; // Устанавливаем флаг, что кнопки были показаны
+        } else if (!isContentEditable || selection.toString().length === 0) {
+            // Скрываем кнопки если нет выделения или выделение не в контейнере contenteditable
+            if (selectionButtonsContainer) {
+                selectionButtonsContainer.remove();
+                selectionButtonsContainer = null;
+            }
+
+            isButtonsShown = false; // Сбрасываем флаг, если выделение потеряно
+        }
+    });
+});
+

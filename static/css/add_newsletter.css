@@ -16,13 +16,32 @@
 }
 
 .add-newsletter-block input[type="text"],
-.add-newsletter-block textarea {
+.add-newsletter-block [contenteditable="true"] {
     width: calc(100% - 20px);
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+.add-newsletter-block [contenteditable="true"]{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 10px;
+}
+
+
+.add-newsletter-block [contenteditable="true"]:focus {
+    border-color: #9c27b0;
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.5);
 }
 
 .add-newsletter-block input[type="submit"] {
@@ -70,4 +89,28 @@
 
 .error-add-newsletter {
     color: #f44336;
+}
+
+
+
+.selection-buttons-container {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.selection-buttons-container button {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.selection-buttons-container button:hover {
+    background-color: #e0e0e0;
 }
