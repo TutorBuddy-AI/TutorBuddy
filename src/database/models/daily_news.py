@@ -1,9 +1,6 @@
 from sqlalchemy import Column, Integer, String, Unicode, Boolean
 from src.database import Base
 from src.database.mixins import TimestampMixin
-from sqlalchemy_file import FileField, ImageField
-from sqlalchemy_file.validators import SizeValidator
-from src.database.models.enums.daily_news import DailyNewsEnum
 
 
 class DailyNews(Base, TimestampMixin):
@@ -14,19 +11,6 @@ class DailyNews(Base, TimestampMixin):
     topic = Column(String, nullable=True)
     url = Column(String, nullable=True)
     path_to_data = Column(String, nullable=True)
-
-    image = Column(
-        ImageField(
-            multiple=True,
-            upload_storage="images",
-            validators=[SizeValidator("100k")],
-        )
-    )
-
-    file = Column(
-        FileField(
-            multiple=True,
-            upload_storage="other_files",
-            validators=[SizeValidator("100k")],
-        )
-    )
+    edition = Column(String, nullable=True)
+    publication_date = Column(String, nullable=True)
+    title = Column(String, nullable=False)

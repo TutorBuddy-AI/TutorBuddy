@@ -14,13 +14,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 image_directory = "static/img/img_newsletter"
 
-fake_users_db = {
-    "admin": {
-        "username": "admin",
-        "password": "admin",
-    }
-}
-
 dotenv_path = Path('.env.local')
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -30,7 +23,7 @@ ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN")
 
 #Подключение к базе в зависимости от username
-DATABASE_URL=os.environ.get("DATABASE_URL")
+DATABASE_URL= os.environ.get("DATABASE_URL")
 
 def create_jwt_token(data: dict):
     """
