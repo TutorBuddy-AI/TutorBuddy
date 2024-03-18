@@ -94,6 +94,9 @@ function displayNewsletter(newsletter) {
     const messageIdElement = document.createElement('p');
     messageIdElement.textContent = `ID: ${newsletter.id}`;
 
+    const title_infoElement = document.createElement('p');
+    title_infoElement.textContent = `title: ${newsletter.title}`;
+
     const messageElement = document.createElement('p');
     messageElement.textContent = `Message: ${newsletter.message}`;
 
@@ -102,6 +105,12 @@ function displayNewsletter(newsletter) {
 
     const topicElement = document.createElement('p');
     topicElement.textContent = `Topic: ${newsletter.topic}`;
+
+    const publication_dateElement = document.createElement('p');
+    publication_dateElement.textContent = `publication_date: ${newsletter.publication_date}`;
+
+    const editionElement = document.createElement('p');
+    editionElement.textContent = `edition: ${newsletter.edition}`;
 
     const urlElement = document.createElement('p');
     urlElement.textContent = `URL: ${newsletter.url}`;
@@ -129,8 +138,11 @@ function displayNewsletter(newsletter) {
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
     NewsletterInfoBlock.appendChild(messageElement);
+    NewsletterInfoBlock.appendChild(title_infoElement);
     NewsletterInfoBlock.appendChild(pathToDataElement);
     NewsletterInfoBlock.appendChild(topicElement);
+    NewsletterInfoBlock.appendChild(publication_dateElement);
+    NewsletterInfoBlock.appendChild(editionElement);
     NewsletterInfoBlock.appendChild(urlElement);
     NewsletterInfoBlock.appendChild(imageElement);
 

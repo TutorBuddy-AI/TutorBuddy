@@ -5,6 +5,9 @@ class NewsletterData(BaseModel):
     url: str
     message: str
     image: bytes
+    edition: str = ''
+    publication_date: str = ''
+    title: str
 
 class ChangePassword(BaseModel):
     username: str

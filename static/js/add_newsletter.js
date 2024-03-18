@@ -17,8 +17,17 @@ async function openSubAddNewsletter() {
                     <label for="url">URL:</label>
                     <input type="text" id="url" name="url" required>
 
+                    <label for="title">Заголовок:</label>
+                    <input type="text" id="title" name="title" required>
+
                     <label for="message">Сообщение:</label>
                     <textarea id="message" name="message" rows="10" cols="50" required></textarea>
+
+                    <label for="edition">Издание(Необязательно):</label>
+                    <input type="text" id="edition" name="edition">
+
+                    <label for="publication_date">Дата публикации(Необязательно):</label>
+                    <input type="text" id="publication_date" name="publication_date">
 
                     <label for="image">Изображение:</label>
                     <input type="file" id="image" name="image" accept="image/*">
@@ -38,8 +47,12 @@ async function openSubAddNewsletter() {
 
             const topic = document.getElementById('topic').value;
             const url = document.getElementById('url').value;
+            const title = document.getElementById('title').value;
             const message = document.getElementById('message').value;
+            const edition = document.getElementById('edition').value;
+            const publication_date = document.getElementById('publication_date').value;
             const imageInput = document.getElementById('image');
+
 
             if (imageInput.files.length > 0) {
                 const imageFile = imageInput.files[0];
@@ -60,6 +73,9 @@ async function openSubAddNewsletter() {
                         topic: topic,
                         url: url,
                         message: message,
+                        title: title,
+                        edition: edition,
+                        publication_date: publication_date,
                         image: imageBase64,
                     };
 

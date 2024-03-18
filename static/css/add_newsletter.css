@@ -1,34 +1,48 @@
 .add-newsletter-block {
-    min-height: 100vh;
-    width: 100%;
+    width: calc(100% - 250px);
     background-color: #F5F5F5;
-    position: fixed;
+    position: absolute;
     top: 60px;
-    left: 250px;
-    overflow-y: auto;
+    right: 0;
     padding: 20px;
+    height: 100%;
+    overflow: auto;
 }
 
 
-#addNewsletterForm input[type="submit"] {
+.add-newsletter-block label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.add-newsletter-block input[type="text"],
+.add-newsletter-block textarea {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.add-newsletter-block input[type="submit"] {
     background-color: #4CAF50;
     color: white;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-left: 50px;
 }
 
-#addNewsletterForm textarea {
-    resize: vertical;
+.add-newsletter-block input[type="submit"]:hover {
+    background-color: #45a049;
 }
 
-input[type="file"] {
+.add-newsletter-block input[type="file"] {
     display: none;
 }
 
-label[for="image"] {
+.add-newsletter-block label[for="image"] {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -36,13 +50,11 @@ label[for="image"] {
     background-color: #e0e0e0;
     color: #333;
     display: inline-block;
-    margin-left: 10px;
 }
 
-label[for="image"]:hover {
+.add-newsletter-block label[for="image"]:hover {
     background-color: #d0d0d0;
 }
-
 
 #resultContainer {
     margin-top: 20px;

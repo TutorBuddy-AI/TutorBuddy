@@ -130,6 +130,9 @@ async def save_newsletter(
         topic = newsletter_data.topic
         url = newsletter_data.url
         message = newsletter_data.message
+        edition = newsletter_data.edition
+        publication_date = newsletter_data.publication_date
+        title = newsletter_data.title
 
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         image_filename = f"newsletter_image_{timestamp}.jpg"
@@ -146,6 +149,9 @@ async def save_newsletter(
             topic=topic,
             url=url,
             path_to_data=image_path,
+            edition=edition,
+            publication_date=publication_date,
+            title=title
         )
 
         session.add(new_newsletter)
@@ -219,6 +225,9 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_va
         "topic": newsletter.topic,
         "url": newsletter.url,
         "path_to_data": newsletter.path_to_data,
+        "edition": newsletter.edition,
+        "publication_date": newsletter.publication_date,
+        "title": newsletter.title,
     }
 
     return JSONResponse(content=newsletter_info)

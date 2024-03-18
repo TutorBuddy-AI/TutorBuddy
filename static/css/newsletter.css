@@ -12,7 +12,7 @@
 .newsletter-info-block {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
     width: calc(100vw - 550px);
     background-color: #ffffff;
     position: fixed;
@@ -20,7 +20,7 @@
     left: 550px;
     padding: 20px;
     overflow-y: auto;
-    max-height: 400px;
+    max-height: 700px;
 }
 
 
