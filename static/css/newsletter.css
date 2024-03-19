@@ -43,7 +43,8 @@
 
 
 button.send-button,
-button.delete-button {
+button.delete-button,
+button.send-datetime-button{
     padding: 10px;
     margin: 5px auto;
     cursor: pointer;
@@ -64,6 +65,10 @@ button.delete-button {
     color: #fff;
 }
 
+button.send-datetime-button{
+    background-color: #ADD8E6;
+    color: #fff;
+}
 
 /* стили модального окна */
 

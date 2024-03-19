@@ -120,11 +120,19 @@ function displayNewsletter(newsletter) {
     imageElement.alt = 'Newsletter Image';
 
     const sendButton = document.createElement('button');
-    sendButton.textContent = 'Отправить';
+    sendButton.textContent = 'Отправить сейчас';
     sendButton.className = 'send-button';
     sendButton.addEventListener('click', () => {
         openSendModal(newsletter.id);
     });
+
+    const send_datetimeButton = document.createElement('button');
+    send_datetimeButton.textContent = 'Отправить по времени';
+    send_datetimeButton.className = 'send-datetime-button';
+    send_datetimeButton.addEventListener('click', () => {
+        openSendDatetimeModal(newsletter.id);
+    });
+
 
     const deleteButton = document.createElement('button');
     deleteButton.textContent = 'Удалить';
@@ -135,6 +143,7 @@ function displayNewsletter(newsletter) {
 
     // порядок отображение
     NewsletterInfoBlock.appendChild(sendButton);
+    NewsletterInfoBlock.appendChild(send_datetimeButton);
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
     NewsletterInfoBlock.appendChild(topicElement);
@@ -161,7 +170,10 @@ function openSendModal(newsletterId) {
     document.getElementById('sendConfirmationModal').style.display = 'block';
 }
 
-
+function openSendDatetimeModal(newsletterId) {
+    document.getElementById('sendDatetimeModalNewsletterId').textContent = newsletterId;
+    document.getElementById('sendDatetimeConfirmationModal').style.display = 'block';
+}
 
 function confirmDeletion() {
     const newsletterId = document.getElementById('deleteModalNewsletterId').textContent;
@@ -210,6 +222,31 @@ function confirmSend() {
     });
 }
 
+
+function confirmSendDatetime() {
+    const newsletterId = document.getElementById('sendDatetimeModalNewsletterId').textContent;
+    //TODO change url !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //TODO Написать логику отправки через время когда примут pr
+    //TODO change url !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    fetch(`/send_newsletter/${newsletterId}`, {
+        method: 'GET'
+    })
+    .then((send_newsletter_Response) => {
+        if (!send_newsletter_Response.ok) {
+            throw new Error(`HTTP error! Status: ${send_newsletter_Response.status}`);
+        }
+        return send_newsletter_Response.json();
+    })
+    .then((result_send_newsletter) => {
+        window.location.reload();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        closeModal('sendDatetimeConfirmationModal');
+    });
+}
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';

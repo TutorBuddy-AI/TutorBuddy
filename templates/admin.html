@@ -78,5 +78,14 @@
     </div>
 </div>
 
+<div id="sendDatetimeConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('sendDatetimeConfirmationModal')">&times;</span>
+        <p>Вы уверены, что хотите отправить рассылку datetime с ID <span id="sendDatetimeModalNewsletterId"></span>?</p><!-- Поменять текст-->
+        <button class="confirm-button" onclick="confirmSendDatetime()">Да</button>
+        <button class="cancel-button" onclick="closeModal('sendDatetimeConfirmationModal')">Отмена</button>
+    </div>
+</div>
+
 </body>
 </html>
