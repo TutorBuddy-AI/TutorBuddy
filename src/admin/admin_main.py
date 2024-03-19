@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 
 from sqlalchemy import select, desc, text, delete
 
+from src.admin.newsletter_admin.newsletter_admin import Newsletter
 from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import ( app, templates,
     SECRET_KEY_ADMIN, ALGORITHM, image_directory, generate_token_and_redirect
@@ -262,12 +263,12 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_t
 @app.get("/send_newsletter/{newsletter_id}")
 async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_token)):
     """
-    pass
+    Отправляет рассылку по newsletter_id
     """
     query = select(DailyNews).where(DailyNews.id == newsletter_id)
     result = await session.execute(query)
     newsletter = result.scalars().first()
-    #await Newsletter().send_newsletter(newsletter)
+    await Newsletter().send_newsletter(newsletter)
     return {"message":"200"}
 
 

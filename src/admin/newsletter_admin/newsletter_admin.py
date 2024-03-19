@@ -24,7 +24,8 @@ import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
 from markdownify import markdownify as md
-
+import html
+import re
 
 class Newsletter:
     '''Рассылка'''
@@ -40,11 +41,12 @@ class Newsletter:
     async def send_single_article(self, daily_news):
         # Вызов метода, передавая topic, ожидаем лист из tg_id в str
         tg_id_list = await self.user_topic(daily_news.topic)
-        post_text = md(daily_news.message)
+        post_text = await self.formatting_post_text(daily_news)
+        cleaned_post_text = await self.remove_html_tags(post_text)
 
         audio_files = {
-            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
+            'Bot': await TextToSpeech.get_speech_by_voice('Bot', cleaned_post_text)
         }
 
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
@@ -70,16 +72,31 @@ class Newsletter:
             if os.path.exists(file_path):
                 os.unlink(file_path)
 
-    async def send_summary(self, tg_id, daily_news, post_audio_files):
-        img_list = daily_news.image
-        url_img = img_list[0]['url']
-        # Вытаскиваем img куда мы сохранили его в admin панеле
-        path_img = url_img
+    async def remove_html_tags(self,post_text):
+        clean = re.compile('<.*?>')
+        return re.sub(clean, '', post_text)
 
-        post_text = md(daily_news.message)
+    async def formatting_post_text(self,daily_news):
+        post_text = f"{daily_news.title}"
+
+        if daily_news.edition:
+            post_text += f"\n{daily_news.edition}"
+        if daily_news.publication_date:
+            post_text += f"\n{daily_news.publication_date}"
+
+        post_text += f"\n{daily_news.message}"
+        # Заменяем <br> на \n
+        formatting_post_text = html.unescape(post_text.replace('<br>', '\n'))
+        return formatting_post_text
+
+    async def send_summary(self, tg_id, daily_news, post_audio_files):
+        path_img = daily_news.path_to_data
+        post_text = await self.formatting_post_text(daily_news)
+        cleaned_post_text = await self.remove_html_tags(post_text)
+
         post_message = MessageHistory(
             tg_id=tg_id,
-            message=post_text,
+            message=cleaned_post_text,
             role='assistant',
             type='text'
         )
@@ -94,7 +111,7 @@ class Newsletter:
             chat_id=int(tg_id),
             photo=types.InputFile(path_img),
             caption=post_text,
-            parse_mode=ParseMode.MARKDOWN,
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup().row(
                 InlineKeyboardButton(
                     text='Original article ➡️📃',

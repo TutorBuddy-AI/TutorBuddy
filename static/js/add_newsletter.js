@@ -14,20 +14,20 @@ async function openSubAddNewsletter() {
                     <label for="topic">Тема:</label>
                     <div contenteditable="true" id="topic" name="topic" required></div>
 
-                    <label for="url">URL:</label>
-                    <div contenteditable="true" id="url" name="url" required></div>
-
                     <label for="title">Заголовок:</label>
                     <div contenteditable="true" id="title" name="title" required></div>
-
-                    <label for="message">Сообщение:</label>
-                    <div contenteditable="true" id="message" name="message" required></div>
 
                     <label for="edition">Издание(Необязательно):</label>
                     <div contenteditable="true" id="edition" name="edition"></div>
 
                     <label for="publication_date">Дата публикации(Необязательно):</label>
                     <div contenteditable="true" id="publication_date" name="publication_date"></div>
+
+                    <label for="message">Сообщение:</label>
+                    <div contenteditable="true" id="message" name="message" required></div>
+
+                    <label for="url">URL:</label>
+                    <div contenteditable="true" id="url" name="url" required></div>
 
                     <label for="image">Изображение:</label>
                     <input type="file" id="image" name="image" accept="image/*">
@@ -37,6 +37,7 @@ async function openSubAddNewsletter() {
                 <div id="resultContainer"></div>
             </div>
         `;
+
 
         statisticsContainer.appendChild(AddNewsletterContainer);
         subSidebar.appendChild(statisticsContainer);
@@ -78,7 +79,7 @@ async function openSubAddNewsletter() {
                         publication_date: publication_date,
                         image: imageBase64,
                     };
-                    console.log(requestData)
+
                     try {
                         const response = await fetch('/save-newsletter', {
                             method: 'POST',
@@ -89,7 +90,7 @@ async function openSubAddNewsletter() {
                         });
 
                         const result = await response.json();
-                        console.log(result);
+
 
                         const resultContainer = document.getElementById('resultContainer');
                         resultContainer.innerHTML = `<p class="success-add-newsletter">${JSON.stringify(result)}</p>`;
@@ -138,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const selection = window.getSelection();
         const isContentEditable = selection.anchorNode && selection.anchorNode.parentElement && selection.anchorNode.parentElement.getAttribute('contenteditable') === 'true';
 
-        console.log('Is content editable:', isContentEditable);
 
         if (isContentEditable && selection.toString().length > 0 && !isButtonsShown) {
             // Показываем кнопки только если что-то выделено это внутри контейнера с contenteditable и кнопки еще не были показаны

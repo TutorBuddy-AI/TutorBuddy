@@ -133,17 +133,17 @@ function displayNewsletter(newsletter) {
         openDeleteModal(newsletter.id);
     });
 
-
+    // порядок отображение
     NewsletterInfoBlock.appendChild(sendButton);
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
-    NewsletterInfoBlock.appendChild(title_infoElement);
-    NewsletterInfoBlock.appendChild(messageElement);
-    NewsletterInfoBlock.appendChild(pathToDataElement);
     NewsletterInfoBlock.appendChild(topicElement);
-    NewsletterInfoBlock.appendChild(publication_dateElement);
+    NewsletterInfoBlock.appendChild(title_infoElement);
     NewsletterInfoBlock.appendChild(editionElement);
+    NewsletterInfoBlock.appendChild(publication_dateElement);
+    NewsletterInfoBlock.appendChild(messageElement);
     NewsletterInfoBlock.appendChild(urlElement);
+    NewsletterInfoBlock.appendChild(pathToDataElement);
     NewsletterInfoBlock.appendChild(imageElement);
 
 
