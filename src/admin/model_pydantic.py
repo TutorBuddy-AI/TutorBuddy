@@ -9,9 +9,10 @@ class NewsletterData(BaseModel):
     publication_date: str = ''
     title: str
 
-class ChangePassword(BaseModel):
-    username: str
-    new_password: str
-    confirm_password: str
+
+class ChangeNewsletter(BaseModel):
+    newsletter_id: int
+    column: str
+    changed_text: str
 
 

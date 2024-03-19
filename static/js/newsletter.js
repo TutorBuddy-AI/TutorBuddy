@@ -85,7 +85,6 @@ async function openSubNewsletter() {
 function displayNewsletter(newsletter) {
     const NewsletterInfoBlock = document.createElement('div');
     NewsletterInfoBlock.className = 'newsletter-info-block';
-
     const titleElement = document.createElement('h2');
     titleElement.textContent = 'Информация о рассылке';
 
@@ -146,17 +145,80 @@ function displayNewsletter(newsletter) {
     NewsletterInfoBlock.appendChild(send_datetimeButton);
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
-    NewsletterInfoBlock.appendChild(topicElement);
-    NewsletterInfoBlock.appendChild(title_infoElement);
-    NewsletterInfoBlock.appendChild(editionElement);
-    NewsletterInfoBlock.appendChild(publication_dateElement);
-    NewsletterInfoBlock.appendChild(messageElement);
-    NewsletterInfoBlock.appendChild(urlElement);
+
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'topic', newsletter.topic));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'title', newsletter.title));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'edition', newsletter.edition));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'publication_date', newsletter.publication_date));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'message', newsletter.message));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'url', newsletter.url));
+
     NewsletterInfoBlock.appendChild(pathToDataElement);
     NewsletterInfoBlock.appendChild(imageElement);
 
 
     document.body.appendChild(NewsletterInfoBlock);
+}
+
+function handleClick(event, newsletter, columnName) {
+    openChangeTextModal(columnName, event.target.textContent);
+
+    // Получаем кнопку "Сохранить" из модального окна
+    const changeTextSaveBtn = document.getElementById("changeTextSaveBtn");
+
+    // кнопка "Сохранить"
+    changeTextSaveBtn.onclick = function() {
+        // Получаем новый текст из поля ввода в модальном окне
+        const newText = document.getElementById("changeTextNewText").value;
+
+        // чтобы текст не был пустым
+        if (newText.trim() !== "") {
+            const requestData = {
+                newsletter_id: newsletter.id,
+                column: columnName,
+                changed_text: newText
+            };
+
+            fetch('/change_newsletter_info', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Не удалось изменить текст.');
+                }
+                // Перезагружаем страницу
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось изменить текст. Пожалуйста, попробуйте еще раз.');
+            });
+        } else {
+            alert("Пожалуйста, введите текст.");
+        }
+    };
+}
+
+function openChangeTextModal(columnName, currentValue) {
+    changeTextModal.style.display = "block";
+    document.getElementById("changeTextColumnName").textContent = columnName;
+    document.getElementById("changeTextNewText").value = currentValue;
+}
+
+
+// создания элемента с возможностью изменения текста при клике
+function createEditableElement(newsletter, columnName, textContent) {
+    const element = document.createElement('p');
+    element.innerHTML = `${columnName}: <span class="editable-text">${textContent}</span>`;
+    element.addEventListener('click', event => {
+        handleClick(event, newsletter, columnName);
+    });
+    element.style.cursor = 'pointer';
+    return element;
 }
 
 

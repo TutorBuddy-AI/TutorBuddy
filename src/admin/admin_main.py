@@ -15,7 +15,7 @@ from src.admin.config_admin import ( app, templates,
     SECRET_KEY_ADMIN, ALGORITHM, image_directory, generate_token_and_redirect
 )
 
-from src.admin.model_pydantic import NewsletterData, ChangePassword
+from src.admin.model_pydantic import NewsletterData, ChangeNewsletter
 from src.database.models import User, MessageHistory, DailyNews
 
 from src.database import session
@@ -233,6 +233,30 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_va
 
     return JSONResponse(content=newsletter_info)
 
+
+@app.put("/change_newsletter_info")
+async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = Depends(is_valid_token)):
+    """
+    Изменение DailyNews.
+    Пример запроса:
+    ```json
+    {
+        "newsletter_id": 1,
+        "column": "topic",
+        "changed_text": "Music"
+    }
+    ```
+    """
+    try:
+        query = select(DailyNews).where(DailyNews.id == newsletter.newsletter_id)
+        result = await session.execute(query)
+        newsletter_info = result.scalars().first()
+        setattr(newsletter_info, newsletter.column, newsletter.changed_text)
+        await session.commit()
+
+        return {"message": "Успешно изменено"}
+    except Exception as e:
+        return JSONResponse(content={"error": f"Не удалось изменить. {str(e)}"}, status_code=500)
 
 @app.delete("/del_newsletter/{newsletter_id}")
 async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_token)):
