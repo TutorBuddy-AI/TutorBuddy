@@ -6,7 +6,6 @@ from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
 from jose import JWTError, jwt
-
 from sqlalchemy import select, desc, text, delete
 
 from src.admin.newsletter_admin.newsletter_admin import Newsletter
@@ -15,8 +14,8 @@ from src.admin.config_admin import ( app, templates,
     SECRET_KEY_ADMIN, ALGORITHM, image_directory, generate_token_and_redirect
 )
 
-from src.admin.model_pydantic import NewsletterData, ChangeNewsletter
-from src.database.models import User, MessageHistory, DailyNews
+from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
+from src.database.models import User, MessageHistory, DailyNews, MessageForUsers
 
 from src.database import session
 
@@ -46,6 +45,10 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
 
     return True
 
+async def is_authenticated(is_valid: bool = Depends(is_valid_token)):
+    if not is_valid:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
 
 @app.get("/admin", response_model=str)
 async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
@@ -56,15 +59,13 @@ async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token))
     return templates.TemplateResponse("admin.html", {"request": request})
 
 @app.post("/admin")
-async def admin_page_post(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def admin_page_post(request: Request, is_valid: bool = Depends(is_authenticated)):
     """после login идет post запрос на admin
     """
-    if not is_valid:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     return templates.TemplateResponse("admin.html", {"request": request})
 
 @app.get("/get_users")
-async def get_users(is_valid: bool = Depends(is_valid_token)):
+async def get_users(is_valid: bool = Depends(is_authenticated)):
     """
     Показывает начальную информацию о пользователях.
     Пример успешного ответа:
@@ -113,7 +114,7 @@ async def get_users(is_valid: bool = Depends(is_valid_token)):
 @app.post("/save-newsletter")
 async def save_newsletter(
     newsletter_data: NewsletterData,
-    is_valid: bool = Depends(is_valid_token)
+    is_valid: bool = Depends(is_authenticated)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -158,13 +159,54 @@ async def save_newsletter(
         session.add(new_newsletter)
         await session.commit()
 
-        return JSONResponse(content={"message": "Рассылка успешно сохранена"})
+        return JSONResponse(content={"message": "Newsletter successfully saved"})
     except Exception as e:
-        return JSONResponse(content={"error": f"Не удалось сохранить рассылку. {str(e)}"}, status_code=500)
+        return JSONResponse(content={"error": f"Failed to save the newsletter. {str(e)}"}, status_code=500)
 
+
+@app.post("/save-message")
+async def save_message(
+    message_data: MessageData,
+    is_valid: bool = Depends(is_authenticated)
+):
+    """
+    Сохранение рассылки в базу DailyNews.
+    Пример запроса:
+    ```json
+    {
+        "message": "Подробности в нашей новой сообщений!",
+        "image": "base64_encoded_image_data"
+    }
+    ```
+    """
+    try:
+
+        message = message_data.message
+
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        image_filename = f"message_image_{timestamp}.jpg"
+        image_path = os.path.join(image_directory, image_filename)
+
+        image_data = message_data.image
+        image_data_decoded = base64.b64decode(image_data)
+
+        with open(image_path, "wb") as image_file:
+            image_file.write(image_data_decoded)
+
+        new_message = MessageForUsers(
+            message=message,
+            path_to_data=image_path,
+        )
+
+        session.add(new_message)
+        await session.commit()
+
+        return JSONResponse(content={"message": "Message successfully saved"})
+    except Exception as e:
+        return JSONResponse(content={"error": f"Failed to save the newsletter. {str(e)}"}, status_code=500)
 
 @app.get("/get_newsletters")
-async def get_newsletters(is_valid: bool = Depends(is_valid_token)):
+async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
     """
     Возвращает информацию о всех рассылках пользователей.
     Пример успешного ответа:
@@ -201,7 +243,7 @@ async def get_newsletters(is_valid: bool = Depends(is_valid_token)):
 
 
 @app.get("/get_newsletter_info/{newsletter_id}")
-async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_valid_token)):
+async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
     """
     Возвращает информацию о рассылке по её идентификатору.
     Пример успешного ответа:
@@ -235,7 +277,7 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_va
 
 
 @app.put("/change_newsletter_info")
-async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = Depends(is_valid_token)):
+async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = Depends(is_authenticated)):
     """
     Изменение DailyNews.
     Пример запроса:
@@ -259,7 +301,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
         return JSONResponse(content={"error": f"Не удалось изменить. {str(e)}"}, status_code=500)
 
 @app.delete("/del_newsletter/{newsletter_id}")
-async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_token)):
+async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
     """
     Удаление рассылки по идентификатору newsletter_id.
     Пример ответа:
@@ -285,7 +327,7 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_t
 
 
 @app.get("/send_newsletter/{newsletter_id}")
-async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_token)):
+async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
     """
     Отправляет рассылку по newsletter_id
     """
@@ -293,12 +335,23 @@ async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_valid_
     result = await session.execute(query)
     newsletter = result.scalars().first()
     await Newsletter().send_newsletter(newsletter)
-    return {"message":"200"}
+    return {"message":"Рассылка успешно отправлена"}
 
+@app.post("/send_newsletter_datetime")
+async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: bool = Depends(is_authenticated)):
+    """
+    Отправляет рассылку по newsletter_id в дату datetime
+    """
+    query = select(DailyNews).where(DailyNews.id == newsletter_data.newsletter_id)
+    result = await session.execute(query)
+    newsletter = result.scalars().first()
+
+    print(newsletter_data.datetime_iso)
+    return
 
 
 @app.get("/get_message_history_user/{tg_id}")
-async def get_message_history(tg_id: int, is_valid: bool = Depends(is_valid_token)):
+async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
     """
     Получение истории сообщений для пользователя с указанным tg_id.
     Пример успешного ответа:
@@ -346,7 +399,7 @@ async def get_message_history(tg_id: int, is_valid: bool = Depends(is_valid_toke
 
 
 @app.get("/get_info_user/{tg_id}")
-async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_valid_token)):
+async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_authenticated)):
     """
     Получение информации о пользователе с указанным tg_id.
     Пример успешного ответа:
@@ -408,7 +461,7 @@ async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_valid_token))
 
 
 @app.get("/get_statistic")
-async def get_statistic(is_valid: bool = Depends(is_valid_token)):
+async def get_statistic(is_valid: bool = Depends(is_authenticated)):
     """
     Получение статистики по приложению.
     Пример успешного ответа:

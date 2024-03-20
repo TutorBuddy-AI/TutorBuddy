@@ -83,6 +83,7 @@ async function openSubStatistic() {
             closeBlock('.dialog-block');
             closeBlock('.profile-block');
             closeBlock('.newsletter-info-block');
+            closeBlock('.add-message-block');
 
         } catch (error) {
             console.error('Error fetching data:', error);

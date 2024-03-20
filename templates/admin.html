@@ -9,14 +9,20 @@
     <link rel="stylesheet" href="static/css/statistic.css">
     <link rel="stylesheet" href="static/css/newsletter.css">
     <link rel="stylesheet" href="static/css/add_newsletter.css">
+    <link rel="stylesheet" href="static/css/add_message.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/static/js/script.js?v=1.0"></script>
     <script src="/static/js/dialog.js?v=1.0"></script>
     <script src="/static/js/profiles.js?v=1.0"></script>
     <script src="/static/js/statistic.js?v=1.0"></script>
     <script src="/static/js/newsletter.js?v=1.0"></script>
+    <script src="/static/js/editor_message.js?v=1.0"></script>
     <script src="/static/js/add_newsletter.js?v=1.0"></script>
+    <script src="/static/js/add_message.js?v=1.0"></script>
+
 
     <title>Admin Panel</title>
 </head>
@@ -46,13 +52,23 @@
             Статистика
         </a>
         <a href="#" onclick="openSubNewsletter()">
-            <img width="18" height="18" src="https://img.icons8.com/ios/50/telegram-app.png" alt="newsletter"/>
-            Рассылки
+        <img width="18" height="18" src="https://img.icons8.com/ios/50/play-property.png" alt="play-property"/>
+            Отправить новость
         </a>
         <a href="#" onclick="openSubAddNewsletter()">
-            <img width="18" height="18" src="https://img.icons8.com/ios/50/mailing.png" alt="mailing"/>
-            Добавить рассылку
+        <img width="18" height="18" src="https://img.icons8.com/ios/50/add-property.png" alt="add-property"/>
+            Добавить новость
         </a>
+<!--        <a href="#" onclick="openSubNewsletter()">-->
+<!--        <img width="18" height="18" src="https://img.icons8.com/ios/50/send&#45;&#45;v1.png" alt="send&#45;&#45;v1"/>-->
+<!--            Отправить сообщение-->
+<!--        </a>-->
+        <!--- WORK !-->
+        <a href="#" onclick="openSubAdd_Message()">
+        <img width="18" height="18" src="https://img.icons8.com/ios/50/new-message.png" alt="new-message"/>
+            Добавить сообщение
+        </a>
+        <!--- WORK !-->
         <a href="/logout">
             <img width="18" height="18" src="https://img.icons8.com/ios/50/exit--v1.png" alt="exit--v1"/>
             Выйти
@@ -78,14 +94,21 @@
     </div>
 </div>
 
+
+
 <div id="sendDatetimeConfirmationModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('sendDatetimeConfirmationModal')">&times;</span>
-        <p>Вы уверены, что хотите отправить рассылку datetime с ID <span id="sendDatetimeModalNewsletterId"></span>?</p><!-- Поменять текст-->
+        <p>Выберите дату и время через календарь по московскому времени когда отправить рассылку с ID <span id="sendDatetimeModalNewsletterId"></span></p>
+        <div>
+            <label for="datetimePicker">Дата и время:</label>
+            <input type="text" id="datetimePicker" name="datetimePicker" required>
+        </div>
         <button class="confirm-button" onclick="confirmSendDatetime()">Да</button>
         <button class="cancel-button" onclick="closeModal('sendDatetimeConfirmationModal')">Отмена</button>
     </div>
 </div>
+
 
 
 <div id="changeTextModal" class="change-text-modal">

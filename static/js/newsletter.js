@@ -17,7 +17,7 @@ async function openSubNewsletter() {
             titleContainer.className = 'title-container';
 
             const titleElement = document.createElement('h2');
-            titleElement.textContent = 'Рассылки';
+            titleElement.textContent = 'Новости';
             titleElement.style.fontWeight = 'bold';
             titleElement.style.marginLeft = '10px';
 
@@ -74,6 +74,7 @@ async function openSubNewsletter() {
             closeBlock('.profile-block');
             closeBlock('.statistic-block');
             closeBlock('.newsletter-info-block');
+            closeBlock('.add-message-block');
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -287,22 +288,30 @@ function confirmSend() {
 
 function confirmSendDatetime() {
     const newsletterId = document.getElementById('sendDatetimeModalNewsletterId').textContent;
-    //TODO change url !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //TODO Написать логику отправки через время когда примут pr
-    //TODO change url !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    fetch(`/send_newsletter/${newsletterId}`, {
-        method: 'GET'
+    const datetime = new Date(document.getElementById('datetimePicker').value).toISOString();
+    console.log(datetime)
+    const requestData = {
+        newsletter_id: newsletterId,
+        datetime_iso: datetime,
+    };
+
+    fetch('/send_newsletter_datetime', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
     })
-    .then((send_newsletter_Response) => {
-        if (!send_newsletter_Response.ok) {
-            throw new Error(`HTTP error! Status: ${send_newsletter_Response.status}`);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to send newsletter');
         }
-        return send_newsletter_Response.json();
+        return response.json();
     })
-    .then((result_send_newsletter) => {
+    .then(result => {
         window.location.reload();
     })
-    .catch((error) => {
+    .catch(error => {
         console.error('Error:', error);
     })
     .finally(() => {
@@ -310,6 +319,18 @@ function confirmSendDatetime() {
     });
 }
 
+
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Calendar
+    flatpickr("#datetimePicker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        defaultDate: "today",
+        timezone: "Europe/Moscow",
+        time_24hr: true
+    });
+});

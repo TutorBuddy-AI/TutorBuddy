@@ -18,6 +18,8 @@ let subDialogsExists = false;
 let subStatisticExists = false;
 let subNewsletterExists = false;
 let subAddNewsletterExists = false;
+let subAddMessageExists = false;
+
 
 function closeSubSidebar() {
     const subSidebar = document.querySelector('.sub-sidebar');
@@ -25,6 +27,7 @@ function closeSubSidebar() {
     const newsletter_block = document.querySelector('.newsletter-block');
     const add_newsletter_block = document.querySelector('.add-newsletter-block');
     const newsletter_info_block = document.querySelector('.newsletter-info-block');
+    const add_message_block = document.querySelector('.add-message-block');
 
     if (subSidebar) {
         subSidebar.remove();
@@ -38,10 +41,14 @@ function closeSubSidebar() {
     if (add_newsletter_block) {
         add_newsletter_block.remove();
     }
+    if (add_message_block) {
+        add_message_block.remove();
+    }
     subProfilesExists = false;
     subDialogsExists = false;
     subStatisticExists = false;
     subNewsletterExists = false;
     subAddNewsletterExists = false;
+    subAddMessageExists = false;
 }
 

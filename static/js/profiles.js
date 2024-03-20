@@ -78,7 +78,7 @@ async function openSubProfiles() {
             closeBlock('.profile-block');
             closeBlock('.statistic-block');
             closeBlock('.newsletter-info-block');
-
+            closeBlock('.add-message-block');
         } catch (error) {
             console.error('Error fetching data:', error);
         }
