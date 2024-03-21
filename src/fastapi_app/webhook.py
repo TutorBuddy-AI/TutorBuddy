@@ -2,7 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
-from src.commands.start import start_router
+from src.commands.start import start_router, start_router_person
 from src.config import config
 from src.config import dp, bot
 from src.utils.newsletter.newsletter import Newsletter
@@ -32,10 +32,21 @@ from src.commands.audio_communication import audio_comm_router
 
 app = FastAPI()
 
-dp.include_routers(go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
-                   edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-                   summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
-                   start_router)
+routers = []
+
+if config.BOT_TYPE == "original":
+    routers = [go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+               edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
+               summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
+               start_router]
+else:
+    routers = [go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+               edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
+               summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
+               start_router_person]
+
+
+dp.include_routers(*routers)
 
 
 @app.on_event("startup")
@@ -52,18 +63,25 @@ async def on_startup():
             drop_pending_updates=True
         )
 
-    bot_commands = [
+    bot_commands_1 = [
         BotCommand(command="/restart", description="⚙ Restart the bot"),
         BotCommand(command="/cancel", description="🔧Cancel current state (use if something went wrong)"),
         BotCommand(command="/scenario", description="🎬 Choose a scenario (soon)"),
         BotCommand(command="/changetopic", description="🔁 Change topic"),
         BotCommand(command="/editprofile", description="✏ Edit profile"),
-        BotCommand(command="/persona", description="👥 Choose a persona to chat"),
+    ]
+    bot_commands_2 = [
         BotCommand(command="/summaries", description="📰 Summaries"),
         BotCommand(command="/all_mistakes", description="🔴 Show all my mistakes"),
         BotCommand(command="/support", description="👨💻 Contact support"),
-        BotCommand(command="/feedback", description="💬 Leave feedback"),
+        BotCommand(command="/feedback", description="💬 Leave feedback")
     ]
+    if config.BOT_TYPE == "personal":
+        bot_commands = bot_commands_1 + bot_commands_2
+    else:
+        bot_commands = (bot_commands_1
+                        + [BotCommand(command="/persona", description="👥 Choose a persona to chat")]
+                        + bot_commands_2)
     await bot.set_my_commands(bot_commands)
 
 

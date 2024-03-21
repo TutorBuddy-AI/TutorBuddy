@@ -15,3 +15,28 @@ tutorbots_pack = {
     "how_you_doin": "CAACAgIAAxkBAAEpPOllvQp3DfJbYNpCrXaKBqLPMbvoowAC1DwAAvSDgEmCnsIiSAe7BDQE",
     "fabulous": "CAACAgIAAxkBAAEphbllz_9Lt7tqngJiMxrxtx8-5INQ9QACVUAAAhLtKEq4duPe2WLHTDQE"
 }
+
+aa_linguas_pack = {
+    "problem": "",
+    "miss_you": "",
+    "yas": "",
+    "you_rock": "",
+    "how_you_doin": "",
+    "fabulous": ""
+}
+
+oksanas_pack = {
+    "problem": "CAACAgIAAxkBAAEqXkhl-wT79qVPkbE6FvD1ZEdvUaNitQADQgACsJZxS6kkMrHZeZqZNAQ",
+    "miss_you": "CAACAgIAAxkBAAEqXkxl-wURk4e5RjYliM0cinb82uflkQAC7kYAAs3RcUt749DWfJu-0TQE",
+    "yas": "CAACAgIAAxkBAAEqXjxl-wRCgxggWGXgbmd8wsyY2CugbgACY0YAAkadcEsnvZ6LuGEe9TQE",
+    "you_rock": "CAACAgIAAxkBAAEqXkZl-wTbA3qbJS_a3U3LY1Mau3Wz7AACyUcAArfPcUu0fdprWC9nTDQE",
+    "how_you_doin": "CAACAgIAAxkBAAEqXkRl-wTDHf4E_od_e98PMcDdvni1egACSEAAArydcUvryFJpyFB9jjQE",
+    "fabulous": "CAACAgIAAxkBAAEqXkBl-wSrVt8uEgKDzCSfVHKUM6s_8QACw0IAAvy5cEuGXaGFZsZRqzQE"
+}
+
+pack_map = {
+    "AA_Lingua": aa_linguas_pack,
+    "Oksana": oksanas_pack,
+    "Anastasia": anastasias_pack,
+    "TutorBuddy": tutorbots_pack
+}

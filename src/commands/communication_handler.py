@@ -22,6 +22,7 @@ from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserCreateMessage, UserService
+from utils.transcriber.text_to_speech import TextToSpeech
 
 
 class CommunicationHandler:
@@ -33,17 +34,19 @@ class CommunicationHandler:
         self.message_text = message.text
         self.chat_id = message.chat.id
         self.speaker: Optional[str] = None
+        self.speaker_short_name: Optional[str] = None
         self.sticker_sender: Optional[StickerSender] = None
 
     async def init(self):
         user_service = UserService()
-        user_info = await user_service.get_user_info(tg_id=self.chat_id)
-        self.speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+        user_info = await user_service.get_user_person(tg_id=str(self.chat_id))
+        self.speaker = user_info["speaker_id"]
+        self.speaker_short_name = user_info["speaker_short_name"]
 
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
     async def handle_audio_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker_short_name} thinks… Please wait")
 
         await self.bot.send_chat_action(chat_id=self.chat_id, action='record_audio')
         message_text = await SpeechToText(file_id=self.message.voice.file_id).get_text()
@@ -64,7 +67,7 @@ class CommunicationHandler:
         await self.save_render_in_context(render)
 
     async def handle_text_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker_short_name} thinks… Please wait")
         await self.bot.send_chat_action(chat_id=self.chat_id, action='typing')
 
         answer = await self.prepare_answer(self.message_text, "text")
@@ -80,6 +83,7 @@ class CommunicationHandler:
         ).render()
 
         message_history = await UserService().count_message_history(self.chat_id)
+        # ToDo fix it
         await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
 
 
@@ -121,15 +125,9 @@ class CommunicationHandler:
         await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
 
     async def render_text_answer(self, render: Render):
-        user_info = await UserService().get_user_info(self.chat_id)
-        user_speaker = user_info['speaker']
         additional_menu_message = None
-        if user_speaker == 'Anastasia':
-            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "TutorBuddy":
-            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        else:
-            raise Exception("Unknown speaker")
+
+        audio = await TextToSpeech(tg_id=str(self.chat_id), prompt=render.answer_text).get_speech()
 
         if render.is_generation_successful:
             with AudioConverter(audio) as ogg_file:
@@ -153,15 +151,8 @@ class CommunicationHandler:
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
 
     async def render_audio_answer(self, render: Render):
-        user_info = await UserService().get_user_info(self.chat_id)
-        user_speaker = user_info['speaker']
 
-        if user_speaker == 'Anastasia':
-            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "TutorBuddy":
-            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        else:
-            raise Exception("Unknown speaker")
+        audio = await TextToSpeech(tg_id=str(self.chat_id), prompt=render.answer_text).get_speech()
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(

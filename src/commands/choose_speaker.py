@@ -1,6 +1,6 @@
 from aiogram.fsm.context import FSMContext
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, Message
 
 from src.config import bot
 from src.utils.answer import AnswerRenderer
@@ -12,11 +12,10 @@ from src.utils.user import UserService
 from aiogram import types, F, Router
 
 from src.states.form import FormInitTalk
-from src.texts.texts import get_choice_is_done, get_start_talk
+from src.texts.texts import get_choice_is_done, get_start_talk, get_start_person_talk, get_check_text
 from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
-
 
 
 choose_speaker_router = Router(name=__name__)
@@ -33,7 +32,8 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
 
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
-    await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup,
+    await bot.send_message(
+        tg_id, get_choice_is_done(), reply_markup=markup,
         parse_mode=ParseMode.HTML)
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
@@ -80,11 +80,42 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     await state.set_state(FormInitTalk.init_user_message)
 
 
+async def continue_dialogue_with_person(message: Message, state: FSMContext):
+    tg_id = message.chat.id
+    user_service = UserService()
+
+    user_info = await user_service.get_user_person(tg_id=str(tg_id))
+
+    welcome_text = get_start_person_talk(user_info.speaker_short_name)
+    audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
+    audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
+
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            FSInputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{welcome_text}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=audio_markup)
+
+    check_text = get_check_text()
+    audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
+
+    with AudioConverter(audio) as ogg_file:
+        await bot.send_voice(
+            message.chat.id,
+            FSInputFile(ogg_file),
+            caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
+            parse_mode=ParseMode.HTML,
+            reply_markup=audio_markup)
+    await state.set_state(FormInitTalk.init_user_message)
+
+
 @choose_speaker_router.message(FormInitTalk.init_user_message, F.text)
 async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
-    user_info = await user_service.get_user_info(tg_id=message.chat.id)
-    speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+    user_info = await user_service.get_user_person(tg_id=message.chat.id)
+    speaker = user_info.speaker_short_name
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     await start_small_talk(message, state, wait_message, message_text=message.text)
@@ -93,8 +124,8 @@ async def start_talk(message: types.Message, state: FSMContext):
 @choose_speaker_router.message(FormInitTalk.init_user_message, F.voice)
 async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
-    user_info = await user_service.get_user_info(tg_id=message.chat.id)
-    speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+    user_info = await user_service.get_user_person(tg_id=message.chat.id)
+    speaker = user_info.speaker_short_name
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     message_text = await SpeechToText(file_id=message.voice.file_id).get_text()

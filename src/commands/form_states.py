@@ -1,19 +1,12 @@
 import asyncio
 
-from aiogram.filters import CommandStart
-
 from src.database import session
 from sqlalchemy import select
 
 from src.config import bot
-from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
-from src.texts.texts import get_welcome_text, get_meet_nastya_text, \
-    get_other_native_language_question, get_incorrect_native_language_question, \
-    get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, \
-    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
-from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_welcome_text, get_other_native_language_question, get_incorrect_native_language_question, \
+from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
     get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
@@ -25,15 +18,13 @@ from src.database.models.setting import Setting
 
 from src.utils.user import UserService, UserHelper
 
-from aiogram.dispatcher import FSMContext
-from aiogram import types, md
-from aiogram.types import InputFile
-from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.fsm.context import FSMContext
-from aiogram import types, md, Router, F
-from aiogram.types import InputFile, FSInputFile
+from aiogram import types, Router, F
+from aiogram.types import FSInputFile, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums.parse_mode import ParseMode
+
+from utils.user.schemas import UserInfo
 
 form_router = Router(name=__name__)
 
@@ -45,7 +36,6 @@ async def clean_messages(chat_id: str, message_id: str):
         pass
 
 
-@form_router.callback_query(F.data == "start")
 async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
     await bot.send_photo(
@@ -229,7 +219,7 @@ async def process_other_topic_handler(message: types.Message, state: FSMContext)
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
-    user_info = await UserHelper().group_user_info(state_user_info=state_data, message=message)
+    user_info: UserInfo = await UserHelper().group_user_info(state_user_info=state_data, message=message)
     # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
     great_markup = AnswerRenderer.get_markup_text_translation_standalone()
 
@@ -241,6 +231,9 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me.",
         parse_mode=ParseMode.HTML,
         reply_markup=great_markup)
+
+
+async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
     await asyncio.sleep(1)
     wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()

@@ -23,6 +23,16 @@ def get_welcome_text():
         "Let's get started! 🏄🏽‍♀️")
 
 
+def get_person_welcome_text():
+    return (
+        f"Hello! With this Telegram bot, you now have access to a world of immersive English practice, "
+        f"right at your fingertips 24/7. "
+        f"We'll work together to take your language skills to new heights through interactive activities, "
+        f"real-world scenarios, and lots of conversation practice."
+        f"So let's get started! I'm just a message away whenever you need practice, "
+        f"feedback or simply someone to chat with in English ♀️")
+
+
 def get_lets_know_each_other():
     return (
         "Let's get to know each other first"
@@ -102,10 +112,25 @@ def get_greeting_anastasia():
 
 def get_start_talk(is_bot: bool, name: str):
     prefix = f"Hi, {name}! " if is_bot else ""
+    return prefix + get_check_text()
+
+
+def get_check_text():
     return (
-            prefix + "The best way to practice spoken English is to speak! "
-            "Go ahead and send me a voice message or text me. "
-            "Tell me, how is your day going?")
+        "The best way to practice spoken English is to speak! "
+        "Go ahead and send me a voice message or text me. "
+        "Tell me, how is your day going?")
+
+
+def get_start_person_talk(person_name: str):
+    return (
+            f"My name is {person_name} and I'm a certified English teacher. "
+            "I specialize in teaching Business English to tech professionals, IT and digital experts and entrepreneurs."
+            "\n\n"
+            "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
+            "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
+            "and even have friendly debates! "
+            "This personal touch will truly level up your English fluency.")
 
 
 def get_meet_bot_text():

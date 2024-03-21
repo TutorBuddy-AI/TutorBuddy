@@ -2,14 +2,14 @@ import traceback
 from typing import Optional
 
 from sqlalchemy import select
+
+from config import config
 from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
 import logging
-from aiogram import types
 from src.database.models.message_history import MessageHistory
-from src.database.models.setting import Setting
 from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
@@ -47,11 +47,15 @@ class Newsletter:
         # Вызов метода, передавая topic, ожидаем лист из tg_id в str
         tg_id_list = await self.user_topic(daily_news.topic)
         post_text = md(daily_news.message)
-
-        audio_files = {
-            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
-        }
+        if config.BOT_TYPE == "original":
+            audio_files = {
+                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+                'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+            }
+        else:
+            audio_files = {
+                config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, post_text),
+            }
 
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
@@ -101,13 +105,14 @@ class Newsletter:
             photo=FSInputFile(path_img),
             caption=post_text,
             parse_mode=ParseMode.MARKDOWN,
-            reply_markup=InlineKeyboardMarkup().row(
-                InlineKeyboardButton(
-                    text='Original article ➡️📃',
-                    web_app=WebAppInfo(),
-                    url=daily_news.url)
-            ).row(post_translate_button)
-        )
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(
+                        text='Original article ➡️📃',
+                        web_app=WebAppInfo(),
+                        url=daily_news.url)],
+                    [post_translate_button]]
+        ))
 
         if voice == "Anastasia":
             file_path = post_audio_files[0]

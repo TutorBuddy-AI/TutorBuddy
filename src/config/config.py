@@ -5,9 +5,13 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from pathlib import Path
 
-dotenv_path = Path('.env.local')
-load_dotenv(dotenv_path=dotenv_path)
+CONF_FILE_PATH = os.environ.get("CONF_FILE_PATH")
 
+dotenv_path = Path('.env.local')
+load_dotenv(dotenv_path=CONF_FILE_PATH)
+
+BOT_TYPE = os.environ.get("BOT_TYPE")
+BOT_PERSON = os.environ.get("BOT_PERSON")
 BOT_API_TOKEN = os.environ.get("BOT_API_TOKEN")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
@@ -24,6 +28,8 @@ class Config(BaseModel):
     SKIP_UPDATES: bool = True
     APP_HOST: str = APP_HOST
     APP_PORT: int = APP_PORT
+    BOT_TYPE: str = BOT_TYPE
+    BOT_PERSON: str = BOT_PERSON
     BOT_API_TOKEN: str = BOT_API_TOKEN
     DATABASE_URL: str = DATABASE_URL
     WEBHOOK_URL: str = WEBHOOK_URL
