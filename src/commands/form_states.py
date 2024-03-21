@@ -243,17 +243,21 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
 
 async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
+    await asyncio.sleep(1)
     wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
+
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
+    meet_bot_text = get_meet_bot_text()
+    audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
+
     await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/meet_bot.png'),
         caption=get_meet_bot_message(),
         parse_mode=ParseMode.HTML,
         reply_markup=caption_markup)
+    await bot.delete_message(message.chat.id, wait_message.message_id)
 
-    meet_bot_text = get_meet_bot_text()
-    audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(
             message.chat.id,
@@ -261,6 +265,7 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
             parse_mode=ParseMode.HTML
         )
 
+    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
     meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
     audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
     await bot.send_photo(

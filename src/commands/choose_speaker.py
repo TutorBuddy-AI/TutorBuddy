@@ -82,17 +82,18 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
 
 async def continue_dialogue_with_person(message: Message, state: FSMContext):
     tg_id = message.chat.id
+
     user_service = UserService()
 
     user_info = await user_service.get_user_person(tg_id=str(tg_id))
-
     speaker = user_info["speaker_short_name"]
-    welcome_text = get_start_person_talk(speaker)
-    audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
-    audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
 
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
+
+    welcome_text = get_start_person_talk(speaker)
+    audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
+    audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
 
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(

@@ -17,12 +17,12 @@ tutorbots_pack = {
 }
 
 aa_linguas_pack = {
-    "problem": "",
-    "miss_you": "",
-    "yas": "",
-    "you_rock": "",
-    "how_you_doin": "",
-    "fabulous": ""
+    "problem": "CAACAgIAAxkBAAEqYOpl-_mmfv_wDAgHmXwxx1UziTn5YAACRk4AAhgAAdhLXXIrU1Vk44w0BA",
+    "miss_you": "CAACAgIAAxkBAAEqYORl-_j9G3Bx5Za1AYVzRq4Dy9iASAACMU4AAmIGuUvRKuwRMbed2DQE",
+    "yas": "CAACAgIAAxkBAAEqYOhl-_l8gC1bH_KMl_-FIqZnqWA_yQACb0cAAs1W2EtQqIepHdAN8jQE",
+    "you_rock": "CAACAgIAAxkBAAEqYOJl-_i_X2VYI8KIFg3UlhHO2p2f_QAC70gAAlL32EvvZy5jtZ4qDjQE",
+    "how_you_doin": "CAACAgIAAxkBAAEqYOZl-_k3GzI_IjsVckshOQABfaafQWAAAlNFAAKBqNlL7Nnx37LNCKM0BA",
+    "fabulous": "CAACAgIAAxkBAAEqYOBl-_h54uQFt2bk23opHxJ1vuS2DQACdE4AAgUr2UutH99hCCAE0jQE"
 }
 
 oksanas_pack = {
