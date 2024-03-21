@@ -2,6 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
+from commands.scenario.scenario import scenario_router
 from src.commands.start import start_router, start_router_person
 from src.config import config
 from src.config import dp, bot
@@ -37,13 +38,13 @@ routers = []
 if config.BOT_TYPE == "original":
     routers = [go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-               summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
+               summaries_router, cancel_router, scenario_router, edit_profile_router, text_comm_router, audio_comm_router,
                start_router]
 else:
-    routers = [go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+    routers = [go_back_router, error_router, form_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-               summaries_router, cancel_router, edit_profile_router, text_comm_router, audio_comm_router,
-               start_router_person]
+               summaries_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
+               audio_comm_router, start_router_person]
 
 
 dp.include_routers(*routers)

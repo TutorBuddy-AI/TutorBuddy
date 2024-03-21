@@ -110,7 +110,7 @@ class UserService:
                 User,
                 Person
             )
-            .join(Person, User.tg_id == Person.id)
+            .join(Person, User.speaker == Person.id)
             .where(User.tg_id == tg_id)
         )
         result = await session.execute(query)
@@ -122,9 +122,9 @@ class UserService:
             "native_lang": result.User.native_lang,
             "topic": result.User.topic,
             "english_level": result.User.english_level,
-            "speaker_id": result.Person.short_id,
-            "speaker_short_name": result.Person.speaker_short_name,
-            "speaker_full_name": result.Person.speaker_full_name
+            "speaker_id": result.Person.id,
+            "speaker_short_name": result.Person.short_name,
+            "speaker_full_name": result.Person.full_name
         }
 
     @Transactional()

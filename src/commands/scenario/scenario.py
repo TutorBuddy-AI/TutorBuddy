@@ -1,4 +1,4 @@
-from aiogram import types, md
+from aiogram import types, md, Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -9,25 +9,27 @@ from src.filters.is_not_register_filter import IsRegister
 from src.keyboards.scenario_keyboard import get_menu_scenario
 from src.utils.answer import AnswerRenderer
 
-
-@dp.callback_query_handler(text="go_back_to_scenario")
-async def scenario_handler(query: types.CallbackQuery, state: FSMContext):
-    # try:
-    #     await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
-    # except:
-    #     pass
-
-    await bot.send_photo(
-        query.message.chat.id,
-        photo=FSInputFile('./files/scenario.png'),
-        caption=
-            f"Choose a scenario to practice your English"
-            f" in various possible situations! 🗣️",
-        parse_mode=ParseMode.HTML,
-        reply_markup=await get_menu_scenario())
+scenario_router = Router(name=__name__)
 
 
-@dp.message_handler(IsRegister(), Command("scenario"))
+# @dp.callback_query_handler(text="go_back_to_scenario")
+# async def scenario_handler(query: types.CallbackQuery, state: FSMContext):
+#     # try:
+#     #     await bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id - 1)
+#     # except:
+#     #     pass
+#
+#     await bot.send_photo(
+#         query.message.chat.id,
+#         photo=FSInputFile('./files/scenario.png'),
+#         caption=
+#             f"Choose a scenario to practice your English"
+#             f" in various possible situations! 🗣️",
+#         parse_mode=ParseMode.HTML,
+#         reply_markup=await get_menu_scenario())
+
+
+@scenario_router.message(IsRegister(), Command("scenario"))
 async def scenario_handler(message: types.Message, state: FSMContext):
     # try:
     #     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id - 1)

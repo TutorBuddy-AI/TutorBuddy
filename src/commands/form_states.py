@@ -1,5 +1,7 @@
 import asyncio
 
+from commands.choose_speaker import continue_dialogue_with_person
+from config import config
 from src.database import session
 from sqlalchemy import select
 
@@ -168,7 +170,8 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
     await bot.send_photo(query.message.chat.id, photo=FSInputFile('./files/topic.jpg'),
                          caption=get_chose_some_topics(),
-                         reply_markup=await get_choose_topic_keyboard())
+                         reply_markup=await get_choose_topic_keyboard(),
+                         parse_mode=ParseMode.HTML)
 
 
 @form_router.callback_query(Form.topic, F.data.startswith("topic"))
@@ -205,7 +208,8 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
     if was_other:
         await state.set_state(Form.additional_topic)
         markup = AnswerRenderer.get_markup_text_translation_standalone()
-        await bot.send_message(query.message.chat.id, get_other_topics(), reply_markup=markup)
+        await bot.send_message(query.message.chat.id, get_other_topics(),
+                               reply_markup=markup, parse_mode=ParseMode.HTML)
     else:
         await state.update_data({"additional_topic": ""})
         await create_user_setup_speaker_choice(query.message, state)
@@ -232,9 +236,13 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         parse_mode=ParseMode.HTML,
         reply_markup=great_markup)
 
+    if config.BOT_TYPE == "original":
+        await choose_person(message, state, user_info)
+    else:
+        await continue_dialogue_with_person(message, state)
+
 
 async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
-    await asyncio.sleep(1)
     wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     await bot.send_photo(

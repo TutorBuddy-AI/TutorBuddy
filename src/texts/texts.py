@@ -28,9 +28,9 @@ def get_person_welcome_text():
         f"Hello! With this Telegram bot, you now have access to a world of immersive English practice, "
         f"right at your fingertips 24/7. "
         f"We'll work together to take your language skills to new heights through interactive activities, "
-        f"real-world scenarios, and lots of conversation practice."
+        f"real-world scenarios, and lots of conversation practice. \n\n"
         f"So let's get started! I'm just a message away whenever you need practice, "
-        f"feedback or simply someone to chat with in English ♀️")
+        f"feedback or simply someone to chat with in English 💬")
 
 
 def get_lets_know_each_other():

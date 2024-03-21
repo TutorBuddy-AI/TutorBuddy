@@ -31,10 +31,10 @@ def upgrade() -> None:
     session = orm.Session(bind=bind)
 
     session.add_all(lookup_values.values())
+    session.commit()
 
 
 def downgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-
-    session.add_all(lookup_values.values())
+    # ToDo delete

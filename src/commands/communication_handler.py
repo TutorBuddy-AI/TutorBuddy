@@ -82,9 +82,9 @@ class CommunicationHandler:
             user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id
         ).render()
 
-        message_history = await UserService().count_message_history(self.chat_id)
+        # message_history = await UserService().count_message_history(self.chat_id)
         # ToDo fix it
-        await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
+        # await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
 
 
         await self.render_text_answer(render)

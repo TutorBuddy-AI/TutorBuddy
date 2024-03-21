@@ -179,14 +179,14 @@ class Newsletter:
             logging.error("ERROR FROM GET_VOICE")
 
     async def get_payload(self, tgid, string):
-        user_info = await UserService().get_user_info(tgid)
+        user_info = await UserService().get_user_person(tgid)
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
                        f" His English level is {user_info['english_level']}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker_short_name']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
         translate_request = {

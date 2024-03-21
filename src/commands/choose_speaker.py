@@ -86,9 +86,13 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
 
     user_info = await user_service.get_user_person(tg_id=str(tg_id))
 
-    welcome_text = get_start_person_talk(user_info.speaker_short_name)
+    speaker = user_info["speaker_short_name"]
+    welcome_text = get_start_person_talk(speaker)
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
+
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+                                          parse_mode=ParseMode.HTML)
 
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(
@@ -98,7 +102,13 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
             parse_mode=ParseMode.HTML,
             reply_markup=audio_markup)
 
+    await bot.delete_message(message.chat.id, wait_message.message_id)
+
     check_text = get_check_text()
+
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+                                          parse_mode=ParseMode.HTML)
+
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
 
     with AudioConverter(audio) as ogg_file:
@@ -108,14 +118,15 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
             caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
             parse_mode=ParseMode.HTML,
             reply_markup=audio_markup)
+    await bot.delete_message(message.chat.id, wait_message.message_id)
     await state.set_state(FormInitTalk.init_user_message)
 
 
 @choose_speaker_router.message(FormInitTalk.init_user_message, F.text)
 async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
-    user_info = await user_service.get_user_person(tg_id=message.chat.id)
-    speaker = user_info.speaker_short_name
+    user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
+    speaker = user_info["speaker_short_name"]
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     await start_small_talk(message, state, wait_message, message_text=message.text)
@@ -124,8 +135,8 @@ async def start_talk(message: types.Message, state: FSMContext):
 @choose_speaker_router.message(FormInitTalk.init_user_message, F.voice)
 async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
-    user_info = await user_service.get_user_person(tg_id=message.chat.id)
-    speaker = user_info.speaker_short_name
+    user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
+    speaker = user_info["speaker_short_name"]
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     message_text = await SpeechToText(file_id=message.voice.file_id).get_text()
@@ -136,7 +147,7 @@ async def start_talk_audio(message: types.Message, state: FSMContext):
 
 
 async def start_small_talk(message: types.Message, state: FSMContext, wait_message: types.Message, message_text: str):
-    text = await TalkInitializer(message.chat.id, message_text).generate_message()
+    text = await TalkInitializer(str(message.chat.id), message_text).generate_message()
     if not text:
         text = "Oooops, something wrong. Try request again later..."
     saved_message = await UserCreateMessage(
@@ -149,7 +160,7 @@ async def start_small_talk(message: types.Message, state: FSMContext, wait_messa
     )
     markup = AnswerRenderer.get_start_talk_markup_with_ids(saved_message[0].id)
 
-    audio = await TextToSpeech(tg_id=message.chat.id, prompt=text).get_speech()
+    audio = await TextToSpeech(tg_id=str(message.chat.id), prompt=text).get_speech()
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(
             message.chat.id,
