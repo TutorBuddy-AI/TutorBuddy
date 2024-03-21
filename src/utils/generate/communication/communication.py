@@ -36,14 +36,14 @@ class CommunicationGenerate:
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
-        user_info = await UserService().get_user_info(self.tg_id)
+        user_info = await UserService().get_user_person(self.tg_id)
         mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
                        f" His English level is '{mapped_level}'. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker_short_name']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
 

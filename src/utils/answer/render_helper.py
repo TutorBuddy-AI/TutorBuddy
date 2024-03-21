@@ -1,4 +1,4 @@
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from src.utils.answer.render import Render
 

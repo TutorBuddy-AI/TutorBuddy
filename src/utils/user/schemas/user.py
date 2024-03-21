@@ -8,6 +8,16 @@ class GetUserInfo(BaseModel):
     english_level: str | None
     speaker: str | None
 
+class GetUserPersonInfo(BaseModel):
+    name: str | None
+    goal: str | None
+    native_lang: str | None
+    topic: str | None
+    english_level: str | None
+    speaker_id: str | None
+    speaker_short_name: str | None
+    speaker_full_name: str | None
+
 class UserInfo(BaseModel):
     tg_id: str
     call_name: str | None

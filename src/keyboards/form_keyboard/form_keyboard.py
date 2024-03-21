@@ -5,8 +5,6 @@ from src.utils.answer import AnswerRenderer
 
 
 async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -> InlineKeyboardMarkup:
-    choose_native_language_inline_kb = InlineKeyboardMarkup(row_width=2)
-
     rus = InlineKeyboardButton(text='Russian 🇷🇺', callback_data='native_RU')
     hindi = InlineKeyboardButton(text='Hindi 🇮🇳', callback_data='native_IN')
 
@@ -24,14 +22,13 @@ async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -
     else:
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
 
-    choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french, other).row(
-            translate_button)
+    choose_native_language_inline_kb = InlineKeyboardMarkup(inline_keyboard=
+                         [[rus, hindi], [persian, spanish], [chinese, german], [french, other], [translate_button]])
 
     return choose_native_language_inline_kb
 
 
 async def get_choose_goal_keyboard(is_caption=True) -> InlineKeyboardMarkup:
-    choose_goal_inline_kb = InlineKeyboardMarkup(row_width=2)
     business = InlineKeyboardButton(text='Business 💵', callback_data='goal_business')
 
     career = InlineKeyboardButton(text='Career 🪜', callback_data='goal_career')
@@ -53,20 +50,19 @@ async def get_choose_goal_keyboard(is_caption=True) -> InlineKeyboardMarkup:
     else:
         translate_button = AnswerRenderer.get_button_text_translation_standalone()
 
-    (choose_goal_inline_kb
-     .row(business, education)
-     .row(career, relocate).row(travel, love)
-     .row(friendship, network)
-     .row(entertainment, other)
-     .row(translate_button)
-     )
+    choose_goal_inline_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [business, education],
+        [career, relocate],
+        [travel, love],
+        [friendship, network],
+        [entertainment, other],
+        [translate_button]
+    ])
 
     return choose_goal_inline_kb
 
 
 async def get_choose_english_level_keyboard(for_user=False, is_caption=True) -> InlineKeyboardMarkup:
-    choose_english_level_inline_kb = InlineKeyboardMarkup(row_width=1)
-
     level_1 = InlineKeyboardButton(text='I can use simple words and basic phrases', callback_data='level_1')
     level_2 = InlineKeyboardButton(text='I can only have simple conversations',
                                    callback_data='level_2')
@@ -80,7 +76,8 @@ async def get_choose_english_level_keyboard(for_user=False, is_caption=True) -> 
     else:
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
 
-    choose_english_level_inline_kb.row(level_1).row(level_2).row(level_3).row(level_4).row(translate_button)
+    choose_english_level_inline_kb = InlineKeyboardMarkup(
+        inline_keyboard=[[level_1], [level_2], [level_3], [level_4], [translate_button]])
 
     return choose_english_level_inline_kb
 
@@ -99,8 +96,6 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
                         button.text = "✅ " + button.text
                     break
     else:
-        choose_topic_inline_kb = InlineKeyboardMarkup(row_width=2)
-
         psychology = InlineKeyboardButton(text='Psychology 🧠', callback_data='topic_psychology')
         business = InlineKeyboardButton(text='Business 💵', callback_data='topic_business')
 
@@ -127,27 +122,27 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
 
         done_button = InlineKeyboardButton(text='Accept ✅', callback_data='done')
 
-        choose_topic_inline_kb.add(
-            psychology, business,
-            startups, innovations,
-            fashion, art_and_design,
-            games, science,
-            travel, book,
-            sports, health,
-            movies, other
-        )
         if is_caption:
             translate_button = AnswerRenderer.get_button_caption_translation_standalone(for_user=for_user)
         else:
             translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
-        choose_topic_inline_kb.row(done_button).row(translate_button)
+
+        choose_topic_inline_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [psychology, business],
+            [startups, innovations],
+            [fashion, art_and_design],
+            [games, science],
+            [travel, book],
+            [sports, health],
+            [movies, other],
+            [done_button],
+            [translate_button]]
+        )
 
     return choose_topic_inline_kb
 
 
 async def get_choose_bot_keyboard(is_caption=True) -> InlineKeyboardMarkup:
-    choose_bot_inline_kb = InlineKeyboardMarkup()
-
     anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='continue_nastya')
 
     tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='continue_bot')
@@ -156,42 +151,38 @@ async def get_choose_bot_keyboard(is_caption=True) -> InlineKeyboardMarkup:
         translate_button = AnswerRenderer.get_button_caption_translation_standalone()
     else:
         translate_button = AnswerRenderer.get_button_text_translation_standalone()
-    choose_bot_inline_kb.row(tutor_buddy).row(anastasia).row(translate_button)
+    choose_bot_inline_kb = InlineKeyboardMarkup(inline_keyboard=[[tutor_buddy], [anastasia], [translate_button]])
 
     return choose_bot_inline_kb
 
 
 async def get_keyboard_summary_choice(menu: bool) -> InlineKeyboardMarkup:
     if menu:
-        keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
         accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
         go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
-        keyboard_summary_markup.add(accept, go_back_btn, translate_button)
+        keyboard_summary_markup = InlineKeyboardMarkup(inline_keyboard=[[accept, go_back_btn], [translate_button]])
         return keyboard_summary_markup
 
     else:
-        keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
         accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
         cancel = InlineKeyboardButton(text='No, thanks 😔', callback_data='dispatch_summary_false')
-        keyboard_summary_markup.add(accept, cancel).add(translate_button)
+        keyboard_summary_markup = InlineKeyboardMarkup(inline_keyboard=[[accept, cancel], [translate_button]])
         return keyboard_summary_markup
 
 
 async def get_keyboard_cancel_news_subs() -> InlineKeyboardMarkup:
-    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
     continue_btn = InlineKeyboardButton(text='Continue 🥳', callback_data='go_back')
     stop_subs_btn = InlineKeyboardButton(text='Stop 😔', callback_data='dispatch_summary_false')
     translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
-    keyboard_summary_markup.row(translate_button).row(continue_btn, stop_subs_btn)
+    keyboard_summary_markup = InlineKeyboardMarkup(inline_keyboard=[[translate_button], [continue_btn, stop_subs_btn]])
     return keyboard_summary_markup
 
 
 async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
-    keyboard_summary_markup = InlineKeyboardMarkup(row_width=2)
     accept = InlineKeyboardButton(text='Yes, sure! 🥳', callback_data='dispatch_summary_true')
     go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
     translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
-    keyboard_summary_markup.row(translate_button).row(accept, go_back_btn)
+    keyboard_summary_markup = InlineKeyboardMarkup(inline_keyboard=[[translate_button], [accept, go_back_btn]])
     return keyboard_summary_markup

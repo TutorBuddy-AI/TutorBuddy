@@ -5,7 +5,7 @@ from src.utils.payments.tariff_plans import get_tariff_plans
 
 
 def get_welcome_text_before_start():
-    return md.text(
+    return (
         "Hi! This is your personal TutorBuddy and I will help you to improve your English.\n\n"
         "By practicing English everyday with me, you will be able to:\n\n"
         "🚀 work or study abroad\n"
@@ -15,7 +15,7 @@ def get_welcome_text_before_start():
 
 
 def get_welcome_text():
-    return md.escape_md(
+    return (
         f"Hi! I'm TutorBuddy, your personal English language practice tutor 💭\n\n"
         "I know how difficult it is to speak English without practice and a native speaker around.\n\n"
         "In order to feel confident in dialogues in a foreign language you need to get between 600 and 1,000 hours of "
@@ -23,14 +23,24 @@ def get_welcome_text():
         "Let's get started! 🏄🏽‍♀️")
 
 
+def get_person_welcome_text():
+    return (
+        f"Hello! With this Telegram bot, you now have access to a world of immersive English practice, "
+        f"right at your fingertips 24/7. "
+        f"We'll work together to take your language skills to new heights through interactive activities, "
+        f"real-world scenarios, and lots of conversation practice. \n\n"
+        f"So let's get started! I'm just a message away whenever you need practice, "
+        f"feedback or simply someone to chat with in English 💬")
+
+
 def get_lets_know_each_other():
-    return md.text(
+    return (
         "Let's get to know each other first"
     )
 
 
 def get_choose_bot_text():
-    return md.escape_md(
+    return (
         "You can continue talking to me or choose one of the other speaking partners. They are Tutor Buddy co-founder's"
         " digital twins, so you can get to know them through voice and visuals and discuss anything with them.\n\n"
         "👩🏻‍🚀 Anastasia is keen on entrepreneurship, fashion, movies and science\n\n"
@@ -39,24 +49,24 @@ def get_choose_bot_text():
 
 
 def get_other_native_language_question():
-    return md.escape_md(
+    return (
         "What is your native language? Write only its name, for example, 'Japanese'"
     )
 
 
 def get_incorrect_native_language_question():
-    return md.escape_md(
+    return (
         "The name of the language looks incorrect. Please use only English characters in the name of the language.\n"
         "Please, tell me the other name of your native language"
     )
 
 
 def get_other_goal():
-    return md.escape_md(f"Please describe the reason why you want to practice English?")
+    return (f"Please describe the reason why you want to practice English?")
 
 
 def get_chose_some_topics():
-    return md.escape_md(
+    return (
         "Choose some appealing topics, so we will:\n"
         "⚡️ have engaging conversations\n"
         "⚡️ discuss relevant news summaries"
@@ -64,20 +74,20 @@ def get_chose_some_topics():
 
 
 def get_chose_some_more_topics():
-    return md.text(
+    return (
         "Please, choose 1+ topics"
     )
 
 
 def get_other_topics():
-    return md.escape_md(
+    return (
         "Please list other topics that interest you, separated by commas. "
         "Example: '3d printing, knitting'"
     )
 
 
 def get_choose_buddy_text():
-    return md.escape_md(
+    return (
         "To have even more fun practicing English, "
         "you can talk to Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️\n\n"
         "She can be your speaking partner, "
@@ -89,7 +99,7 @@ def get_choose_buddy_text():
 
 
 def get_choice_is_done():
-    return md.escape_md("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
+    return ("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
 
 
 def get_greeting_anastasia():
@@ -102,10 +112,25 @@ def get_greeting_anastasia():
 
 def get_start_talk(is_bot: bool, name: str):
     prefix = f"Hi, {name}! " if is_bot else ""
+    return prefix + get_check_text()
+
+
+def get_check_text():
     return (
-            prefix + "The best way to practice spoken English is to speak! "
-            "Go ahead and send me a voice message or text me. "
-            "Tell me, how is your day going?")
+        "The best way to practice spoken English is to speak! "
+        "Go ahead and send me a voice message or text me. "
+        "Tell me, how is your day going?")
+
+
+def get_start_person_talk(person_name: str):
+    return (
+            f"My name is {person_name} and I'm a certified English teacher. "
+            "I specialize in teaching Business English to tech professionals, IT and digital experts and entrepreneurs."
+            "\n\n"
+            "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
+            "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
+            "and even have friendly debates! "
+            "This personal touch will truly level up your English fluency.")
 
 
 def get_meet_bot_text():
@@ -116,7 +141,7 @@ def get_meet_bot_text():
 
 
 def get_meet_bot_message():
-    return md.escape_md(
+    return (
         "I am TutorBuddy, that one English-speaking friend, "
         "who is always there to help you sharpen your language skills. "
         "My range of interest is quite wide and I hope we’ll find a lot in common 😉\n\n"
@@ -134,7 +159,7 @@ def get_meet_nastya_text(name):
 
 
 def get_meet_nastya_message(name):
-    return md.escape_md(get_meet_nastya_text(name) + "💬")
+    return (get_meet_nastya_text(name) + "💬")
 
 
 def get_first_summary(name):

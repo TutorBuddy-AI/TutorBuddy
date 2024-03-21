@@ -16,7 +16,7 @@ class MessageMistakesCreator:
         generated_text = await MistakesChecker(
             tg_id=str(self.tg_id),
             user_message_history=await self.get_user_message_history(),
-            message_text = self.message_text
+            message_text=self.message_text
         ).generate_mistakes()
 
         if generated_text is not None:

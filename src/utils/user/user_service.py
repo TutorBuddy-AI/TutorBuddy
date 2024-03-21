@@ -1,6 +1,7 @@
+from database.models import Person
 from src.database.models import User, MessageHistory, Setting
 from src.database import Transactional, session
-from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
+from src.utils.user.schemas import GetUserInfo, UserInfo, GetUserPersonInfo, GetUserMessageHistory
 from src.utils.generate.question_history import SupportHistory
 from src.utils.generate.feedback_loop import FeedbackHistory
 
@@ -98,6 +99,32 @@ class UserService:
             "topic": result.topic,
             "english_level": result.english_level,
             "speaker": result.speaker
+        }
+
+    async def get_user_person(
+            self,
+            tg_id: str
+    ) -> GetUserPersonInfo:
+        query = (
+            select(
+                User,
+                Person
+            )
+            .join(Person, User.speaker == Person.id)
+            .where(User.tg_id == tg_id)
+        )
+        result = await session.execute(query)
+        result = result.first()
+
+        return {
+            "name": result.User.call_name,
+            "goal": result.User.goal,
+            "native_lang": result.User.native_lang,
+            "topic": result.User.topic,
+            "english_level": result.User.english_level,
+            "speaker_id": result.Person.id,
+            "speaker_short_name": result.Person.short_name,
+            "speaker_full_name": result.Person.full_name
         }
 
     @Transactional()

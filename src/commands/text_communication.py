@@ -1,13 +1,14 @@
 import asyncio
-import json
-import re
 
-from aiogram.dispatcher import FSMContext
+from aiogram.enums import ParseMode
+from aiogram.fsm.context import FSMContext
+
 from src.commands.communication_handler import CommunicationHandler
-from src.config import dp, bot
+from src.config import bot
 from aiogram.types import CallbackQuery, Message
 
-from src.utils.answer.answer_renderer import translation_data, mistakes_data, AnswerRenderer
+from src.filters.is_not_register_filter import IsRegister
+from src.utils.answer.answer_renderer import TranslationData, MistakesData, AnswerRenderer
 from src.utils.message import MessageHelper
 from src.utils.message.message_service import MessageService
 from src.utils.message_hint.message_hint_creator import MessageHintCreator
@@ -17,16 +18,17 @@ from src.utils.message_history_mistakes.message_mistakes_creator import MessageM
 from src.utils.message_translation import MessageTranslationService
 from src.utils.message_translation.message_translation_creator import MessageTranslationCreator
 from src.utils.paraphrasing import MessageParaphraseService
-from aiogram import types, md
+from aiogram import types, md, Router, F
 from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 from src.utils.stciker.sticker_sender import StickerSender
-from aiogram.utils.callback_data import CallbackData
 
 from src.utils.user import UserService
 from src.texts.texts import get_pin_message
 
+text_comm_router = Router(name=__name__)
 
-@dp.message_handler(content_types=types.ContentType.TEXT)
+
+@text_comm_router.message(IsRegister(), F.text)
 async def handle_get_text_message(message: types.Message, state: FSMContext):
     handler = CommunicationHandler(message, state, bot)
     await handler.init()
@@ -34,7 +36,7 @@ async def handle_get_text_message(message: types.Message, state: FSMContext):
     await handler.handle_text_message()
 
 
-@dp.callback_query_handler(text="request_hint")
+@text_comm_router.callback_query(F.data == "request_hint")
 async def handle_get_hint(query: CallbackQuery, state: FSMContext):
     message: Message = query.message
     handler = CommunicationHandler(message, state, bot)
@@ -50,57 +52,60 @@ async def handle_get_hint(query: CallbackQuery, state: FSMContext):
 
     await MessageHintService().create_message_hint(helper_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
     await asyncio.sleep(3)
 
     await handler.render_answer(await handler.load_render_from_context())
 
 
-@dp.callback_query_handler(mistakes_data.filter())
-async def handle_get_mistakes(query: CallbackQuery, callback_data: mistakes_data):
+@text_comm_router.callback_query(MistakesData.filter())
+async def handle_get_mistakes(query: CallbackQuery, callback_data: MistakesData):
     message = query.message
 
-    user_message = await MessageService().get_message(str(message.chat.id), int(callback_data["user_message_id"]))
+    user_message = await MessageService().get_message(str(message.chat.id), int(callback_data.user_message_id))
     generated_text = await MessageMistakesCreator(
         tg_id=str(message.chat.id),
         message_text=user_message.message
     ).create_communication_message_text()
 
     mistakes_info = await MessageMistakesHelper().group_message_mistakes_info(
-        int(callback_data["user_message_id"]), int(callback_data["bot_message_id"]),
+        int(callback_data.user_message_id), int(callback_data.bot_message_id),
         user_message.type, message, generated_text)
 
     await MessageMistakesService().create_mistakes(mistakes_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text),
+    await bot.send_message(message.chat.id, generated_text,
                            reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True),
-                           reply_to_message_id=callback_data["user_message_tgid"])
+                           parse_mode=ParseMode.HTML,
+                           reply_to_message_id=callback_data.user_message_tgid)
 
 
-@dp.callback_query_handler(translation_data.filter())
-async def handle_get_translation(query: CallbackQuery, callback_data: translation_data):
+@text_comm_router.callback_query(TranslationData.filter())
+async def handle_get_translation(query: CallbackQuery, callback_data: TranslationData):
     """
     Callback to translate message caption. Text is provided in query message,
     Message ids are provided in callback_data
     """
     message = query.message
-    user_info = await UserService().get_user_info(tg_id=message.chat.id)
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker']} thinks… Please wait")
+    user_info = await UserService().get_user_person(tg_id=str(message.chat.id))
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker_short_name']} thinks… Please wait",
+                                          parse_mode=ParseMode.HTML)
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text(message.caption)
 
-    user_message_id = int(callback_data["user_message_id"]) if callback_data["user_message_id"] else None
-    bot_message_id = int(callback_data["bot_message_id"]) if callback_data["bot_message_id"] else None
+    user_message_id = int(callback_data.user_message_id) if callback_data.user_message_id else None
+    bot_message_id = int(callback_data.bot_message_id) if callback_data.bot_message_id else None
     helper_info = await MessageHelper().group_message_helper_info(
         user_message_id, bot_message_id, message, generated_text)
 
     await MessageTranslationService().create_translation(helper_info)
+
     await bot.delete_message(message.chat.id, wait_message.message_id)
-    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
-@dp.callback_query_handler(text="request_text_translation_standalone", state="*")
+@text_comm_router.callback_query(F.data == "request_text_translation_standalone")
 async def handle_get_translation_text_standalone(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message text, when user is not logged in
@@ -113,10 +118,10 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML,  reply_to_message_id=message.message_id)
 
 
-@dp.callback_query_handler(text="request_caption_translation_standalone", state="*")
+@text_comm_router.callback_query(F.data == "request_caption_translation_standalone")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message caption, when user is not logged in
@@ -129,10 +134,10 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.caption, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
-@dp.callback_query_handler(text="request_text_translation_standalone_for_user", state="*")
+@text_comm_router.callback_query(F.data == "request_text_translation_standalone_for_user")
 async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message text, when user is not logged in
@@ -145,10 +150,10 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 
-@dp.callback_query_handler(text="request_caption_translation_standalone_for_user", state="*")
+@text_comm_router.callback_query(F.data == "request_caption_translation_standalone_for_user")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
     """
     Callback to translate standalone message caption, when user is not logged in
@@ -161,9 +166,11 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.caption, lang)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, generated_text,
+                           parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
-@dp.callback_query_handler(text="pin_message_translate", state="*")
+
+@text_comm_router.callback_query(F.data == "pin_message_translate")
 async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
     message = query.message
     await bot.send_message(message.chat.id, get_pin_message(translate=True), reply_to_message_id=message.message_id)
@@ -187,10 +194,10 @@ async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMCon
 #
 #     await MessageTranslationService().create_translation(helper_info)
 #
-#     await bot.send_message(message.chat.id, md.escape_md(generated_text))
+#     await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
 
 
-@dp.callback_query_handler(text="request_paraphrase")
+@text_comm_router.callback_query(F.data == "request_paraphrase")
 async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
     message = query.message
 
@@ -208,28 +215,28 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
     await MessageParaphraseService().create_message_paraphrase(helper_info)
 
-    await bot.send_message(message.chat.id, md.escape_md(generated_text))
+    await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML)
 
     await asyncio.sleep(3)
 
     await handler.render_answer(await handler.load_render_from_context())
 
 
-@dp.message_handler(content_types=types.ContentType.VIDEO)
+@text_comm_router.message(IsRegister(), F.video)
 async def handle_video_message(message: Message):
     user_info = await UserService().get_user_info(message.chat.id)
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
-@dp.message_handler(content_types=types.ContentType.STICKER)
+@text_comm_router.message(IsRegister(), F.sticker)
 async def handle_sticker_message(message: Message):
     user_info = await UserService().get_user_info(message.chat.id)
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
-@dp.message_handler(content_types=types.ContentType.VIDEO_NOTE)
+@text_comm_router.message(IsRegister(), F.video_note)
 async def handle_video_note_message(message: Message):
     user_info = await UserService().get_user_info(message.chat.id)
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])

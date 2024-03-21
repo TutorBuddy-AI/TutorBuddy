@@ -1,6 +1,7 @@
 import asyncio
 
-from aiogram.dispatcher import FSMContext
+from aiogram.enums import ParseMode
+from aiogram.fsm.context import FSMContext
 
 from src.config import dp, bot
 from src.states.scenario import TalkShowForm
@@ -34,11 +35,13 @@ async def choose_job_menu_scenario(query: types.CallbackQuery, state: FSMContext
 
     await state.set_state(TalkShowForm.job)
 
-    await bot.send_message(query.message.chat.id, md.escape_md("This is your moment of glory! 🪄 Tell me which job made you famous?"),
+    await bot.send_message(query.message.chat.id,
+                           "This is your moment of glory! 🪄 Tell me which job made you famous?",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=await get_choose_job_menu_talk_show_scenario())
 
 
-@dp.callback_query_handler(state=TalkShowForm.job)
+@dp.callback_query_handler(TalkShowForm.job)
 async def process_get_job(query: types.CallbackQuery, state: FSMContext):
     await bot.send_chat_action(chat_id=query.message.chat.id, action='typing')
     try:
@@ -62,7 +65,7 @@ async def process_get_job(query: types.CallbackQuery, state: FSMContext):
             job=job
         )
 
-        await bot.send_message(query.message.chat.id, md.escape_md(generate_text))
+        await bot.send_message(query.message.chat.id, generate_text, parse_mode=ParseMode.HTML)
 
         question_text = await _genarate_text(
             tg_id=str(query.message.chat.id),
@@ -70,7 +73,7 @@ async def process_get_job(query: types.CallbackQuery, state: FSMContext):
             job=job
         )
 
-        await bot.send_message(query.message.chat.id, md.escape_md(question_text))
+        await bot.send_message(query.message.chat.id, question_text, parse_mode=ParseMode.HTML)
 
         await state.update_data(
             previous_questions=question_text,
@@ -80,7 +83,7 @@ async def process_get_job(query: types.CallbackQuery, state: FSMContext):
     if job == "other":
         await state.set_state(TalkShowForm.other_job)
 
-        await bot.send_message(query.message.chat.id, md.escape_md("Name a job that made you a celebrity"))
+        await bot.send_message(query.message.chat.id, "Name a job that made you a celebrity", parse_mode=ParseMode.HTML,)
 
 
 @dp.message_handler(state=TalkShowForm.other_job)
@@ -103,7 +106,7 @@ async def process_get_other_job(message: types.Message, state: FSMContext):
         job=message.text
     )
 
-    await bot.send_message(message.chat.id, md.escape_md(generate_text))
+    await bot.send_message(message.chat.id, generate_text, parse_mode=ParseMode.HTML)
 
     question_text = await _genarate_text(
         tg_id=str(message.chat.id),
@@ -577,7 +580,7 @@ async def process_get_other_job(message: types.Message, state: FSMContext):
 
     job = data.get("job")
 
-    await state.finish()
+    await state.clear()
 
     question_text = await _genarate_text(
         tg_id=str(message.chat.id),
