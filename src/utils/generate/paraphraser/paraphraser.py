@@ -43,7 +43,7 @@ class Paraphraser:
                        f" His English level is {user_info['english_level']}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker_short_name']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
 

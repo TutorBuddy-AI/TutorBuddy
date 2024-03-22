@@ -45,7 +45,7 @@ class TalkInitializer:
             "content": (f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
                         f" His English level is {mapped_level}. His goal is to study the English"
                         f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                        f"You are {user_info['speaker_short_name']}. You are developed by AI TutorBuddy."
+                        f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
                         f"You are his buddy in English practice and also his friend. "
                         f"{prompt_to_insert}"                       
                         f"To continue dialog, please, chose one of topics and ask him something like are interested "
