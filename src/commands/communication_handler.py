@@ -46,7 +46,7 @@ class CommunicationHandler:
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
     async def handle_audio_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker_short_name} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
 
         await self.bot.send_chat_action(chat_id=self.chat_id, action='record_audio')
         message_text = await SpeechToText(file_id=self.message.voice.file_id).get_text()
@@ -67,7 +67,8 @@ class CommunicationHandler:
         await self.save_render_in_context(render)
 
     async def handle_text_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker_short_name} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait",
+                                                   parse_mode=ParseMode.HTML)
         await self.bot.send_chat_action(chat_id=self.chat_id, action='typing')
 
         answer = await self.prepare_answer(self.message_text, "text")

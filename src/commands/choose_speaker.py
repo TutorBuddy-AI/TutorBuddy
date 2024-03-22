@@ -1,7 +1,10 @@
+import logging
+
 from aiogram.fsm.context import FSMContext
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.types import FSInputFile, Message
 
+from config import config
 from src.config import bot
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
@@ -86,22 +89,29 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     user_service = UserService()
 
     user_info = await user_service.get_user_person(tg_id=str(tg_id))
-    speaker = user_info["speaker_short_name"]
+    speaker = user_info["speaker_id"]
+    speaker_short_name = user_info["speaker_short_name"]
 
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
 
-    welcome_text = get_start_person_talk(speaker)
+    welcome_text = get_start_person_talk(speaker_short_name)
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
+    logging.info(f"./files/meet_{config.BOT_PERSON.lower()}.jpg")
+    await bot.send_photo(
+        message.chat.id,
+        caption=welcome_text,
+        photo=FSInputFile(f"./files/meet_{config.BOT_PERSON.lower()}.jpg"),
+        parse_mode=ParseMode.HTML,
+        reply_markup=audio_markup
+    )
 
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(
             message.chat.id,
             FSInputFile(ogg_file),
-            caption=f'<span class="tg-spoiler">{welcome_text}</span>',
-            parse_mode=ParseMode.HTML,
-            reply_markup=audio_markup)
+            parse_mode=ParseMode.HTML)
 
     await bot.delete_message(message.chat.id, wait_message.message_id)
 
@@ -127,7 +137,7 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
 async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
-    speaker = user_info["speaker_short_name"]
+    speaker = user_info["speaker_id"]
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     await start_small_talk(message, state, wait_message, message_text=message.text)
@@ -137,7 +147,7 @@ async def start_talk(message: types.Message, state: FSMContext):
 async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
-    speaker = user_info["speaker_short_name"]
+    speaker = user_info["speaker_id"]
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     message_text = await SpeechToText(file_id=message.voice.file_id).get_text()

@@ -88,7 +88,7 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
     """
     message = query.message
     user_info = await UserService().get_user_person(tg_id=str(message.chat.id))
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker_short_name']} thinks… Please wait",
+    wait_message = await bot.send_message(message.chat.id, f"⏳ {user_info['speaker_id']} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
