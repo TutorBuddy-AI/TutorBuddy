@@ -143,7 +143,7 @@ function displayNewsletter(newsletter) {
 
     // порядок отображение
     NewsletterInfoBlock.appendChild(sendButton);
-    NewsletterInfoBlock.appendChild(send_datetimeButton);
+//    NewsletterInfoBlock.appendChild(send_datetimeButton);
     NewsletterInfoBlock.appendChild(deleteButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
 
