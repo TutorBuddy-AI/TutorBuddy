@@ -6,7 +6,6 @@ from src.config import config
 from src.config import dp, bot
 from src.commands.form_states import process_start_register_user, process_get_name  # Magic Import - don't touch
 from src.states import Form  # Magic Import - don't touch
-from src.utils.newsletter.newsletter import Newsletter
 from aiogram import types
 
 import logging
@@ -79,12 +78,3 @@ async def receive_update(update: Dict, request: Request):
     finally:
         pass
     return {"status_code": 200}
-
-
-@app.get('/start_newsletter')
-async def send_newsletter():
-    try:
-        await Newsletter().send_newsletter()
-        return {'message': 'Newsletter sent'}
-    except Exception as e:
-        traceback.print_exc()
