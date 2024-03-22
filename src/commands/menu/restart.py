@@ -22,6 +22,7 @@ async def restart_handler(message: types.Message):
     await bot.send_message(message.chat.id,
                            "Are you sure you want to lose your progress"
                            " and clear the chat?",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=restart_kb)
 
 
