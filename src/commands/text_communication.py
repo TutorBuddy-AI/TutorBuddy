@@ -173,7 +173,8 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 @text_comm_router.callback_query(F.data == "pin_message_translate")
 async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
     message = query.message
-    await bot.send_message(message.chat.id, get_pin_message(translate=True), reply_to_message_id=message.message_id)
+    await bot.send_message(message.chat.id, get_pin_message(translate=True), reply_to_message_id=message.message_id,
+                           parse_mode=ParseMode.HTML)
 
 # @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
 # async def handle_get_translation_for_message(query: CallbackQuery, state: FSMContext):

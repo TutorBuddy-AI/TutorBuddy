@@ -90,7 +90,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     result_text += text[1] + " "
 
     if topics_num < 1:
-        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(),
+        await bot.send_message(query.message.chat.id, get_chose_some_more_topics(), parse_mode=ParseMode.HTML,
                                reply_markup=await get_choose_topic_keyboard(for_user=True, is_caption=False))
     else:
         await process_topics(query, state, result_text, was_other)
@@ -101,7 +101,8 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
 
     if was_other:
         await state.set_state(FormTopic.new_additional_topic)
-        await bot.send_message(query.message.chat.id, get_other_topics())
+        await bot.send_message(query.message.chat.id, get_other_topics(),
+                               parse_mode=ParseMode.HTML)
     else:
         await state.update_data({"additional_topic": ""})
         await create_user_setup_speaker_choice(query.message, state)

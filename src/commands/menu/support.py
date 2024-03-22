@@ -53,7 +53,7 @@ async def support_query_handler(message: types.Message, state: FSMContext):
                     f"<b>User:</b> {url_telegram}\n" \
                     f"<b>Message:</b> <i>{message.text}</i>"
 
-    await bot.send_message('-1001938775399', message_group, parse_mode=types.ParseMode.HTML)
+    await bot.send_message('-1001938775399', message_group, parse_mode=ParseMode.HTML)
 
     await bot.send_message(message.chat.id,
                            text="Message sent successfully. The manager will definitely contact you. Thank you!",

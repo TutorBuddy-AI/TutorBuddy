@@ -21,9 +21,10 @@ async def feedback_handler(query: types.CallbackQuery, state: FSMContext):
 
     await bot.send_photo(query.message.chat.id, photo=FSInputFile('./files/feedback.jpg'),
                          caption=("TutorBuddy team is always glad to hear your feedback!"
-                                              " Tell us what do you like or dislike about this bot and"
-                                              " how can we improve it?\n"
-                                              "Please, send text message"),
+                                  " Tell us what do you like or dislike about this bot and"
+                                  " how can we improve it?\n"
+                                  "Please, send text message"),
+                         parse_mode=ParseMode.HTML,
                          reply_markup=await get_go_back_inline_keyboard())
 
 
@@ -64,7 +65,7 @@ async def feedback_query_handler(message: types.Message, state: FSMContext):
                     f"<b>User:</b> {url_telegram}\n" \
                     f"<b>Message:</b> <i>{message.text}</i>"
 
-    await bot.send_message('-1001938775399', message_group, parse_mode=types.ParseMode.HTML)
+    await bot.send_message('-1001938775399', message_group, parse_mode=ParseMode.HTML)
 
     await bot.send_message(message.chat.id,
                            text="Message sent successfully. Thank you!",

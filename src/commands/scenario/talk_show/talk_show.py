@@ -83,7 +83,7 @@ async def process_get_job(query: types.CallbackQuery, state: FSMContext):
     if job == "other":
         await state.set_state(TalkShowForm.other_job)
 
-        await bot.send_message(query.message.chat.id, "Name a job that made you a celebrity", parse_mode=ParseMode.HTML,)
+        await bot.send_message(query.message.chat.id, "Name a job that made you a celebrity", parse_mode=ParseMode.HTML)
 
 
 @dp.message_handler(state=TalkShowForm.other_job)

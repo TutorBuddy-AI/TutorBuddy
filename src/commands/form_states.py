@@ -117,14 +117,15 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
 @form_router.callback_query(Form.native_language, F.data == "other_language")
 async def process_start_register_other_language(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_native_language_question(),
-                           reply_markup=types.ReplyKeyboardRemove())
+                           parse_mode=ParseMode.HTML, reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(Form.other_language)
 
 
 @form_router.message(Form.other_language)
 async def process_other_language(message: types.Message, state: FSMContext):
     if not message.text.isalpha():
-        await bot.send_message(message.chat.id, get_incorrect_native_language_question())
+        await bot.send_message(message.chat.id, get_incorrect_native_language_question(),
+                               parse_mode=ParseMode.HTML)
     else:
         await state.update_data({"native_language": message.text})
         await bot.send_photo(message.chat.id, photo=FSInputFile('./files/goal.png'),
@@ -148,7 +149,8 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
 @form_router.callback_query(Form.goal, F.data == "other_goal")
 async def start_process_other_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, get_other_goal(),
-                           reply_markup=AnswerRenderer.get_markup_text_translation_standalone())
+                           reply_markup=AnswerRenderer.get_markup_text_translation_standalone(),
+                           parse_mode=ParseMode.HTML)
     await state.set_state(Form.other_goal)
 
 
@@ -244,7 +246,8 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
 async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
     await asyncio.sleep(1)
-    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
+    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait",
+                                          parse_mode=ParseMode.HTML)
 
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     meet_bot_text = get_meet_bot_text()
@@ -265,7 +268,8 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
             parse_mode=ParseMode.HTML
         )
 
-    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait")
+    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait",
+                                          parse_mode=ParseMode.HTML)
     meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
     audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
     await bot.send_photo(
