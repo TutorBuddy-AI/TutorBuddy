@@ -532,7 +532,7 @@ async def get_message_hint_user(tg_id: int, is_valid: bool = Depends(is_authenti
     query = select(MessageMistakes).where(MessageMistakes.tg_id == str(tg_id))
     result = await session.execute(query)
     user_mistake = result.scalars().first()
-    print(tg_id)
+
     if user_mistake:
         user_dict = {
             "id": user_mistake.id,
