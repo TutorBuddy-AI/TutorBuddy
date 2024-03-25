@@ -11,17 +11,18 @@ async function openSubAdd_Message() {
         addMessageForm.innerHTML = `
             <div>
                 <form id="AddMessageForm">
-                    <label for="message">Сообщение:</label>
+                    <label for="message">Message:</label>
                     <div contenteditable="true" id="message" name="message" required></div>
 
-                    <label for="image">Изображение:</label>
+                    <label for="image">Image:</label>
                     <input type="file" id="image" name="image" accept="image/*">
 
-                    <input type="submit" value="Сохранить">
+                    <input type="submit" value="Save">
                 </form>
                 <div id="resultContainer"></div>
             </div>
         `;
+
 
         addMessageContainer.appendChild(addMessageForm);
         subSidebar.appendChild(addMessageContainer);
@@ -75,7 +76,7 @@ async function openSubAdd_Message() {
                         closeBlock('.newsletter-info-block');
                     } catch (error) {
                         const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="error-add-message">Ошибка при сохранении сообщения: ${JSON.stringify(error)}</p>`;
+                        resultContainer.innerHTML = `<p class="error-add-message">Error while saving message: ${JSON.stringify(error)}</p>`;
                     }
                 };
 
