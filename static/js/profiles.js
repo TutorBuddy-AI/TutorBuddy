@@ -17,7 +17,7 @@ async function openSubProfiles() {
             titleContainer.className = 'title-container';
 
             const titleElement = document.createElement('h2');
-            titleElement.textContent = 'Профили';
+            titleElement.textContent = 'Profiles';
             titleElement.style.fontWeight = 'bold';
             titleElement.style.marginLeft = '10px';
 
@@ -25,7 +25,7 @@ async function openSubProfiles() {
 
             const searchInput = document.createElement('input');
             searchInput.type = 'text';
-            searchInput.placeholder = 'Поиск по tg_username';
+            searchInput.placeholder = 'Search by tg_username';
             searchInput.addEventListener('input', () => handleSearch(users, searchInput.value));
 
             titleContainer.appendChild(searchInput);
@@ -134,10 +134,10 @@ function displayProfiles(user) {
     const profileBlock = document.createElement('div');
     profileBlock.className = 'profile-block';
 
-    const mainInfoSection = createSection('Основная информация', 'main-info');
-    const goalSection = createSection('Цель и тема', 'goal-section');
-    const englishInfoSection = createSection('Информация об английском', 'english-info-section');
-    const createdAtSection = createSection('Время создания аккаунта', 'created-at-section');
+    const mainInfoSection = createSection('Main Information', 'main-info');
+    const goalSection = createSection('Goal and Theme', 'goal-section');
+    const englishInfoSection = createSection('English Information', 'english-info-section');
+    const createdAtSection = createSection('Account Creation Time', 'created-at-section');
 
     populateSection(mainInfoSection, user, ['id', 'tg_id', 'call_name', 'speaker', 'tg_firstName', 'tg_lastName', 'tg_language', 'tg_username']);
     populateSection(goalSection, user, ['goal', 'topic', 'additional_topic']);

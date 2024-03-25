@@ -17,7 +17,7 @@ async function openSubNewsletter() {
             titleContainer.className = 'title-container';
 
             const titleElement = document.createElement('h2');
-            titleElement.textContent = 'Новости';
+            titleElement.textContent = 'News';
             titleElement.style.fontWeight = 'bold';
             titleElement.style.marginLeft = '10px';
 
@@ -87,7 +87,7 @@ function displayNewsletter(newsletter) {
     const NewsletterInfoBlock = document.createElement('div');
     NewsletterInfoBlock.className = 'newsletter-info-block';
     const titleElement = document.createElement('h2');
-    titleElement.textContent = 'Информация о рассылке';
+    titleElement.textContent = 'Newsletter Information';
 
     NewsletterInfoBlock.appendChild(titleElement);
 
@@ -120,14 +120,14 @@ function displayNewsletter(newsletter) {
     imageElement.alt = 'Newsletter Image';
 
     const sendButton = document.createElement('button');
-    sendButton.textContent = 'Отправить сейчас';
+    sendButton.textContent = 'Send Now';
     sendButton.className = 'send-button';
     sendButton.addEventListener('click', () => {
         openSendModal(newsletter.id);
     });
 
     const send_datetimeButton = document.createElement('button');
-    send_datetimeButton.textContent = 'Отправить по времени';
+    send_datetimeButton.textContent = 'Send by Time';
     send_datetimeButton.className = 'send-datetime-button';
     send_datetimeButton.addEventListener('click', () => {
         openSendDatetimeModal(newsletter.id);
@@ -135,7 +135,7 @@ function displayNewsletter(newsletter) {
 
 
     const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Удалить';
+    deleteButton.textContent = 'Delete';
     deleteButton.className = 'delete-button';
     deleteButton.addEventListener('click', () => {
         openDeleteModal(newsletter.id);
@@ -189,17 +189,17 @@ function handleClick(event, newsletter, columnName) {
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Не удалось изменить текст.');
+                    throw new Error('Failed to change the text.');
                 }
                 // Перезагружаем страницу
                 location.reload();
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось изменить текст. Пожалуйста, попробуйте еще раз.');
+                alert('Failed to change the text. Please try again.');
             });
         } else {
-            alert("Пожалуйста, введите текст.");
+            alert("Please enter text.");
         }
     };
 }

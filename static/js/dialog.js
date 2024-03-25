@@ -19,7 +19,7 @@ async function openSubDialogs() {
             titleContainer.className = 'title-container';
 
             const titleElement = document.createElement('h2');
-            titleElement.textContent = 'Диалоги';
+            titleElement.textContent = 'Dialogs';
             titleElement.style.fontWeight = 'bold';
             titleElement.style.marginLeft = '10px';
 

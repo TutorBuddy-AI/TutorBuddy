@@ -10,25 +10,25 @@ async function openSubAddNewsletter() {
         AddNewsletterContainer.innerHTML = `
             <div>
                 <form id="addNewsletterForm">
-                    <label for="topic">Тема:</label>
+                    <label for="topic">Topic:</label>
                     <div contenteditable="true" id="topic" name="topic" required></div>
 
-                    <label for="title">Заголовок:</label>
+                    <label for="title">Title:</label>
                     <div contenteditable="true" id="title" name="title" required></div>
 
-                    <label for="edition">Издание(Необязательно):</label>
+                    <label for="edition">Edition (Optional):</label>
                     <div contenteditable="true" id="edition" name="edition"></div>
 
-                    <label for="publication_date">Дата публикации(Необязательно):</label>
+                    <label for="publication_date">Publication Date (Optional):</label>
                     <div contenteditable="true" id="publication_date" name="publication_date"></div>
 
-                    <label for="message">Сообщение:</label>
+                    <label for="message">Message:</label>
                     <div contenteditable="true" id="message" name="message" required></div>
 
                     <label for="url">URL:</label>
                     <div contenteditable="true" id="url" name="url" required></div>
 
-                    <label for="image">Изображение:</label>
+                    <label for="image">Image:</label>
                     <input type="file" id="image" name="image" accept="image/*">
 
                     <input type="submit" value="Сохранить">
@@ -101,9 +101,8 @@ async function openSubAddNewsletter() {
                         closeBlock('.newsletter-info-block');
                         closeBlock('.add-message-block');
                     } catch (error) {
-                        console.error('Ошибка при сохранении рассылки:', error);
                         const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="error-add-newsletter">Ошибка при сохранении рассылки: ${JSON.stringify(error)}</p>`;
+                        resultContainer.innerHTML = `<p class="error-add-newsletter">Error while saving newsletter: ${JSON.stringify(error)}</p>`;
                     }
                 };
 

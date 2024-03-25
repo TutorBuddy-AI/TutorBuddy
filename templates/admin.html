@@ -41,23 +41,23 @@
     <div id="sidebar">
         <a href="#" onclick="openSubProfiles()">
             <img width="18" height="18" src="https://img.icons8.com/windows/32/contract-job.png" alt="contract-job"/>
-            Профили
+            Profiles
         </a>
         <a href="#" onclick="openSubDialogs()">
             <img width="18" height="18" src="https://img.icons8.com/ios/50/filled-speech-bubble-with-dots--v1.png" alt="filled-speech-bubble-with-dots--v1"/>
-            Диалоги
+            Dialogs
         </a>
         <a href="#" onclick="openSubStatistic()">
             <img width="18" height="18" src="https://img.icons8.com/ios/50/statistics.png" alt="statistics"/>
-            Статистика
+            Dashboards
         </a>
         <a href="#" onclick="openSubNewsletter()">
         <img width="18" height="18" src="https://img.icons8.com/ios/50/play-property.png" alt="play-property"/>
-            Отправить новость
+            Send news
         </a>
         <a href="#" onclick="openSubAddNewsletter()">
         <img width="18" height="18" src="https://img.icons8.com/ios/50/add-property.png" alt="add-property"/>
-            Добавить новость
+            Add news
         </a>
 <!--        <a href="#" onclick="openSubNewsletter()">-->
 <!--        <img width="18" height="18" src="https://img.icons8.com/ios/50/send&#45;&#45;v1.png" alt="send&#45;&#45;v1"/>-->
@@ -71,7 +71,7 @@
         <!--- WORK !-->
         <a href="/logout">
             <img width="18" height="18" src="https://img.icons8.com/ios/50/exit--v1.png" alt="exit--v1"/>
-            Выйти
+            Exit
         </a>
     </div>
 </div>
@@ -79,33 +79,35 @@
 <div id="deleteConfirmationModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('deleteConfirmationModal')">&times;</span>
-        <p>Вы уверены, что хотите удалить рассылку с ID <span id="deleteModalNewsletterId"></span>?</p>
-        <button class="confirm-button" onclick="confirmDeletion()">Да</button>
-        <button class="cancel-button" onclick="closeModal('deleteConfirmationModal')">Отмена</button>
+        <p>Are you sure you want to delete the newsletter with ID <span id="deleteModalNewsletterId"></span>?</p>
+        <button class="confirm-button" onclick="confirmDeletion()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('deleteConfirmationModal')">Cancel</button>
     </div>
 </div>
+
 
 <div id="sendConfirmationModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('sendConfirmationModal')">&times;</span>
-        <p>Вы уверены, что хотите отправить рассылку с ID <span id="sendModalNewsletterId"></span>?</p>
-        <button class="confirm-button" onclick="confirmSend()">Да</button>
-        <button class="cancel-button" onclick="closeModal('sendConfirmationModal')">Отмена</button>
+        <p>Are you sure you want to send the newsletter with ID <span id="sendModalNewsletterId"></span>?</p>
+        <button class="confirm-button" onclick="confirmSend()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('sendConfirmationModal')">Cancel</button>
     </div>
 </div>
+
 
 
 
 <div id="sendDatetimeConfirmationModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('sendDatetimeConfirmationModal')">&times;</span>
-        <p>Выберите дату и время через календарь по московскому времени когда отправить рассылку с ID <span id="sendDatetimeModalNewsletterId"></span></p>
+        <p>Select the date and time using the calendar in Moscow time when to send the newsletter with ID <span id="sendDatetimeModalNewsletterId"></span></p>
         <div>
-            <label for="datetimePicker">Дата и время:</label>
+            <label for="datetimePicker">Date and time:</label>
             <input type="text" id="datetimePicker" name="datetimePicker" required>
         </div>
-        <button class="confirm-button" onclick="confirmSendDatetime()">Да</button>
-        <button class="cancel-button" onclick="closeModal('sendDatetimeConfirmationModal')">Отмена</button>
+        <button class="confirm-button" onclick="confirmSendDatetime()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('sendDatetimeConfirmationModal')">Cancel</button>
     </div>
 </div>
 
@@ -114,11 +116,12 @@
 <div id="changeTextModal" class="change-text-modal">
   <div class="change-text-modal-content">
     <span class="close" onclick="closeModal('changeTextModal')">&times;</span>
-    <p id="changeTextModalTitle">Введите новый текст для <span id="changeTextColumnName"></span>:</p>
+    <p id="changeTextModalTitle">Enter new text for <span id="changeTextColumnName"></span>:</p>
     <textarea id="changeTextNewText" placeholder=""></textarea>
-    <button id="changeTextSaveBtn">Сохранить</button>
+    <button id="changeTextSaveBtn">Save</button>
   </div>
 </div>
+
 
 
 
