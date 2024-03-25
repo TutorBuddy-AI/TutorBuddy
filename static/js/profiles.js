@@ -123,14 +123,14 @@ function handleSearch(users, searchTerm) {
                 const user_data = await user_data_Response.json();
                 displayProfiles(user_data);
             } catch (error) {
-                console.error('Error fetching user profile:', error);
+//                console.error('Error fetching user profile:', error);
             }
         });
     });
 }
 
 
-function displayProfiles(user) {
+async function displayProfiles(user) {
     const profileBlock = document.createElement('div');
     profileBlock.className = 'profile-block';
 
@@ -158,7 +158,25 @@ function displayProfiles(user) {
     }
 
     document.body.appendChild(profileBlock);
+
+    try {
+        const tg_id = user.tg_id;
+        const user_mistake_Response = await fetch(`/get_message_hint_user/${tg_id}`);
+
+        if (!user_mistake_Response.ok) {
+            throw new Error(`HTTP error! Status: ${user_mistake_Response.status}`);
+        }
+
+        const user_mistake = await user_mistake_Response.json();
+        if (user_mistake.message) {
+            displayMistake(user_mistake.message);
+        }
+    } catch (error) {
+//        console.error('Error fetching user mistake:', error);
+    }
 }
+
+
 
 function createDivider() {
     const divider = document.createElement('div');
@@ -225,7 +243,26 @@ function populateSection(section, user, fields, hideLabel = false) {
 }
 
 
+function displayMistake(errorMessage) {
+    const mistakeBlock = document.createElement('div');
+    mistakeBlock.className = 'mistakeBlock';
 
+    const titleMistake = document.createElement('h2');
+    titleMistake.textContent = 'Mistakes';
+    titleMistake.style.fontWeight = 'bold';
+    titleMistake.style.marginLeft = '10px';
+
+    const errorMessageElement = document.createElement('p');
+    errorMessageElement.textContent = errorMessage;
+
+    mistakeBlock.appendChild(titleMistake);
+    mistakeBlock.appendChild(errorMessageElement);
+
+    document.body.appendChild(mistakeBlock);
+}
+
+
+// English level converter
 function convertEnglishLevel(value) {
     const levelDict = {
         '1': 'I can use simple words and basic phrases',

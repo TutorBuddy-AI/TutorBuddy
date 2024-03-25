@@ -15,7 +15,7 @@ from src.admin.config_admin import ( app, templates,
 )
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
-from src.database.models import User, MessageHistory, DailyNews, MessageForUsers
+from src.database.models import User, MessageHistory, DailyNews, MessageForUsers, MessageMistakes
 
 from src.database import session
 
@@ -512,6 +512,39 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
     }
 
     return JSONResponse(content=statistic)
+
+
+@app.get("/get_message_hint_user/{tg_id}")
+async def get_message_hint_user(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+    """
+    Получение информации о ошибках пользователя с указанным tg_id.
+    Пример успешного ответа:
+
+    ```json
+    {
+        "id": 1,
+        "tg_id": "1234567",
+        "message": "message",
+        "created_at": "2024-03-05 06:02:04"
+    }
+    ```
+    """
+    query = select(MessageMistakes).where(MessageMistakes.tg_id == str(tg_id))
+    result = await session.execute(query)
+    user_mistake = result.scalars().first()
+    print(tg_id)
+    if user_mistake:
+        user_dict = {
+            "id": user_mistake.id,
+            "tg_id": user_mistake.tg_id,
+            "message": user_mistake.message,
+            "created_at": datetime.strftime(user_mistake.created_at, "%Y-%m-%d %H:%M:%S")
+        }
+        return JSONResponse(content=user_dict)
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
 
 
 @app.get("/")
