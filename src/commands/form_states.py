@@ -187,16 +187,13 @@ async def process_timezone(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["time_zone"] = query.data.split("_")[1]
     await state.set_state(Form.english_level)
-    print(await state.get_state())
 
 
 @dp.callback_query_handler(lambda query: query.data == "timezone_other", state=Form.time_zone)
 async def process_other_timezone(query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(query.message.chat.id, "Please enter the name of your city:")
-    print(await state.get_state())
 
     await state.set_state(Form.other_city_timezone)
-    print(await state.get_state())
 
 
 @dp.message_handler(state=Form.other_city_timezone)
@@ -206,16 +203,13 @@ async def process_other_city_timezone(message: types.Message, state: FSMContext)
     time_zone = await utc_user.get_timezone(message, city_name)
     async with state.proxy() as data:
         data["time_zone"] = time_zone
-    print(await state.get_state())
 
     await state.set_state(Form.english_level)
-    print(await state.get_state())
     # await bot.send_message(message.chat.id, "Thank you😉 Now let's continue.")
 
 
 @dp.callback_query_handler(state=Form.english_level)
 async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
-    print(await state.get_state())
 
     await state.set_state(Form.topic)
 
