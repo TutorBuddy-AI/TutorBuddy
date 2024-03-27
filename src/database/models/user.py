@@ -62,6 +62,7 @@ class User(Base, TimestampMixin):
     topic = Column(String, nullable=True)
     additional_topic = Column(String, nullable=True)
     english_level = Column(String, nullable=True)
+    time_zone = Column(String, nullable=True)
 
     roles = relationship(
         "Role",

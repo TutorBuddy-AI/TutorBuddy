@@ -1,32 +1,26 @@
 import asyncio
-from src.database import session
-from sqlalchemy import select
 
-from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.config import dp, bot
 from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_welcome_text, get_meet_nastya_text, get_welcome_text_before_start, \
     get_lets_know_each_other, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_choose_buddy_text, \
-    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message, get_first_summary
+    get_meet_bot_message, get_meet_bot_text, get_meet_nastya_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
-    get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
+    get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard, get_choose_timezone
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from src.database.models.message_history import MessageHistory
-from src.database.models.setting import Setting
 
-from src.utils.user import UserService, UserHelper, UserCreateMessage
+from src.utils.user import UserService, UserHelper
 
 from aiogram.dispatcher import FSMContext
 from aiogram import types, md
 from aiogram.types import InputFile, CallbackQuery
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 
-from src.utils.newsletter.newsletter import Newsletter
+from utils.find_timezone.timezone import UtcUser
 
 
 async def clean_messages(chat_id: str, message_id: str):
@@ -177,9 +171,51 @@ async def process_other_goal_handler(message: types.Message, state: FSMContext):
 
 
 @dp.callback_query_handler(lambda query: query.data.startswith("level"), state=Form.english_level)
-async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
+async def process_timezone(query: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data["english_level"] = query.data.split("_")[1]
+
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/geopos.png'),
+                         caption=md.escape_md(
+                             f"What {'city'} are you in? \n It's important for me to know so we can determine your time zone and not bother you at inconvenient times 😉"),
+                         reply_markup=await get_choose_timezone())
+    await state.set_state(Form.time_zone)
+
+
+@dp.callback_query_handler(lambda query: query.data.startswith("utc"), state=Form.time_zone)
+async def process_timezone(query: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["time_zone"] = query.data.split("_")[1]
+    await state.set_state(Form.english_level)
+    print(await state.get_state())
+
+
+@dp.callback_query_handler(lambda query: query.data == "timezone_other", state=Form.time_zone)
+async def process_other_timezone(query: types.CallbackQuery, state: FSMContext):
+    await bot.send_message(query.message.chat.id, "Please enter the name of your city:")
+    print(await state.get_state())
+
+    await state.set_state(Form.other_city_timezone)
+    print(await state.get_state())
+
+
+@dp.message_handler(state=Form.other_city_timezone)
+async def process_other_city_timezone(message: types.Message, state: FSMContext):
+    city_name = message.text.strip()
+    utc_user = UtcUser()
+    time_zone = await utc_user.get_timezone(message, city_name)
+    async with state.proxy() as data:
+        data["time_zone"] = time_zone
+    print(await state.get_state())
+
+    await state.set_state(Form.english_level)
+    print(await state.get_state())
+    # await bot.send_message(message.chat.id, "Thank you😉 Now let's continue.")
+
+
+@dp.callback_query_handler(state=Form.english_level)
+async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
+    print(await state.get_state())
 
     await state.set_state(Form.topic)
 
@@ -259,59 +295,31 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         caption=get_meet_bot_message(),
         reply_markup=caption_markup)
 
-    meet_bot_text = get_meet_bot_text()
-    audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
+    # meet_bot_text = get_meet_bot_text()
+    # audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
+    # with AudioConverter(audio) as ogg_file:
+    await bot.send_voice(
+        message.chat.id,
+        types.InputFile('./files/meet_bot.ogg'),
+        parse_mode=ParseMode.HTML
+    )
 
-    meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
-    audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    # meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
+    # audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
+    await asyncio.sleep(2)
     await bot.send_photo(
         message.chat.id,
         photo=types.InputFile('./files/meet_nastya.png'),
         caption=get_meet_nastya_message(user_info["call_name"]),
         reply_markup=caption_markup)
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            types.InputFile(ogg_file),
-            parse_mode=ParseMode.HTML
-        )
+
+    await bot.send_voice(
+        message.chat.id,
+        types.InputFile('./files/meet_nastya.ogg'),
+        parse_mode=ParseMode.HTML
+    )
 
     await bot.send_message(
         message.chat.id, text=md.escape_md("Who would you like to talk to?"),
-        reply_markup=await get_choose_bot_keyboard(is_caption=False))
+        reply_markup=await get_choose_bot_keyboard())
     await state.finish()
-
-
-@dp.callback_query_handler(lambda query: query.data.startswith('dispatch_summary_'))
-async def handler_choice_summary(query: types.CallbackQuery, state: FSMContext):
-    chat_id = query.message.chat.id
-
-    select_query = select(Setting).where(Setting.tg_id == str(chat_id))
-    result = await session.execute(select_query)
-    user = result.scalars().first()
-
-    user_answer = True if query.data == "dispatch_summary_true" else False
-    if user:
-        user.summary_on = user_answer
-        user.summary_answered = True
-        await session.commit()
-    else:
-        session.add(Setting(tg_id=str(chat_id), summary_on=user_answer, summary_answered=True))
-        await session.commit()
-    if user_answer:
-        text_true = ("Deal! Looking forward to discuss the most up-to-date news ⚡ "
-                     "In case you change your mind, you may refuse to receive summaries anytime: "
-                     "go to Menu and choose 'Summaries'.")
-        await bot.send_message(query.message.chat.id, md.escape_md(text_true),
-                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))
-    else:
-        text_false = ("Got it! ✌🏻 In case you change your mind, "
-                      "go to Menu and choose 'Summaries', so you can still get the most fresh ones!")
-        await bot.send_message(query.message.chat.id, md.escape_md(text_false),
-                               reply_markup=AnswerRenderer.get_markup_text_translation_standalone(for_user=True))

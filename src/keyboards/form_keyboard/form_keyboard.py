@@ -25,7 +25,7 @@ async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
 
     choose_native_language_inline_kb.row(rus, hindi).row(persian, spanish).row(chinese, german).row(french, other).row(
-            translate_button)
+        translate_button)
 
     return choose_native_language_inline_kb
 
@@ -195,3 +195,29 @@ async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
     translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
     keyboard_summary_markup.row(translate_button).row(accept, go_back_btn)
     return keyboard_summary_markup
+
+
+async def get_choose_timezone(is_caption=True) -> InlineKeyboardMarkup:
+    choose_timezone_inline_kb = InlineKeyboardMarkup(row_width=2)
+
+    utc_plus_3 = InlineKeyboardButton(text='Мск - Спб (UTC+3)', callback_data='utc_+03:00')
+    utc_plus_2 = InlineKeyboardButton(text='Калининград (UTC+2)', callback_data='utc_+02:00')
+    utc_plus_5 = InlineKeyboardButton(text='Уфа (UTC+5)', callback_data='utc_+05:00')
+    utc_plus_7 = InlineKeyboardButton(text='Красноярск (UTC+7)', callback_data='utc_+07:00')
+    utc_plus_10 = InlineKeyboardButton(text='Владивосток (UTC+10)', callback_data='utc_+10:00')
+    utc_plus_1 = InlineKeyboardButton(text='Лондон (UTC+1)', callback_data='utc_+01:00')
+
+    choose_timezone_inline_kb.add(utc_plus_3, utc_plus_5, utc_plus_10)
+    choose_timezone_inline_kb.add(utc_plus_2, utc_plus_7, utc_plus_1)
+
+    other = InlineKeyboardButton(text='Other ✍️', callback_data='timezone_other')
+
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone()
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone()
+
+    choose_timezone_inline_kb.add(other)
+    choose_timezone_inline_kb.add(translate_button)
+
+    return choose_timezone_inline_kb
