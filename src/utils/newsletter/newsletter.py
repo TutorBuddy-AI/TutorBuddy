@@ -2,23 +2,23 @@ import traceback
 from typing import Optional
 
 from sqlalchemy import select
+
+from config import config
 from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
 import logging
-from aiogram import types
 from src.database.models.message_history import MessageHistory
-from src.database.models.setting import Setting
 from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cache import AudioConverterCache
 from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from aiogram.types import ParseMode
+from aiogram.enums.parse_mode import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from aiogram.types.web_app_info import WebAppInfo
 import asyncio
 from src.utils.generate import GenerateAI
@@ -47,11 +47,15 @@ class Newsletter:
         # Вызов метода, передавая topic, ожидаем лист из tg_id в str
         tg_id_list = await self.user_topic(daily_news.topic)
         post_text = md(daily_news.message)
-
-        audio_files = {
-            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-            'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
-        }
+        if config.BOT_TYPE == "original":
+            audio_files = {
+                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+                'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
+            }
+        else:
+            audio_files = {
+                config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, post_text),
+            }
 
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
@@ -98,23 +102,24 @@ class Newsletter:
         # Отправка фото с текстом newsletter под ним
         post_message = await bot.send_photo(
             chat_id=int(tg_id),
-            photo=types.InputFile(path_img),
+            photo=FSInputFile(path_img),
             caption=post_text,
             parse_mode=ParseMode.MARKDOWN,
-            reply_markup=InlineKeyboardMarkup().row(
-                InlineKeyboardButton(
-                    text='Original article ➡️📃',
-                    web_app=WebAppInfo(),
-                    url=daily_news.url)
-            ).row(post_translate_button)
-        )
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(
+                        text='Original article ➡️📃',
+                        web_app=WebAppInfo(),
+                        url=daily_news.url)],
+                    [post_translate_button]]
+        ))
 
         if voice == "Anastasia":
             file_path = post_audio_files[0]
         else:
             file_path = post_audio_files[1]
 
-        await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        await bot.send_voice(int(tg_id), FSInputFile(file_path))
         return post_message
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
@@ -140,7 +145,7 @@ class Newsletter:
         with AudioConverter(audio) as ogg_file:
             # Отправка вопроса юзера по поводу newsletter голосовое сообщение
             await bot.send_voice(int(tg_id),
-                                 types.InputFile(ogg_file),
+                                 FSInputFile(ogg_file),
                                  caption=f'<span class="tg-spoiler">{answer}</span>',
                                  parse_mode=ParseMode.HTML,
                                  reply_markup=markup,
@@ -174,14 +179,14 @@ class Newsletter:
             logging.error("ERROR FROM GET_VOICE")
 
     async def get_payload(self, tgid, string):
-        user_info = await UserService().get_user_info(tgid)
+        user_info = await UserService().get_user_person(tgid)
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
                        f" His English level is {user_info['english_level']}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
         translate_request = {
@@ -192,6 +197,7 @@ class Newsletter:
                 f"ask your interlocutor about his/her opinion about this article. "
                 f"Continue discussing this article with him/her, "
                 f"briefly respond to his/her messages and always ask a logical question to continue the dialogue."
+                f"don’t put user response in your answer, don’t name the paragraphs"
         }
         logging.error(translate_request)
 
@@ -210,7 +216,7 @@ class Newsletter:
         user_info = await user_service.get_user_info(tg_id=tg_id)
         name = user_info["name"]
 
-        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
+        await bot.send_photo(int(tg_id), photo=FSInputFile('./files/summary.jpg'),
                              caption=get_first_summary(name),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=await get_keyboard_summary_choice(menu=False))
@@ -236,7 +242,7 @@ class Newsletter:
 
         await bot.send_voice(
             tg_id,
-            types.InputFile(file_voice),
+            FSInputFile(file_voice),
             parse_mode=ParseMode.HTML,
             reply_markup=markup
         )

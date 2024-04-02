@@ -1,11 +1,11 @@
-from src.utils.stciker.sticker_pack import anastasias_pack, tutorbots_pack
+from src.utils.stciker.sticker_pack import pack_map
 
 
 class StickerSender:
     def __init__(self, bot, chat_id, speaker):
         self.bot = bot
         self.chat_id = chat_id
-        self.pack = anastasias_pack if speaker == "Anastasia" else tutorbots_pack
+        self.pack = pack_map[speaker]
 
     async def send_problem_sticker(self, reply_to=None):
         await self.bot.send_sticker(

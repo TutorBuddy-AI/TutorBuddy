@@ -1,11 +1,12 @@
+from database.models import Person
 from src.database.models import User, MessageHistory, Setting
 from src.database import Transactional, session
-from src.utils.user.schemas import GetUserInfo, UserInfo, UserLocationInfo, GetUserMessageHistory
+from src.utils.user.schemas import GetUserInfo, UserInfo, GetUserPersonInfo, GetUserMessageHistory
 from src.utils.generate.question_history import SupportHistory
 from src.utils.generate.feedback_loop import FeedbackHistory
 
 from src.utils.message_history_mistakes import MessageMistakesService
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, text
 from src.utils.message_hint import MessageHintService
 from src.utils.message_translation import MessageTranslationService
 from src.utils.paraphrasing import MessageParaphraseService
@@ -69,6 +70,11 @@ class UserService:
 
         return results
 
+    async def count_message_history(self, tg_id) -> int:
+        query = text("SELECT COUNT(*) AS message_count FROM message_history WHERE tg_id = :tg_id")
+        result = await session.execute(query, {"tg_id": str(tg_id)})
+        return result.scalar()
+
     async def is_exist(
             self,
             tg_id: str
@@ -93,6 +99,32 @@ class UserService:
             "topic": result.topic,
             "english_level": result.english_level,
             "speaker": result.speaker
+        }
+
+    async def get_user_person(
+            self,
+            tg_id: str
+    ) -> GetUserPersonInfo:
+        query = (
+            select(
+                User,
+                Person
+            )
+            .join(Person, User.speaker == Person.id)
+            .where(User.tg_id == tg_id)
+        )
+        result = await session.execute(query)
+        result = result.first()
+
+        return {
+            "name": result.User.call_name,
+            "goal": result.User.goal,
+            "native_lang": result.User.native_lang,
+            "topic": result.User.topic,
+            "english_level": result.User.english_level,
+            "speaker_id": result.Person.id,
+            "speaker_short_name": result.Person.short_name,
+            "speaker_full_name": result.Person.full_name
         }
 
     @Transactional()

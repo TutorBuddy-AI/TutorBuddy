@@ -62,7 +62,7 @@ class AnswerMistakesGenerator:
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
-        user_info = await UserService().get_user_info(self.tg_id)
+        user_info = await UserService().get_user_person(self.tg_id)
         mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
 
         service_request = {
@@ -71,7 +71,7 @@ class AnswerMistakesGenerator:
                        f" His English level is {mapped_level}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
 
@@ -94,7 +94,8 @@ class AnswerMistakesGenerator:
             text_of_the_answer should be replaced with the text of the answer for user,
             Please, keep the conversation friendly and engaging. 
             Answer the user's questions and inquire about topics that interest him, 
-            as if you're chatting with a friend to keep the conversation going. Don't allow the dialog to finish on you.
+            as if you're chatting with a friend to keep the conversation going.Always conclude your responses with a relevant question to ensure the conversation continues on an engaging note. 
+            Don't allow the dialog to finish on you.
             Entertain your interlocutor. 
             If the conversation shifts to a language other than English, kindly remind them to continue in English. 
             Always respond in English only.

@@ -1,15 +1,19 @@
-from aiogram import types, md
-from aiogram.dispatcher import FSMContext
+from aiogram import types, md, Router, F
+from aiogram.enums import ParseMode
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from src.config import dp, bot
+from src.config import bot
 from src.filters import IsNotRegister
 from src.filters.is_not_register_filter import IsRegister
 from src.utils.answer import AnswerRenderer
 from src.utils.message_history_mistakes import MessageMistakesService
 
+mistakes_router = Router(name=__name__)
 
-@dp.message_handler(IsRegister(), commands=["all_mistakes"])
+
+@mistakes_router.message(IsRegister(), Command("all_mistakes"))
 async def get_mistakes(message: types.Message, state: FSMContext):
 
     data = await MessageMistakesService().get_user_message_history_mistakes(tg_id=str(message.chat.id))
@@ -24,31 +28,32 @@ async def get_mistakes(message: types.Message, state: FSMContext):
                         message.message_id)
     else:
         await bot.send_message(message.chat.id,
-                               md.escape_md("You haven't ever requested to find mistakes in your messages."))
+                               text="You haven't ever requested to find mistakes in your messages.",
+                               parse_mode=ParseMode.HTML)
 
 
-@dp.message_handler(IsNotRegister(), commands=["feedback"])
+@mistakes_router.message(IsNotRegister(), Command("feedback"))
 async def edit_profile_handler(message: types.Message):
     translate_markup = AnswerRenderer.get_markup_text_translation_standalone(for_user=False)
-    await bot.send_message(message.chat.id, text=md.escape_md("Please, register first"), reply_markup=translate_markup)
+    await bot.send_message(message.chat.id, text="Please, register first", parse_mode=ParseMode.HTML,
+                           reply_markup=translate_markup)
 
 
 def create_inline_keyboard(current_index, total_elements):
-    keyboard = InlineKeyboardMarkup(row_width=3)
-    prev_button = InlineKeyboardButton("⬅️", callback_data="prev")
+    prev_button = InlineKeyboardButton(text="⬅️", callback_data="prev")
 
-    index_button = InlineKeyboardButton(f"{current_index + 1} / {total_elements}", callback_data="...........")
+    index_button = InlineKeyboardButton(text=f"{current_index + 1} / {total_elements}", callback_data="...........")
 
-    next_button = InlineKeyboardButton("➡️", callback_data="next")
+    next_button = InlineKeyboardButton(text="➡️", callback_data="next")
 
     go_back_btn = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
-    keyboard.row(prev_button, index_button, next_button).add(go_back_btn)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[[prev_button, index_button, next_button], [go_back_btn]])
 
     return keyboard
 
 
-@dp.callback_query_handler(lambda query: query.data in ["prev", "next"])
+@mistakes_router.callback_query(F.data.in_(["prev", "next"]))
 async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMContext):
 
     storage = await state.get_data()
@@ -78,6 +83,8 @@ async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMC
 
 async def send_data(chat_id, data_element, keyboard, message_id):
     if data_element is None:
-        await bot.send_message(chat_id=chat_id, text=md.escape_md("You don't have any mistakes"), reply_markup=keyboard)
+        await bot.send_message(chat_id=chat_id, text="You don't have any mistakes", parse_mode=ParseMode.HTML,
+                               reply_markup=keyboard)
     else:
-        await bot.send_message(chat_id=chat_id, text=md.escape_md(data_element['message']), reply_markup=keyboard)
+        await bot.send_message(chat_id=chat_id, text=data_element['message'], parse_mode=ParseMode.HTML,
+                               reply_markup=keyboard)

@@ -1,12 +1,13 @@
 from typing import List, Optional
 
 from aiogram import Bot
-from aiogram.dispatcher import FSMContext
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from aiogram import md
-from aiogram import types
-from aiogram.types import ParseMode
+# from aiogram import types
+from aiogram.types.input_file import FSInputFile
+from aiogram.enums.parse_mode import ParseMode
 
+from src.commands.notification import send_pin_message
 from src.database.models import MessageHistory
 from src.utils.answer import AnswerRenderer
 from src.utils.answer.answer import Answer
@@ -16,12 +17,12 @@ from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.generate.communication import CommunicationGenerate
 from src.utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from src.utils.message import MessageHelper
-from src.utils.message_history_mistakes import MessageMistakesHelper, MessageMistakesService
 from src.utils.transcriber import TextToSpeechEleven
 from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserCreateMessage, UserService
+from utils.transcriber.text_to_speech import TextToSpeech
 
 
 class CommunicationHandler:
@@ -33,17 +34,20 @@ class CommunicationHandler:
         self.message_text = message.text
         self.chat_id = message.chat.id
         self.speaker: Optional[str] = None
+        self.speaker_short_name: Optional[str] = None
         self.sticker_sender: Optional[StickerSender] = None
 
     async def init(self):
         user_service = UserService()
-        user_info = await user_service.get_user_info(tg_id=self.chat_id)
-        self.speaker = user_info["speaker"] if user_info["speaker"] else "TutorBuddy"
+        user_info = await user_service.get_user_person(tg_id=str(self.chat_id))
+        self.speaker = user_info["speaker_id"]
+        self.speaker_short_name = user_info["speaker_short_name"]
 
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
     async def handle_audio_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait",
+                                                   parse_mode=ParseMode.HTML)
 
         await self.bot.send_chat_action(chat_id=self.chat_id, action='record_audio')
         message_text = await SpeechToText(file_id=self.message.voice.file_id).get_text()
@@ -64,7 +68,8 @@ class CommunicationHandler:
         await self.save_render_in_context(render)
 
     async def handle_text_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait")
+        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait",
+                                                   parse_mode=ParseMode.HTML)
         await self.bot.send_chat_action(chat_id=self.chat_id, action='typing')
 
         answer = await self.prepare_answer(self.message_text, "text")
@@ -78,6 +83,12 @@ class CommunicationHandler:
             answer, self.message_text, self.message.message_id, "text",
             user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id
         ).render()
+
+        # message_history = await UserService().count_message_history(self.chat_id)
+        # ToDo fix it
+        # await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
+
+
         await self.render_text_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)
         await self.save_render_in_context(render)
@@ -116,21 +127,15 @@ class CommunicationHandler:
         await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
 
     async def render_text_answer(self, render: Render):
-        user_info = await UserService().get_user_info(self.chat_id)
-        user_speaker = user_info['speaker']
         additional_menu_message = None
-        if user_speaker == 'Anastasia':
-            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "TutorBuddy":
-            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        else:
-            raise Exception("Unknown speaker")
+
+        audio = await TextToSpeech(tg_id=str(self.chat_id), prompt=render.answer_text).get_speech()
 
         if render.is_generation_successful:
             with AudioConverter(audio) as ogg_file:
                 answer_message = await self.bot.send_voice(
                     self.chat_id,
-                    types.InputFile(ogg_file),
+                    FSInputFile(ogg_file, "voice"),
                     caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                     parse_mode=ParseMode.HTML,
                     reply_markup=render.bot_message_markup,
@@ -141,22 +146,15 @@ class CommunicationHandler:
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(self.chat_id,
-                                          types.InputFile(ogg_file),
+                                          FSInputFile(ogg_file, "voice"),
                                           caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                                           parse_mode=ParseMode.HTML,
                                           reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
 
     async def render_audio_answer(self, render: Render):
-        user_info = await UserService().get_user_info(self.chat_id)
-        user_speaker = user_info['speaker']
 
-        if user_speaker == 'Anastasia':
-            audio = await TextToSpeechEleven(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        elif user_speaker == "TutorBuddy":
-            audio = await TextToSpeechOpenAI(prompt=render.answer_text, tg_id=str(self.chat_id)).get_speech()
-        else:
-            raise Exception("Unknown speaker")
+        audio = await TextToSpeech(tg_id=str(self.chat_id), prompt=render.answer_text).get_speech()
 
         if render.is_generation_successful:
             additional_menu_message = await self.bot.send_message(
@@ -166,7 +164,7 @@ class CommunicationHandler:
             with AudioConverter(audio) as ogg_file:
                 answer_message = await self.bot.send_voice(
                                        self.chat_id,
-                                       types.InputFile(ogg_file),
+                                       FSInputFile(ogg_file, "voice"),
                                        caption=f'<span class="tg-spoiler">{render.answer_text}</span>',
                                        parse_mode=ParseMode.HTML,
                                        reply_markup=render.bot_message_markup,
@@ -178,7 +176,7 @@ class CommunicationHandler:
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(
-                    self.chat_id, types.InputFile(ogg_file),
+                    self.chat_id, FSInputFile(ogg_file, "voice"),
                     reply_to_message_id=render.reply_to_message_id)
             await self.sticker_sender.send_problem_sticker(render.reply_to_message_id)
 

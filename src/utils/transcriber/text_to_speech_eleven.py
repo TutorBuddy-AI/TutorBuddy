@@ -8,8 +8,14 @@ from src.config import config
 
 import json
 
-id_bot_voice = "SQbRRoMNiJau4LetNtC3"
-id_nastya_voice = "j561qvFxyYEptWwufeRi"
+voice_map = {
+    "Anastasia": "LC58oHYbe1EOt8kPZizM",
+    "AA_Lingua": "sKSCI18qgaDgCq3gTkK2",
+    "Oksana": "YFczjBOHj0ctMzjDRucv"
+}
+
+
+
 model = "eleven_multilingual_v2"
 request_url = "https://api.elevenlabs.io/v1/text-to-speech/"
 
@@ -29,10 +35,10 @@ class TextToSpeechEleven:
         self.prompt = prompt
         self.tg_id = tg_id
 
-    async def get_speech(self) -> Optional[BytesIO]:
+    async def get_speech(self, voice: str) -> Optional[BytesIO]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                    url=f"{request_url}{id_nastya_voice}",
+                    url=f"{request_url}{voice_map[voice]}",
                     json=await TextToSpeechEleven.get_combine_data(self.prompt),
                     headers=headers) as response:
                 if response.status == 200:
@@ -42,10 +48,10 @@ class TextToSpeechEleven:
                     return None
 
     @staticmethod
-    async def get_speech_for_text(text) -> Optional[BytesIO]:
+    async def get_speech_for_text(text, voice: str) -> Optional[BytesIO]:
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                    url=f"{request_url}{id_nastya_voice}",
+                    url=f"{request_url}{voice_map[voice]}",
                     json=await TextToSpeechEleven.get_combine_data(text),
                     headers=headers) as response:
                 if response.status == 200:

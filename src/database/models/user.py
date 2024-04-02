@@ -1,3 +1,4 @@
+from config import config
 from src.database import Base
 from src.database.mixins import TimestampMixin
 from sqlalchemy import (
@@ -48,7 +49,7 @@ class User(Base, TimestampMixin):
 
     call_name = Column(String, nullable=False)
     email = Column(String, nullable=True, unique=True)
-    speaker = Column(String, nullable=True, default="Anastasia")
+    speaker = Column(String, nullable=True, default=config.BOT_PERSON)  # ForeignKey('person.id')
     phone_number = Column(String, nullable=True)
     tg_firstName = Column(String, nullable=True)
     tg_lastName = Column(String, nullable=True)
