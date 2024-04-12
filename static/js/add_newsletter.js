@@ -1,113 +1,125 @@
 async function openSubAddNewsletter() {
-    closeSubSidebar();
+    const pageTitle = document.getElementById('page-title');
+    pageTitle.innerHTML = 'Add newsletter message';
+    const passField = document.getElementById("main_content_cont");
+    passField.innerHTML = '';
 
-    if (!subAddNewsletterExists) {
-        const subSidebar = document.createElement('div');
-        subSidebar.className = 'add-newsletter-block';
+    const AddNewsletterContainer = document.createElement('div');
 
-        const AddNewsletterContainer = document.createElement('div');
-
-        AddNewsletterContainer.innerHTML = `
-            <div>
-                <form id="addNewsletterForm">
-                    <label for="topic">Topic:</label>
-                    <div contenteditable="true" id="topic" name="topic" required></div>
-
-                    <label for="title">Title:</label>
-                    <div contenteditable="true" id="title" name="title" required></div>
-
-                    <label for="edition">Edition (Optional):</label>
-                    <div contenteditable="true" id="edition" name="edition"></div>
-
-                    <label for="publication_date">Publication Date (Optional):</label>
-                    <div contenteditable="true" id="publication_date" name="publication_date"></div>
-
-                    <label for="message">Message:</label>
-                    <div contenteditable="true" id="message" name="message" required></div>
-
-                    <label for="url">URL:</label>
-                    <div contenteditable="true" id="url" name="url" required></div>
-
-                    <label for="image">Image:</label>
-                    <input type="file" id="image" name="image" accept="image/*">
-
-                    <input type="submit" value="Сохранить">
-                </form>
-                <div id="resultContainer"></div>
+    AddNewsletterContainer.innerHTML = `
+        <div class="col-md-12">
+          <form class="card" id="addNewsletterForm">
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label required">Topic</label>
+                <div>
+                  <input type="text" class="form-control" placeholder="Article Topic" id="topic">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label required">Title</label>
+                <div>
+                  <input type="text" class="form-control" placeholder="New Title" id="title">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Publisher</label>
+                <div>
+                  <input type="text" class="form-control" placeholder="Article Publisher" id="publisher">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Publication Date</label>
+                <div>
+                  <input type="text" class="form-control" placeholder="Publication Date"  id="publication_date">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label required">Message text<span class="form-label-description"></span></label>
+                <textarea class="form-control" name="example-textarea-input" rows="6" placeholder="Content.." style="height: 218px;" id="message">
+                </textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label required">URL</label>
+                <div>
+                  <input type="text" class="form-control" placeholder="Article URL" id="url">
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="form-label required">Message Image</div>
+                <input type="file" class="form-control" wfd-id="id155" accept="image/*" id="image">
+              </div>
             </div>
-        `;
-
-
-        subSidebar.appendChild(AddNewsletterContainer);
-        document.body.appendChild(subSidebar);
-
-        document.getElementById('addNewsletterForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
+            <div class="card-footer text-end">
+              <div id="resultContainer"></div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </form>
+        </div>
+    `;
+    passField.appendChild(AddNewsletterContainer);
+    document.getElementById('addNewsletterForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
 
         const topic = document.getElementById('topic').innerHTML;
         const url = document.getElementById('url').innerHTML;
         const title = document.getElementById('title').innerHTML;
         const message = document.getElementById('message').innerHTML;
-        const edition = document.getElementById('edition').innerHTML;
+        const publisher = document.getElementById('publisher').innerHTML;
         const publication_date = document.getElementById('publication_date').innerHTML;
         const imageInput = document.getElementById('image');
 
+        if (imageInput.files.length > 0) {
+            const imageFile = imageInput.files[0];
+            const reader = new FileReader();
 
-            if (imageInput.files.length > 0) {
-                const imageFile = imageInput.files[0];
-                const reader = new FileReader();
+            reader.onload = async function (e) {
+                const buffer = e.target.result;
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
 
-                reader.onload = async function (e) {
-                    const buffer = e.target.result;
-                    const bytes = new Uint8Array(buffer);
-                    let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
 
-                    for (let i = 0; i < bytes.byteLength; i++) {
-                        binary += String.fromCharCode(bytes[i]);
-                    }
+                const imageBase64 = btoa(binary);
 
-                    const imageBase64 = btoa(binary);
-
-                    const requestData = {
-                        topic: topic,
-                        url: url,
-                        message: message,
-                        title: title,
-                        edition: edition,
-                        publication_date: publication_date,
-                        image: imageBase64,
-                    };
-
-                    try {
-                        const response = await fetch('/save-newsletter', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(requestData),
-                        });
-
-                        const result = await response.json();
-
-
-                        const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="success-add-newsletter">${JSON.stringify(result)}</p>`;
-                        document.getElementById('addNewsletterForm').reset();
-
-                        subAddNewsletterExists = true;
-                        closeBlock('.dialog-block');
-                        closeBlock('.profile-block');
-                        closeBlock('.statistic-block');
-                        closeBlock('.newsletter-info-block');
-                        closeBlock('.add-message-block');
-                    } catch (error) {
-                        const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="error-add-newsletter">Error while saving newsletter: ${JSON.stringify(error)}</p>`;
-                    }
+                const requestData = {
+                    topic: topic,
+                    url: url,
+                    message: message,
+                    title: title,
+                    edition: publisher,
+                    publication_date: publication_date,
+                    image: imageBase64,
                 };
 
-                reader.readAsArrayBuffer(imageFile);
-            }
-        });
-    }
+                try {
+                    const response = await fetch('/save-newsletter', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestData),
+                    });
+
+                    const result = await response.json();
+
+
+                    const resultContainer = document.getElementById('resultContainer');
+                    resultContainer.innerHTML = `<p class="success-add-newsletter">${JSON.stringify(result)}</p>`;
+                    document.getElementById('addNewsletterForm').reset();
+
+                    subAddNewsletterExists = true;
+                } catch (error) {
+                    const resultContainer = document.getElementById('resultContainer');
+                    resultContainer.innerHTML = `<p class="error-add-newsletter">Error while saving newsletter: ${JSON.stringify(error)}</p>`;
+                }
+            };
+            reader.readAsArrayBuffer(imageFile);
+        }
+        else {
+            const resultContainer = document.getElementById('resultContainer');
+        }
+    });
 }

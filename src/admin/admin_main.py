@@ -5,14 +5,15 @@ from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import DecodeError, ExpiredSignatureError
 from sqlalchemy import select, desc, text, delete
 
+from config import config
 from src.admin.newsletter_admin.newsletter_admin import Newsletter
 from src.database.models.admin import Admin, pwd_context
-from src.admin.config_admin import ( app, templates,
-    SECRET_KEY_ADMIN, ALGORITHM, image_directory, generate_token_and_redirect
-)
+from src.admin.config_admin import (app, templates, image_directory,
+                                    generate_token_and_redirect)
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
 from src.database.models import User, MessageHistory, DailyNews, MessageForUsers, MessageMistakes
@@ -33,17 +34,20 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
 
         token = token.split("Bearer ")[-1]
 
-        payload = jwt.decode(token, SECRET_KEY_ADMIN, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, config.SECRET_KEY_ADMIN, algorithms=[config.ALGORITHM])
         username: str = payload.get("sub")
         query = select(Admin).where(Admin.username == username)
         result = await session.execute(query)
         admin = result.scalars().first()
         if username is None or username != admin.username:
             return False
-    except JWTError:
+    except DecodeError:
+        return False
+    except ExpiredSignatureError:
         return False
 
     return True
+
 
 async def is_authenticated(is_valid: bool = Depends(is_valid_token)):
     if not is_valid:
@@ -58,11 +62,22 @@ async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token))
         return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin.html", {"request": request})
 
+
+@app.get("/admin1", response_model=str)
+async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
+    """html admin
+    """
+    if not is_valid:
+        return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("admin_old.html", {"request": request})
+
+
 @app.post("/admin")
 async def admin_page_post(request: Request, is_valid: bool = Depends(is_authenticated)):
     """после login идет post запрос на admin
     """
     return templates.TemplateResponse("admin.html", {"request": request})
+
 
 @app.get("/get_users")
 async def get_users(is_valid: bool = Depends(is_authenticated)):
@@ -205,6 +220,7 @@ async def save_message(
     except Exception as e:
         return JSONResponse(content={"error": f"Failed to save the newsletter. {str(e)}"}, status_code=500)
 
+
 @app.get("/get_newsletters")
 async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
     """
@@ -239,7 +255,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
         ]
         return JSONResponse(content=newsletters_list)
     else:
-        return {"status":"empty"}
+        return {"status": "empty"}
 
 
 @app.get("/get_newsletter_info/{newsletter_id}")
@@ -300,6 +316,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
     except Exception as e:
         return JSONResponse(content={"error": f"Не удалось изменить. {str(e)}"}, status_code=500)
 
+
 @app.delete("/del_newsletter/{newsletter_id}")
 async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
     """
@@ -322,7 +339,6 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authent
     result = await session.execute(delete_query)
     await session.commit()
 
-
     return {"status": f"success delete newsletter with id: {newsletter_id}"}
 
 
@@ -335,7 +351,8 @@ async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authen
     result = await session.execute(query)
     newsletter = result.scalars().first()
     await Newsletter().send_newsletter(newsletter)
-    return {"message":"Рассылка успешно отправлена"}
+    return {"message": "Рассылка успешно отправлена"}
+
 
 @app.post("/send_newsletter_datetime")
 async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: bool = Depends(is_authenticated)):
@@ -395,7 +412,7 @@ async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authentica
         ]
         return JSONResponse(content=message_history_list)
     else:
-        return {"status":"empty"}
+        return {"status": "empty"}
 
 
 @app.get("/get_info_user/{tg_id}")
@@ -506,7 +523,7 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
     statistic = {
         "count_users": count_users,
         "count_messages": count_messages,
-        "count_topic":count_topic_dict_filtered,
+        "count_topic": count_topic_dict_filtered,
         "count_choice_nastya":count_choice_nastya,
         "count_choice_bot": count_choice_bot
     }
@@ -545,14 +562,20 @@ async def get_message_hint_user(tg_id: int, is_valid: bool = Depends(is_authenti
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-
-
 @app.get("/")
 async def login_page(request: Request):
     """
     Отображение страницы входа.
     """
     return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.get("/1")
+async def login_page(request: Request):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("login_old.html", {"request": request})
 
 
 @app.post("/login")
@@ -573,10 +596,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), request: Reque
         error_message = "Invalid username or password"
         return templates.TemplateResponse("login.html", {"request": request, "error_message": error_message})
 
+
 @app.post("/change_password")
 async def change_password(username: str = Form(...),
                           new_password: str = Form(...),
-                          confirm_password: str = Form(...),request: Request = None):
+                          confirm_password: str = Form(...), request: Request = None):
     """
     Смена пароля.
     """
@@ -591,6 +615,7 @@ async def change_password(username: str = Form(...),
     error_message_change_password = "Username or passwords do not match"
     return templates.TemplateResponse("login.html", {"error_message": error_message_change_password, "request": request})
 
+
 @app.get("/logout")
 async def logout(request: Request):
     """
@@ -601,4 +626,4 @@ async def logout(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, port=8001, reload=True)
+    uvicorn.run(app="src.admin.admin_main:app", port=8001, reload=True)

@@ -24,5 +24,6 @@ class Admin(Base, TimestampMixin):
     username = Column(String, unique=True)
     password = Column(String, nullable=True)
 
-    def get_password_hash(self, password):
+    @staticmethod
+    def get_password_hash(password):
         return pwd_context.hash(password)
