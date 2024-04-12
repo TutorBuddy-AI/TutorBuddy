@@ -20,11 +20,6 @@ class MistakesData(CallbackData, prefix="mistakes"):
     user_message_tgid: str
 
 
-
-# translation_data = CallbackData("translate", 'action', 'bot_message_id', "user_message_id")
-# mistakes_data = CallbackData("mistakes", 'action', 'bot_message_id', "user_message_id", "user_message_tgid")
-
-
 class AnswerRenderer:
     """Class to present generation results in messages"""
     def __init__(

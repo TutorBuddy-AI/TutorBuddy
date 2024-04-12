@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 CONF_FILE_PATH = os.environ.get("CONF_FILE_PATH")
-
-dotenv_path = Path('.env.local')
 load_dotenv(dotenv_path=CONF_FILE_PATH)
 
 BOT_TYPE = os.environ.get("BOT_TYPE")
@@ -22,6 +20,9 @@ ELEVENLABS_API = os.environ.get('ELEVENLABS_API')
 UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', "files")
 APP_HOST: str = os.environ.get('APP_HOST', "localhost")
 APP_PORT: str = os.environ.get('APP_PORT', 8000)
+SECRET_KEY_ADMIN = os.environ.get("SECRET_KEY_ADMIN")
+ALGORITHM = os.environ.get("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN")
 
 
 class Config(BaseModel):
@@ -43,6 +44,9 @@ class Config(BaseModel):
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     UPLOAD_FOLDER: str = UPLOAD_FOLDER
+    SECRET_KEY_ADMIN: str = SECRET_KEY_ADMIN
+    ALGORITHM: str = ALGORITHM
+    ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN: int = int(ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN)
 
 
 config = Config()

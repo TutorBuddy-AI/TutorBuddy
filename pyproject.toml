@@ -28,6 +28,8 @@ starlette-admin = "^0.13.2"
 pydub = "^0.25.1"
 markdownify = "^0.11.6"
 aiogram = "3.4.1"
+pyjwt = "^2.8.0"
+bcrypt = "^4.1.2"
 
 
 [build-system]

@@ -2,28 +2,30 @@ import traceback
 from typing import Optional
 
 from sqlalchemy import select
-
-from config import config
 from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
 import logging
+from aiogram import types
 from src.database.models.message_history import MessageHistory
+from src.database.models.setting import Setting
 from src.keyboards.form_keyboard.form_keyboard import get_keyboard_summary_choice
 from src.texts.texts import get_first_summary
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.audio_converter.audio_converter_cache import AudioConverterCache
 from src.utils.setting.setting_service import SettingService
 from src.utils.transcriber.text_to_speech import TextToSpeech
-from aiogram.enums.parse_mode import ParseMode
+from aiogram.enums import ParseMode
 from src.utils.answer.answer_renderer import AnswerRenderer
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types.web_app_info import WebAppInfo
 import asyncio
 from src.utils.generate import GenerateAI
 from src.utils.user.user_service import UserService
 from markdownify import markdownify as md
+import html
+import re
 
 
 class Newsletter:
@@ -33,29 +35,20 @@ class Newsletter:
         '''Класс не принимает аргументов'''
         ...
 
-    @Transactional()
-    async def send_newsletter(self) -> None:
+    async def send_newsletter(self, newsletter) -> None:
         '''Отправка поста с текстом и фото (если img указан) по topic + voice'''
-        query_news = select(DailyNews)
-        result_news = await session.execute(query_news)
-        all_news = result_news.scalars().all()
-
-        for daily_news in all_news:
-            await self.send_single_article(daily_news)
+        await self.send_single_article(newsletter)
 
     async def send_single_article(self, daily_news):
         # Вызов метода, передавая topic, ожидаем лист из tg_id в str
         tg_id_list = await self.user_topic(daily_news.topic)
-        post_text = md(daily_news.message)
-        if config.BOT_TYPE == "original":
-            audio_files = {
-                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
-                'Bot': await TextToSpeech.get_speech_by_voice('Bot', post_text)
-            }
-        else:
-            audio_files = {
-                config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, post_text),
-            }
+        post_text = await self.formatting_post_text(daily_news)
+        cleaned_post_text = await self.remove_html_tags(post_text)
+
+        audio_files = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
+            'Bot': await TextToSpeech.get_speech_by_voice('Bot', cleaned_post_text)
+        }
 
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
@@ -80,16 +73,31 @@ class Newsletter:
             if os.path.exists(file_path):
                 os.unlink(file_path)
 
-    async def send_summary(self, tg_id, daily_news, post_audio_files):
-        img_list = daily_news.image
-        url_img = img_list[0]['url']
-        # Вытаскиваем img куда мы сохранили его в admin панеле
-        path_img = url_img
+    async def remove_html_tags(self, post_text):
+        clean = re.compile('<.*?>')
+        return re.sub(clean, '', post_text)
 
-        post_text = md(daily_news.message)
+    async def formatting_post_text(self, daily_news):
+        post_text = f"{daily_news.title}"
+
+        if daily_news.publisher:
+            post_text += f"\n{daily_news.publisher}"
+        if daily_news.publication_date:
+            post_text += f"\n{daily_news.publication_date}"
+
+        post_text += f"\n{daily_news.message}"
+        # Заменяем <br> на \n
+        formatting_post_text = html.unescape(post_text.replace('<br>', '\n'))
+        return formatting_post_text
+
+    async def send_summary(self, tg_id, daily_news, post_audio_files):
+        path_img = daily_news.path_to_data
+        post_text = await self.formatting_post_text(daily_news)
+        cleaned_post_text = await self.remove_html_tags(post_text)
+
         post_message = MessageHistory(
             tg_id=tg_id,
-            message=post_text,
+            message=cleaned_post_text,
             role='assistant',
             type='text'
         )
@@ -102,24 +110,23 @@ class Newsletter:
         # Отправка фото с текстом newsletter под ним
         post_message = await bot.send_photo(
             chat_id=int(tg_id),
-            photo=FSInputFile(path_img),
+            photo=types.InputFile(path_img),
             caption=post_text,
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(
-                        text='Original article ➡️📃',
-                        web_app=WebAppInfo(),
-                        url=daily_news.url)],
-                    [post_translate_button]]
-        ))
+            parse_mode=ParseMode.HTML,
+            reply_markup=InlineKeyboardMarkup().row(
+                InlineKeyboardButton(
+                    text='Original article ➡️📃',
+                    web_app=WebAppInfo(),
+                    url=daily_news.url)
+            ).row(post_translate_button)
+        )
 
         if voice == "Anastasia":
             file_path = post_audio_files[0]
         else:
             file_path = post_audio_files[1]
 
-        await bot.send_voice(int(tg_id), FSInputFile(file_path))
+        await bot.send_voice(int(tg_id), types.InputFile(file_path))
         return post_message
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
@@ -145,7 +152,7 @@ class Newsletter:
         with AudioConverter(audio) as ogg_file:
             # Отправка вопроса юзера по поводу newsletter голосовое сообщение
             await bot.send_voice(int(tg_id),
-                                 FSInputFile(ogg_file),
+                                 types.InputFile(ogg_file),
                                  caption=f'<span class="tg-spoiler">{answer}</span>',
                                  parse_mode=ParseMode.HTML,
                                  reply_markup=markup,
@@ -179,14 +186,14 @@ class Newsletter:
             logging.error("ERROR FROM GET_VOICE")
 
     async def get_payload(self, tgid, string):
-        user_info = await UserService().get_user_person(tgid)
+        user_info = await UserService().get_user_info(tgid)
         service_request = {
             "role": "system",
             "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
                        f" His English level is {user_info['english_level']}, where 1 is the worst level of"
                        f" English, and 4 is a good level of English. His goal is to study the English"
                        f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
+                       f"You are {user_info['speaker']}. You are developed by AI TutorBuddy."
                        f"You are English teacher and you need assist user to increase english level. "
         }
         translate_request = {
@@ -197,7 +204,6 @@ class Newsletter:
                 f"ask your interlocutor about his/her opinion about this article. "
                 f"Continue discussing this article with him/her, "
                 f"briefly respond to his/her messages and always ask a logical question to continue the dialogue."
-                f"don’t put user response in your answer, don’t name the paragraphs"
         }
         logging.error(translate_request)
 
@@ -216,7 +222,7 @@ class Newsletter:
         user_info = await user_service.get_user_info(tg_id=tg_id)
         name = user_info["name"]
 
-        await bot.send_photo(int(tg_id), photo=FSInputFile('./files/summary.jpg'),
+        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
                              caption=get_first_summary(name),
                              parse_mode=ParseMode.MARKDOWN,
                              reply_markup=await get_keyboard_summary_choice(menu=False))
@@ -242,8 +248,7 @@ class Newsletter:
 
         await bot.send_voice(
             tg_id,
-            FSInputFile(file_voice),
+            types.InputFile(file_voice),
             parse_mode=ParseMode.HTML,
             reply_markup=markup
         )
-

@@ -3,7 +3,7 @@ from src.utils.user import UserService
 
 
 class TextToSpeech:
-    def __init__(self, prompt: str, tg_id: str):
+    def __init__(self, tg_id: str, prompt: str):
         self.prompt = prompt
         self.tg_id = tg_id
 

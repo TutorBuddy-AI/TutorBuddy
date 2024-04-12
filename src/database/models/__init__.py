@@ -10,3 +10,5 @@ from src.database.models.questions_history import QuestionsHistory
 from src.database.models.message_hint import MessageHint
 from src.database.models.message_paraphrase import MessageParaphrase
 from src.database.models.message_translation import MessageTranslation
+from src.database.models.message_for_users import MessageForUsers
+from src.database.models.admin import Admin

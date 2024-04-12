@@ -1,0 +1,117 @@
+.add-newsletter-block {
+    width: 100%;
+    background-color: #F5F5F5;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    padding: 20px;
+    height: 100%;
+    overflow: auto;
+    left: 250px;
+}
+
+
+.add-newsletter-block label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.add-newsletter-block input[type="text"],
+.add-newsletter-block [contenteditable="true"] {
+    width: calc(100% - 20px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+.add-newsletter-block [contenteditable="true"]{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-bottom: 15px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 10px;
+}
+
+
+.add-newsletter-block [contenteditable="true"]:focus {
+    border-color: #9c27b0;
+    box-shadow: 0 0 5px rgba(156, 39, 176, 0.5);
+}
+
+.add-newsletter-block input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-newsletter-block input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.add-newsletter-block input[type="file"] {
+    display: none;
+}
+
+.add-newsletter-block label[for="image"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    color: #333;
+    display: inline-block;
+}
+
+.add-newsletter-block label[for="image"]:hover {
+    background-color: #d0d0d0;
+}
+
+#resultContainer {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.success-add-newsletter {
+    color: #4caf50;
+}
+
+.error-add-newsletter {
+    color: #f44336;
+}
+
+
+
+.selection-buttons-container {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.selection-buttons-container button {
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.selection-buttons-container button:hover {
+    background-color: #e0e0e0;
+}

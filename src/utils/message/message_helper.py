@@ -11,7 +11,7 @@ class MessageHelper:
         ...
 
     async def group_message_helper_info(
-            self, bot_message_id: int, user_message_id: int, message: Message, hint: str) -> MessageHelperInfo:
+            self, user_message_id: int, bot_message_id: int, message: Message, hint: str) -> MessageHelperInfo:
         helper_info = {
             "tg_id": str(message.chat.id),
             "user_message_id": user_message_id,

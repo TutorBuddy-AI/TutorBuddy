@@ -88,7 +88,6 @@ class CommunicationHandler:
         # ToDo fix it
         # await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
 
-
         await self.render_text_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)
         await self.save_render_in_context(render)
