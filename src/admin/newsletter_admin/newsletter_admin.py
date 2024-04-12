@@ -27,6 +27,7 @@ from markdownify import markdownify as md
 import html
 import re
 
+
 class Newsletter:
     '''Рассылка'''
 
@@ -46,7 +47,7 @@ class Newsletter:
 
         audio_files = {
             'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
-            'Bot': await TextToSpeech.get_speech_by_voice('Bot', cleaned_post_text)
+            'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', cleaned_post_text)
         }
 
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
@@ -76,15 +77,16 @@ class Newsletter:
         clean = re.compile('<.*?>')
         return re.sub(clean, '', post_text)
 
-    async def formatting_post_text(self,daily_news):
-        post_text = f"{daily_news.title}"
+    async def formatting_post_text(self, daily_news):
+        post_text = f"#{daily_news.topic}\n\n"
+        post_text += f"<b>{daily_news.title}</b>"
 
         if daily_news.edition:
             post_text += f"\n{daily_news.edition}"
         if daily_news.publication_date:
             post_text += f"\n{daily_news.publication_date}"
 
-        post_text += f"\n{daily_news.message}"
+        post_text += f"\n\n{daily_news.message}"
         # Заменяем <br> на \n
         formatting_post_text = html.unescape(post_text.replace('<br>', '\n'))
         return formatting_post_text
@@ -109,15 +111,15 @@ class Newsletter:
         # Отправка фото с текстом newsletter под ним
         post_message = await bot.send_photo(
             chat_id=int(tg_id),
-            photo=types.InputFile(path_img),
+            photo=types.FSInputFile(path_img),
             caption=post_text,
             parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup().row(
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(
                     text='Original article ➡️📃',
-                    web_app=WebAppInfo(),
-                    url=daily_news.url)
-            ).row(post_translate_button)
+                    web_app=WebAppInfo(url=daily_news.url))
+                ],
+                [post_translate_button]])
         )
 
         if voice == "Anastasia":
@@ -125,7 +127,7 @@ class Newsletter:
         else:
             file_path = post_audio_files[1]
 
-        await bot.send_voice(int(tg_id), types.InputFile(file_path))
+        await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
         return post_message
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
@@ -151,7 +153,7 @@ class Newsletter:
         with AudioConverter(audio) as ogg_file:
             # Отправка вопроса юзера по поводу newsletter голосовое сообщение
             await bot.send_voice(int(tg_id),
-                                 types.InputFile(ogg_file),
+                                 types.FSInputFile(ogg_file),
                                  caption=f'<span class="tg-spoiler">{answer}</span>',
                                  parse_mode=ParseMode.HTML,
                                  reply_markup=markup,
