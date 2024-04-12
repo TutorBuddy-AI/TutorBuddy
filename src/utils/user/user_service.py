@@ -1,3 +1,5 @@
+import logging
+
 from database.models import Person
 from src.database.models import User, MessageHistory, Setting
 from src.database import Transactional, session
@@ -88,10 +90,9 @@ class UserService:
             self,
             tg_id: str
     ) -> GetUserInfo:
-        query = select(User).where(User.tg_id == str(tg_id))
+        query = select(User).where(User.tg_id == tg_id)
         result = await session.execute(query)
         result = result.scalars().first()
-
         return {
             "name": result.call_name,
             "goal": result.goal,

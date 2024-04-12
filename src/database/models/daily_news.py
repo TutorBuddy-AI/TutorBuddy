@@ -11,6 +11,6 @@ class DailyNews(Base, TimestampMixin):
     topic = Column(String, nullable=True)
     url = Column(String, nullable=True)
     path_to_data = Column(String, nullable=True)
-    edition = Column(String, nullable=True)
+    publisher = Column(String, nullable=True)
     publication_date = Column(String, nullable=True)
     title = Column(String, nullable=False)

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
@@ -96,6 +97,8 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
 
     user_message_id = int(callback_data.user_message_id) if callback_data.user_message_id else None
     bot_message_id = int(callback_data.bot_message_id) if callback_data.bot_message_id else None
+
+    logging.error(f"User_mess_id: {user_message_id}")
     helper_info = await MessageHelper().group_message_helper_info(
         user_message_id, bot_message_id, message, generated_text)
 

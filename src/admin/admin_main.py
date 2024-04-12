@@ -147,7 +147,7 @@ async def save_newsletter(
         topic = newsletter_data.topic
         url = newsletter_data.url
         message = newsletter_data.message
-        edition = newsletter_data.edition
+        publisher = newsletter_data.publisher
         publication_date = newsletter_data.publication_date
         title = newsletter_data.title
 
@@ -166,7 +166,7 @@ async def save_newsletter(
             topic=topic,
             url=url,
             path_to_data=image_path,
-            edition=edition,
+            publisher=publisher,
             publication_date=publication_date,
             title=title
         )
@@ -284,7 +284,7 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_au
         "topic": newsletter.topic,
         "url": newsletter.url,
         "path_to_data": newsletter.path_to_data,
-        "edition": newsletter.edition,
+        "publisher": newsletter.publisher,
         "publication_date": newsletter.publication_date,
         "title": newsletter.title,
     }

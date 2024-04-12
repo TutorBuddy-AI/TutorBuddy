@@ -16,8 +16,8 @@ async function openSubAddNewsletter() {
                     <label for="title">Title:</label>
                     <div contenteditable="true" id="title" name="title" required></div>
 
-                    <label for="edition">Edition (Optional):</label>
-                    <div contenteditable="true" id="edition" name="edition"></div>
+                    <label for="publisher">Publisher (Optional):</label>
+                    <div contenteditable="true" id="publisher" name="publisher"></div>
 
                     <label for="publication_date">Publication Date (Optional):</label>
                     <div contenteditable="true" id="publication_date" name="publication_date"></div>
@@ -48,7 +48,7 @@ async function openSubAddNewsletter() {
         const url = document.getElementById('url').innerHTML;
         const title = document.getElementById('title').innerHTML;
         const message = document.getElementById('message').innerHTML;
-        const edition = document.getElementById('edition').innerHTML;
+        const publisher = document.getElementById('publisher').innerHTML;
         const publication_date = document.getElementById('publication_date').innerHTML;
         const imageInput = document.getElementById('image');
 
@@ -73,7 +73,7 @@ async function openSubAddNewsletter() {
                         url: url,
                         message: message,
                         title: title,
-                        edition: edition,
+                        publisher: publisher,
                         publication_date: publication_date,
                         image: imageBase64,
                     };

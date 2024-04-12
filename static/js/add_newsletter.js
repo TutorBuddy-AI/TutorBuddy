@@ -89,7 +89,7 @@ async function openSubAddNewsletter() {
                     url: url,
                     message: message,
                     title: title,
-                    edition: publisher,
+                    publisher: publisher,
                     publication_date: publication_date,
                     image: imageBase64,
                 };

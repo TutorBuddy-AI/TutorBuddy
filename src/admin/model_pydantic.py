@@ -5,7 +5,7 @@ class NewsletterData(BaseModel):
     url: str
     message: str
     image: bytes
-    edition: str = ''
+    publisher: str = ''
     publication_date: str = ''
     title: str
 

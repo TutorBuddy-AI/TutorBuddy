@@ -80,8 +80,8 @@ class Newsletter:
     async def formatting_post_text(self, daily_news):
         post_text = f"{daily_news.title}"
 
-        if daily_news.edition:
-            post_text += f"\n{daily_news.edition}"
+        if daily_news.publisher:
+            post_text += f"\n{daily_news.publisher}"
         if daily_news.publication_date:
             post_text += f"\n{daily_news.publication_date}"
 

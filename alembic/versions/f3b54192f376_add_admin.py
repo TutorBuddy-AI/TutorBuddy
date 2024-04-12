@@ -1,21 +1,20 @@
 """Add admin
 
-Revision ID: cc233a92aed6
-Revises: 94e381370664
-Create Date: 2024-04-07 19:39:12.634458
+Revision ID: f3b54192f376
+Revises: 05927834daa0
+Create Date: 2024-04-12 21:33:30.768054
 
 """
 from alembic import op
 import sqlalchemy as sa
 import sqlalchemy_file
-
 from sqlalchemy import orm
 
 from database.models import Admin
 
 # revision identifiers, used by Alembic.
-revision = 'cc233a92aed6'
-down_revision = '94e381370664'
+revision = 'f3b54192f376'
+down_revision = '05927834daa0'
 branch_labels = None
 depends_on = None
 

@@ -6,6 +6,7 @@ from src.config import bot, dp
 from src.database import session, Transactional
 from src.database.models import DailyNews, User
 import os
+from config import config
 import logging
 from aiogram import types
 from src.database.models.message_history import MessageHistory
@@ -44,12 +45,15 @@ class Newsletter:
         tg_id_list = await self.user_topic(daily_news.topic)
         post_text = await self.formatting_post_text(daily_news)
         cleaned_post_text = await self.remove_html_tags(post_text)
-
-        audio_files = {
-            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
-            'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', cleaned_post_text)
-        }
-
+        if config.BOT_TYPE == "original":
+            audio_files = {
+                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
+                'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', cleaned_post_text)
+            }
+        else:
+            audio_files = {
+                config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, cleaned_post_text)
+            }
         converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
 
         for tg_id in tg_id_list:
@@ -81,17 +85,18 @@ class Newsletter:
         post_text = f"#{daily_news.topic}\n\n"
         post_text += f"<b>{daily_news.title}</b>"
 
-        if daily_news.edition:
-            post_text += f"\n{daily_news.edition}"
+        if daily_news.publisher:
+            post_text += f"\n{daily_news.publisher}"
         if daily_news.publication_date:
             post_text += f"\n{daily_news.publication_date}"
 
-        post_text += f"\n\n{daily_news.message}"
+        post_text += "\n\n<u>Article summary:</u>"
+        post_text += f"\n{daily_news.message}"
         # Заменяем <br> на \n
-        formatting_post_text = html.unescape(post_text.replace('<br>', '\n'))
+        formatting_post_text = html.unescape(post_text.replace('<br>', ''))
         return formatting_post_text
 
-    async def send_summary(self, tg_id, daily_news, post_audio_files):
+    async def send_summary(self, tg_id, daily_news, post_audio_files: dict[str, str]):
         path_img = daily_news.path_to_data
         post_text = await self.formatting_post_text(daily_news)
         cleaned_post_text = await self.remove_html_tags(post_text)
@@ -104,6 +109,7 @@ class Newsletter:
         )
         # Сохранение в MessageHistory текст поста
         session.add(post_message)
+        await session.commit()
         voice = await self.get_voice(tg_id)
 
         post_translate_button = AnswerRenderer.get_button_caption_translation(
@@ -122,10 +128,7 @@ class Newsletter:
                 [post_translate_button]])
         )
 
-        if voice == "Anastasia":
-            file_path = post_audio_files[0]
-        else:
-            file_path = post_audio_files[1]
+        file_path = post_audio_files[voice]
 
         await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
         return post_message
@@ -146,8 +149,9 @@ class Newsletter:
         )
         # Сохранение в MessageHistory текст поста
         session.add(talk_message)
-        voice = await self.get_voice(tg_id)
-        audio = await TextToSpeech.get_speech_by_voice(voice, answer)
+        await session.commit()
+        # audio = await TextToSpeech.get_speech_by_voice(voice, answer)
+        audio = await TextToSpeech(str(tg_id), answer).get_speech()
         markup = AnswerRenderer.get_markup_caption_translation(
             bot_message_id=talk_message.id, user_message_id="")
         with AudioConverter(audio) as ogg_file:
@@ -216,41 +220,3 @@ class Newsletter:
             "messages": extended_history,
             "max_tokens": 100
         }
-
-    @staticmethod
-    async def summaries_choice(tg_id):
-        user_service = UserService()
-        user_info = await user_service.get_user_info(tg_id=tg_id)
-        name = user_info["name"]
-
-        await bot.send_photo(int(tg_id), photo=types.InputFile('./files/summary.jpg'),
-                             caption=get_first_summary(name),
-                             parse_mode=ParseMode.MARKDOWN,
-                             reply_markup=await get_keyboard_summary_choice(menu=False))
-
-        talk_message = MessageHistory(
-            tg_id=tg_id,
-            message=get_first_summary("name"),
-            role='assistant',
-            type='text'
-        )
-
-        session.add(talk_message)
-        await session.commit()
-        await session.close()
-
-        markup = AnswerRenderer.get_markup_caption_translation(
-            bot_message_id=talk_message.id, user_message_id="")
-
-        file_voice = './files/summary_choice_bot.opus'
-
-        if user_info["speaker"] == "Anastasia":
-            file_voice = './files/summary_choice_nastya.opus'
-
-        await bot.send_voice(
-            tg_id,
-            types.InputFile(file_voice),
-            parse_mode=ParseMode.HTML,
-            reply_markup=markup
-        )
-

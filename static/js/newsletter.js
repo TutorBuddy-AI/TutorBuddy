@@ -109,8 +109,8 @@ function displayNewsletter(newsletter) {
     const publication_dateElement = document.createElement('p');
     publication_dateElement.innerHTML = `publication_date: ${newsletter.publication_date}`;
 
-    const editionElement = document.createElement('p');
-    editionElement.innerHTML = `edition: ${newsletter.edition}`;
+    const publisherElement = document.createElement('p');
+    publisherElement.innerHTML = `publisher: ${newsletter.publisher}`;
 
     const urlElement = document.createElement('p');
     urlElement.innerHTML = `URL: ${newsletter.url}`;
@@ -149,7 +149,7 @@ function displayNewsletter(newsletter) {
 
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'topic', newsletter.topic));
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'title', newsletter.title));
-    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'edition', newsletter.edition));
+    NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'publisher', newsletter.publisher));
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'publication_date', newsletter.publication_date));
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'message', newsletter.message));
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'url', newsletter.url));

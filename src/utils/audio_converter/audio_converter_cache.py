@@ -18,9 +18,9 @@ class AudioConverterCache:
         self.mode = mode
         self.temp_files = []
 
-    def convert_files_to_ogg(self):
+    def convert_files_to_ogg(self) -> dict[str]:
         temp_directory = tempfile.mkdtemp()
-        converted_files = []
+        converted_files = {}
 
         try:
             for variable_name, audio_bytes in self.audio_files.items():
@@ -36,7 +36,7 @@ class AudioConverterCache:
                         check=True,
                         capture_output=False
                     )
-                    converted_files.append(output_file_path)
+                    converted_files[variable_name] = output_file_path
                     self.output_files[variable_name] = input_file
 
                 except Exception as e:
