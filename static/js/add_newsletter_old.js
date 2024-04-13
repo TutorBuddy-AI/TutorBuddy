@@ -79,7 +79,7 @@ async function openSubAddNewsletter() {
                     };
 
                     try {
-                        const response = await fetch('/save-newsletter', {
+                        const response = await fetch('./save-newsletter', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
