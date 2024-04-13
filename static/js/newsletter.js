@@ -5,7 +5,7 @@ async function openSubNewsletter() {
         subSidebar.className = 'newsletter-block';
 
         try {
-            const response = await fetch('/get_newsletters');
+            const response = await fetch('./get_newsletters');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -52,7 +52,7 @@ async function openSubNewsletter() {
                 userBlock.addEventListener('click', async () => {
                     try {
                         const newsletter_id = newsletter.id;
-                        const newsletter_infoResponse = await fetch(`/get_newsletter_info/${newsletter_id}`);
+                        const newsletter_infoResponse = await fetch(`./get_newsletter_info/${newsletter_id}`);
 
                         if (!newsletter_infoResponse.ok) {
                             throw new Error(`HTTP error! Status: ${newsletter_infoResponse.status}`);
@@ -180,7 +180,7 @@ function handleClick(event, newsletter, columnName) {
                 changed_text: newText
             };
 
-            fetch('/change_newsletter_info', {
+            fetch('./change_newsletter_info', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -241,7 +241,7 @@ function openSendDatetimeModal(newsletterId) {
 function confirmDeletion() {
     const newsletterId = document.getElementById('deleteModalNewsletterId').textContent;
 
-    fetch(`/del_newsletter/${newsletterId}`, {
+    fetch(`./del_newsletter/${newsletterId}`, {
         method: 'DELETE'
     })
     .then((delete_newsletter_Response) => {
@@ -265,7 +265,7 @@ function confirmDeletion() {
 
 function confirmSend() {
     const newsletterId = document.getElementById('sendModalNewsletterId').textContent;
-    fetch(`/send_newsletter/${newsletterId}`, {
+    fetch(`./send_newsletter/${newsletterId}`, {
         method: 'GET'
     })
     .then((send_newsletter_Response) => {
@@ -295,7 +295,7 @@ function confirmSendDatetime() {
         datetime_iso: datetime,
     };
 
-    fetch('/send_newsletter_datetime', {
+    fetch('./send_newsletter_datetime', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

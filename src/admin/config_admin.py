@@ -32,6 +32,6 @@ async def generate_token_and_redirect(username: str) -> RedirectResponse:
     """
     token_data = {"sub": username}
     token = create_jwt_token(token_data)
-    response = RedirectResponse(url="/admin")
+    response = RedirectResponse(url="./admin")
     response.set_cookie(key="Authorization", value=f"Bearer {token}")
     return response
