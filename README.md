@@ -9,30 +9,42 @@ poetry shell && poetry install
 ## Setup .env keys
 
 ```
-BOT_API_TOKEN=''
-DATABASE_URL=''
-ADMIN_PASSWORD=''
-WEBHOOK_URL=''
-WEBHOOK_SECRET_TOKEN='' # auth token у ngrok
-OPENAI_API = '["Bearer token"]'
-PROXY = '[["http://131.108.17.251:9670", "7pxHP6", "pHY5rF"]]'    # HTTPS, Логин, Пароль. Если нету, пользуйтесь этим
-ELEVENLABS_API = 'c207730cb78101ce98761b628554b3a2'
+# [bot]
+BOT_TYPE='original' # original/personal
+BOT_PERSON='Anastasia' # may use Anastasia for original, or Oksana/AA_Lingua for personal bot
+BOT_API_TOKEN='{your_test_bot_token}'
+WEBHOOK_URL='{ngrok_active_url}'
+# [database]
+DATABASE_URL='postgresql+asyncpg://postgres:rMoAwRMbgI@localhost:5432/{db_name}'
+# [admin]
+ADMIN_PASSWORD='123123'
+SECRET_KEY_ADMIN='aboba'
+ALGORITHM='HS256'
+ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN=100
+# [generation]
+PROXY = '[["http://13.50.236.62:9670", "7pxHP6", "pHY5rF"]]'
+OPENAI_API = '["Bearer {your_openapitoken}"]' # may use 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
+ELEVENLABS_API='09a580962bcc1c023379f70fa8cf19bf'
+# [admin]
+ADMIN_PASSWORD='admin'
 ```
 
 ## Run migrations
 
 ```
+export CONF_FILE_PATH="./.env.local"
 alembic upgrade heads
 ```
 
 ## Run admin
 
 ```
+export CONF_FILE_PATH="./.env.local"
 export PYTHONPATH=$PWD
 ```
 
 ```
-python3 src/admin/admin.py
+python src/admin/admin_main.py
 ```
 
 Open in browser http://127.0.0.1:8001/admin
@@ -46,14 +58,14 @@ Password: your password from `ADMIN_PASSWORD` .env variable
 ## Run Bot
 
 ```
-python3 set_webhook_url.py
+ngrok http 8000
 ```
-Just start and turn it off once ⬆️
+Just start it once ⬆️
+Then setup ngrok forwarding url to config
 ```
-python3 main.py
+export CONF_FILE_PATH="./.env.local"
+python main.py
 ```
-
-If the bot stops working due to frequent server restarts, use ```python3 set_webhook_url.py```
 
 ## SQLAlchemy for asyncio context
 
@@ -78,6 +90,8 @@ password: 123
 ```
 
 ## Bot Token for prod
+
+DON'T USE IT LOCALLY
 
 ```
 t.me/tutorbuddyai_bot - 6348419609:AAElinRGeTOxK8bhkJaRiD8xftFCqBM9MF8

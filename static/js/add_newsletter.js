@@ -13,32 +13,50 @@ async function openSubAddNewsletter() {
               <div class="mb-3">
                 <label class="form-label required">Topic</label>
                 <div>
+                  <select class="form-select" multiple="" id="topic">
+                    <option value="psychology">Psychology</option>
+                    <option value="business">Business</option>
+                    <option value="startups">StartUps</option>
+                    <option value="innovations">Innovations</option>
+                    <option value="fashion">Fashion</option>
+                    <option value="art">Art&Design</option>
+                    <option value="games">Games</option>
+                    <option value="science">Science</option>
+                    <option value="travel">Travel</option>
+                    <option value="books">Books</option>
+                    <option value="sports">Sports</option>
+                    <option value="health">Health</option>
+                    <option value="movies">Movies</option>
+                  </select>
                   <input type="text" class="form-control" placeholder="Article Topic" id="topic">
                 </div>
               </div>
-              <div class="mb-3">
-                <label class="form-label required">Title</label>
-                <div>
-                  <input type="text" class="form-control" placeholder="New Title" id="title">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Publisher</label>
-                <div>
-                  <input type="text" class="form-control" placeholder="Article Publisher" id="publisher">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Publication Date</label>
-                <div>
-                  <input type="text" class="form-control" placeholder="Publication Date"  id="publication_date">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label required">Message text<span class="form-label-description"></span></label>
-                <textarea class="form-control" name="example-textarea-input" rows="6" placeholder="Content.." style="height: 218px;" id="message">
-                </textarea>
-              </div>
+              <label class="form-label">Message content<span class="form-label-description" id="message-len">0</span></label>
+              <fieldset class="form-fieldset">
+                  <div class="mb-3">
+                    <label class="form-label required">Title<span class="form-label-description" id="title-len">0</span></label>
+                    <div>
+                      <input type="text" class="form-control" placeholder="New Title" id="title">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Publisher<span class="form-label-description" id="publisher-len">0</span></label>
+                    <div>
+                      <input type="text" class="form-control" placeholder="Article Publisher" id="publisher">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Publication Date<span class="form-label-description" id="publication-date-len">0</span></label>
+                    <div>
+                      <input type="text" class="form-control" placeholder="Publication Date"  id="publication_date">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label required">Article text<span class="form-label-description" id="article-len">0</span></label>
+                    <textarea class="form-control" name="example-textarea-input" rows="6" placeholder="Content.." style="height: 218px;" id="message">
+                    </textarea>
+                  </div>
+              </fieldset>
               <div class="mb-3">
                 <label class="form-label required">URL</label>
                 <div>
@@ -61,7 +79,7 @@ async function openSubAddNewsletter() {
     document.getElementById('addNewsletterForm').addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        const topic = document.getElementById('topic').innerHTML;
+        const topic = document.getElementById('topic').value;
         const url = document.getElementById('url').innerHTML;
         const title = document.getElementById('title').innerHTML;
         const message = document.getElementById('message').innerHTML;
