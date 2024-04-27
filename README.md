@@ -23,7 +23,7 @@ ALGORITHM='HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN=100
 # [generation]
 PROXY = '[["http://13.50.236.62:9670", "7pxHP6", "pHY5rF"]]'
-OPENAI_API = '["Bearer {your_openapitoken}"]' # may use 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
+OPENAI_API = '["Bearer {your_openapitoken}"]' # may use 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
 ELEVENLABS_API='09a580962bcc1c023379f70fa8cf19bf'
 # [admin]
 ADMIN_PASSWORD='admin'

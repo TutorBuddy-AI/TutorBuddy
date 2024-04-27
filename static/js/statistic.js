@@ -5,7 +5,7 @@ async function openSubStatistic() {
         subSidebar.className = 'statistic-block';
 
         try {
-            const response = await fetch('/get_statistic');
+            const response = await fetch('./get_statistic');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);

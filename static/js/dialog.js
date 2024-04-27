@@ -7,7 +7,7 @@ async function openSubDialogs() {
         subSidebar.className = 'sub-sidebar';
 
         try {
-            const response = await fetch('/get_users');
+            const response = await fetch('./get_users');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -61,7 +61,7 @@ async function openSubDialogs() {
                 userBlock.addEventListener('click', async () => {
                     try {
                         const tg_id = user.tg_id;
-                        const messageHistoryResponse = await fetch(`/get_message_history_user/${tg_id}`);
+                        const messageHistoryResponse = await fetch(`./get_message_history_user/${tg_id}`);
 
                         if (!messageHistoryResponse.ok) {
                             throw new Error(`HTTP error! Status: ${messageHistoryResponse.status}`);

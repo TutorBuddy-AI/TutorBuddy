@@ -9,9 +9,9 @@ from src.config import config
 import json
 
 voice_map = {
-    "Anastasia": "j561qvFxyYEptWwufeRi",
-    "AA_Lingua": "T7J4pAIjxiDqtLtukCL5",
-    "Oksana": "uWkk7IZt4SclZkX3Gst9"
+    "Anastasia": "LC58oHYbe1EOt8kPZizM",
+    "AA_Lingua": "sKSCI18qgaDgCq3gTkK2",
+    "Oksana": "YFczjBOHj0ctMzjDRucv"
 }
 
 

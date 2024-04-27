@@ -5,7 +5,7 @@ async function openSubProfiles() {
         subSidebar.className = 'sub-sidebar';
 
         try {
-            const response = await fetch('/get_users');
+            const response = await fetch('./get_users');
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -57,7 +57,7 @@ async function openSubProfiles() {
                 userBlock.addEventListener('click', async () => {
                     try {
                         const tg_id = user.tg_id;
-                        const user_data_Response = await fetch(`/get_info_user/${tg_id}`);
+                        const user_data_Response = await fetch(`./get_info_user/${tg_id}`);
 
                         if (!user_data_Response.ok) {
                             throw new Error(`HTTP error! Status: ${user_data_Response.status}`);
@@ -114,7 +114,7 @@ function handleSearch(users, searchTerm) {
         userBlock.addEventListener('click', async () => {
             try {
                 const tg_id = user.tg_id;
-                const user_data_Response = await fetch(`/get_info_user/${tg_id}`);
+                const user_data_Response = await fetch(`./get_info_user/${tg_id}`);
 
                 if (!user_data_Response.ok) {
                     throw new Error(`HTTP error! Status: ${user_data_Response.status}`);
@@ -161,7 +161,7 @@ async function displayProfiles(user) {
 
     try {
         const tg_id = user.tg_id;
-        const user_mistake_Response = await fetch(`/get_message_hint_user/${tg_id}`);
+        const user_mistake_Response = await fetch(`./get_message_hint_user/${tg_id}`);
 
         if (!user_mistake_Response.ok) {
             throw new Error(`HTTP error! Status: ${user_mistake_Response.status}`);
