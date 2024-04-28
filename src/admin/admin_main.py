@@ -1,13 +1,15 @@
 from datetime import datetime
 import base64
 import os
+from typing import Any
+
 from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
-from sqlalchemy import select, desc, text, delete
+from sqlalchemy import select, desc, text, delete, Row, RowMapping
 
 from config import config
 from src.admin.newsletter_admin.newsletter_admin import Newsletter
@@ -19,7 +21,7 @@ from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsl
 from src.database.models import User, MessageHistory, DailyNews, MessageForUsers, MessageMistakes
 
 from src.database import session
-
+from utils.newsletter.newsletter_service import NewsletterService
 
 """Docs /docs"""
 
@@ -347,9 +349,7 @@ async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authen
     """
     Отправляет рассылку по newsletter_id
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(query)
-    newsletter = result.scalars().first()
+    newsletter = await NewsletterService.get_newsletter(newsletter_id)
     await Newsletter().send_newsletter(newsletter)
     return {"message": "Рассылка успешно отправлена"}
 
