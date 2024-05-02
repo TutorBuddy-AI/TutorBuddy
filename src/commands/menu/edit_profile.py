@@ -8,7 +8,7 @@ from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
-from src.states import FormName, FormNativeLanguage, FormEnglishLevel
+from src.states import FormName, FormNativeLanguage, FormEnglishLevel, FormCity
 from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
@@ -25,6 +25,8 @@ async def edit_profile_handler(message: types.Message):
     native_language = InlineKeyboardButton(text='Native language', callback_data='change_native_language')
     english_level = InlineKeyboardButton(text='English Level', callback_data='change_english_level')
 
+    city = InlineKeyboardButton(text='Change City', callback_data='change_city')
+
     user_topic = InlineKeyboardButton(text='Chosen topics', callback_data='get_user_topic')
     go_back = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
@@ -32,6 +34,7 @@ async def edit_profile_handler(message: types.Message):
 
     edit_profile_kb = InlineKeyboardMarkup(inline_keyboard=[[name, topic],
                                                             [native_language, english_level],
+                                                            [city],
                                                             [user_topic, go_back],
                                                             [translate_button]])
 
@@ -49,6 +52,20 @@ async def edit_profile_handler(message: types.Message):
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+@edit_profile_router.callback_query(F.data == "change_city")
+async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
+    await state.set_state(FormCity.new_city)
+    await bot.send_message(query.message.chat.id, "Please enter your city:")
+
+
+@edit_profile_router.message(FormCity.new_city)
+async def new_city_handler(message: types.Message, state: FSMContext):
+    city = message.text
+    await UserService().change_user_city(tg_id=str(message.chat.id), new_city=city)
+    await bot.send_message(message.chat.id, f"Your city has been successfully updated to: {city}")
+    await state.clear()
+
 
 @edit_profile_router.callback_query(F.data == "change_name")
 async def change_name_query_handler(query: CallbackQuery, state: FSMContext):

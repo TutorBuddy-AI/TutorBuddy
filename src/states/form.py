@@ -49,3 +49,7 @@ class FormEnglishLevel(StatesGroup):
 
 class FormInitTalk(StatesGroup):
     init_user_message = State()
+
+
+class FormCity(StatesGroup):
+    new_city = State()

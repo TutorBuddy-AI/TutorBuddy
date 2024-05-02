@@ -6,7 +6,7 @@ from src.database import session
 from sqlalchemy import select
 
 from src.config import bot
-from src.states import Form
+from src.states import Form, FormCity
 from src.filters import IsNotRegister
 from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
@@ -17,6 +17,7 @@ from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.setting import Setting
+from src.database.models import Base, UserLocation
 
 from src.utils.user import UserService, UserHelper
 
@@ -174,6 +175,21 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
                          caption=get_chose_some_topics(),
                          reply_markup=await get_choose_topic_keyboard(),
                          parse_mode=ParseMode.HTML)
+
+
+@form_router.message(Form.other_language, state="*")
+async def process_city_question(message: types.Message, state: FSMContext):
+    await bot.send_message(message.chat.id, "Which city are you from?")
+    await state.set_state("city_question")
+
+
+@form_router.message(state="city_question")
+async def process_city_answer(message: types.Message, state: FSMContext):
+    city_name = message.text
+    await state.update_data({"city": city_name})
+    await bot.send_message(message.chat.id, "Thanks for letting me know!")
+
+    await process_other_language(message, state)
 
 
 @form_router.callback_query(Form.topic, F.data.startswith("topic"))
