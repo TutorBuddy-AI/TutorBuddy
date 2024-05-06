@@ -95,7 +95,7 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
                                           parse_mode=ParseMode.HTML)
 
-    welcome_text = get_start_person_talk(speaker_short_name)
+    welcome_text = get_start_person_talk(speaker, speaker_short_name)
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     logging.info(f"./files/meet_{config.BOT_PERSON.lower()}.jpg")
