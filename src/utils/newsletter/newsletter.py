@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import select
 from src.config import bot, dp
 from src.database import session, Transactional
-from src.database.models import DailyNews, User
+from src.database.models import Newsletter, User
 import os
 import logging
 from aiogram import types
@@ -50,7 +50,7 @@ class Newsletter:
             'Bot': await TextToSpeech.get_speech_by_voice('Bot', cleaned_post_text)
         }
 
-        converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
+        converted_files = AudioConverterCache(audio_files).convert_audio_to_ogg()
 
         for tg_id in tg_id_list:
             try:

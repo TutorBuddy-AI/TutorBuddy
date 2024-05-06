@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import select
 from src.config import bot, dp
 from src.database import session, Transactional
-from src.database.models import DailyNews, User
+from src.database.models import Newsletter, User
 import os
 from config import config
 import logging
@@ -28,8 +28,10 @@ from markdownify import markdownify as md
 import html
 import re
 
+from utils.newsletter.newsletter_service import NewsletterService
 
-class Newsletter:
+
+class NewsletterPublisher:
     '''Рассылка'''
 
     def __init__(self):
@@ -40,82 +42,56 @@ class Newsletter:
         '''Отправка поста с текстом и фото (если img указан) по topic + voice'''
         await self.send_single_article(newsletter)
 
-    async def send_single_article(self, daily_news):
+    async def send_single_article(self, newsletter):
         # Вызов метода, передавая topic, ожидаем лист из tg_id в str
-        tg_id_list = await self.user_topic(daily_news.topic)
-        post_text = await self.formatting_post_text(daily_news)
-        cleaned_post_text = await self.remove_html_tags(post_text)
-        if config.BOT_TYPE == "original":
-            audio_files = {
-                'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', cleaned_post_text),
-                'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', cleaned_post_text)
-            }
-        else:
-            audio_files = {
-                config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, cleaned_post_text)
-            }
-        converted_files = AudioConverterCache(audio_files).convert_files_to_ogg()
+        tg_id_list = await self.user_topic(newsletter.topic)
+        newsletter_audio_files = await NewsletterService.get_newsletter_audio_files(newsletter.id)
 
         for tg_id in tg_id_list:
             try:
                 if await SettingService.is_summary_on(tg_id):
-                    post_message = await self.send_summary(tg_id, daily_news, converted_files)
-                    await asyncio.sleep(3)
-
-                    await self.send_opinion(tg_id, post_text, post_message.message_id)
-                    await asyncio.sleep(3)
-                    # if self.is_summary_answered(tg_id):
-                    #     await self.summaries_choice(tg_id)
+                    await self.send_summary_and_opinion_to_chat(tg_id, newsletter, newsletter_audio_files)
 
             except Exception as e:
                 traceback.print_exc()
 
-        await self.delete_audio_files(converted_files)
+    async def send_summary_and_opinion_to_chat(self, tg_id: str, newsletter, newsletter_audio_files):
+        newsletter_message = await self.send_summary(tg_id, newsletter, newsletter_audio_files)
+        await asyncio.sleep(3)
 
-    async def delete_audio_files(self, converted_files):
-        for file_path in converted_files:
-            if os.path.exists(file_path):
-                os.unlink(file_path)
+        post_text = await NewsletterPublisher.formatting_post_text(newsletter)
+        await self.send_opinion(tg_id, post_text, newsletter_message.message_id)
+        await asyncio.sleep(3)
 
-    async def remove_html_tags(self,post_text):
-        clean = re.compile('<.*?>')
-        return re.sub(clean, '', post_text)
+    async def send_summary(self, tg_id: str, newsletter, post_audio_files: dict[str, str]):
+        newsletter_message = await NewsletterPublisher.send_newsletter_text_to_chat(newsletter, tg_id)
 
-    async def formatting_post_text(self, daily_news):
-        post_text = f"#{daily_news.topic}\n\n"
-        post_text += f"<b>{daily_news.title}</b>"
+        voice = await self.get_voice(tg_id)
 
-        if daily_news.publisher:
-            post_text += f"\n{daily_news.publisher}"
-        if daily_news.publication_date:
-            post_text += f"\n{daily_news.publication_date}"
+        file_path = post_audio_files[voice]
 
-        post_text += "\n\n<u>Article summary:</u>"
-        post_text += f"\n{daily_news.message}"
-        # Заменяем <br> на \n
-        formatting_post_text = html.unescape(post_text.replace('<br>', ''))
-        return formatting_post_text
+        await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
+        return newsletter_message
 
-    async def send_summary(self, tg_id, daily_news, post_audio_files: dict[str, str]):
-        path_img = daily_news.path_to_data
-        post_text = await self.formatting_post_text(daily_news)
-        cleaned_post_text = await self.remove_html_tags(post_text)
+    @staticmethod
+    async def send_newsletter_text_to_chat(newsletter, tg_id: str):
+        path_img = newsletter.path_to_data
+        post_text = await NewsletterPublisher.formatting_post_text(newsletter)
+        cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
 
-        post_message = MessageHistory(
+        newsletter_message_hist = MessageHistory(
             tg_id=tg_id,
             message=cleaned_post_text,
             role='assistant',
             type='text'
         )
         # Сохранение в MessageHistory текст поста
-        session.add(post_message)
+        session.add(newsletter_message_hist)
         await session.commit()
-        voice = await self.get_voice(tg_id)
 
         post_translate_button = AnswerRenderer.get_button_caption_translation(
-            bot_message_id=post_message.id, user_message_id="")
-        # Отправка фото с текстом newsletter под ним
-        post_message = await bot.send_photo(
+            bot_message_id=newsletter_message_hist.id, user_message_id="")
+        newsletter_message = await bot.send_photo(
             chat_id=int(tg_id),
             photo=types.FSInputFile(path_img),
             caption=post_text,
@@ -123,15 +99,37 @@ class Newsletter:
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(
                     text='Original article ➡️📃',
-                    web_app=WebAppInfo(url=daily_news.url))
-                ],
+                    web_app=WebAppInfo(url=newsletter.url))
+            ],
                 [post_translate_button]])
         )
+        return newsletter_message
 
-        file_path = post_audio_files[voice]
+    async def delete_audio_files(self, converted_files):
+        for file_path in converted_files:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
 
-        await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
-        return post_message
+    @staticmethod
+    async def remove_html_tags(post_text: str):
+        clean = re.compile('<.*?>')
+        return re.sub(clean, '', post_text)
+
+    @staticmethod
+    async def formatting_post_text(newsletter):
+        post_text = f"#{newsletter.topic}\n\n"
+        post_text += f"<b>{newsletter.title}</b>"
+
+        if newsletter.publisher:
+            post_text += f"\n{newsletter.publisher}"
+        if newsletter.publication_date:
+            post_text += f"\n{newsletter.publication_date}"
+
+        post_text += "\n\n<u>Article summary:</u>"
+        post_text += f"\n{newsletter.message}"
+        # Заменяем <br> на \n
+        formatting_post_text = html.unescape(post_text.replace('<br>', ''))
+        return formatting_post_text
 
     async def send_opinion(self, tg_id, post_text, post_message_id):
         payload = await self.get_payload(tg_id, post_text)
@@ -220,3 +218,7 @@ class Newsletter:
             "messages": extended_history,
             "max_tokens": 100
         }
+
+    async def send_newsletter_to_chat(self, newsletter, tg_id: str):
+        newsletter_audio_files = await NewsletterService.get_newsletter_audio_files(newsletter.id)
+        await self.send_summary(tg_id, newsletter, newsletter_audio_files)

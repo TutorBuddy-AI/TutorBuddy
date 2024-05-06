@@ -128,10 +128,10 @@ async def receive_update(update: Dict, request: Request):
     return {"status_code": 200}
 
 
-@app.get('/start_newsletter')
-async def send_newsletter():
-    try:
-        await Newsletter().send_newsletter()
-        return {'message': 'Newsletter sent'}
-    except Exception as e:
-        traceback.print_exc()
+# @app.get('/start_newsletter')
+# async def send_newsletter():
+#     try:
+#         await Newsletter().send_newsletter()
+#         return {'message': 'Newsletter sent'}
+#     except Exception as e:
+#         traceback.print_exc()
