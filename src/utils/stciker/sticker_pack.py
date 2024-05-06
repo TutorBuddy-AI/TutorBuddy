@@ -34,9 +34,19 @@ oksanas_pack = {
     "fabulous": "CAACAgIAAxkBAAEqXkBl-wSrVt8uEgKDzCSfVHKUM6s_8QACw0IAAvy5cEuGXaGFZsZRqzQE"
 }
 
+victorias_pack = {
+    "problem": "CAACAgIAAxkBAAErQedmOTfXjvqao2AOO51mtbWqMp3p5wACfUYAAng2YUng2hyG3RkGzTUE",
+    "miss_you": "CAACAgIAAxkBAAErQeVmOTezU86EC083FjEfMVFrVymaYgAChUIAAoO3WUk-5cT-jqM0DjUE",
+    "yas": "CAACAgIAAxkBAAErQctmOTPh0OZe6eIaXjbOFEOUptXAAAMXTwACYEFhScC0TQFb7-rUNQQ",
+    "you_rock": "CAACAgIAAxkBAAErQc1mOTPoR2IPLQOgLCsAAca6cB1yQOMAAmNJAAKsc2FJuwKuD51MVBg1BA",
+    "how_you_doin": "CAACAgIAAxkBAAErQc9mOTPzNeW_VqPt7AVHes1u3tdoNwADUwACGU1gSTVAZ4tVRc26NQQ",
+    "fabulous": "CAACAgIAAxkBAAErQelmOTgCTFsgY1Jl6ajcYmzmZ9KbmwACiEkAArzfWEnBgE3G7qzheDUE"
+}
+
 pack_map = {
     "AA_Lingua": aa_linguas_pack,
     "Oksana": oksanas_pack,
     "Anastasia": anastasias_pack,
-    "TutorBuddy": tutorbots_pack
+    "TutorBuddy": tutorbots_pack,
+    "Victoria": victorias_pack
 }
