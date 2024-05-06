@@ -19,10 +19,9 @@ class StandaloneTranslator:
         self.message_text = message_text
         self.lang = lang
 
-    async def translate(self) -> str:
-        payload = await self.get_combine_data()
+    async def translate(self, max_tokens: int = 100) -> str:
+        payload = await self.get_combine_data(max_tokens)
         generated_text = await GenerateAI(request_url=self.request_url).request_gpt(payload=payload)
-
         if generated_text:
             return generated_text["choices"][0]["message"]["content"]
         else:
@@ -32,11 +31,11 @@ class StandaloneTranslator:
         user_info = await UserService().get_user_info(self.tg_id)
         return user_info['native_lang']
 
-    async def get_combine_data(self) -> json:
+    async def get_combine_data(self, max_tokens: int = 100) -> json:
         return {
             "model": "gpt-3.5-turbo",
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
-            "max_tokens": 100
+            "max_tokens": max_tokens
         }
 
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:

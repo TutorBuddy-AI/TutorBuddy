@@ -23,6 +23,7 @@ from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserCreateMessage, UserService
 from utils.transcriber.text_to_speech import TextToSpeech
+from src.texts.texts import get_bot_waiting_message
 
 
 class CommunicationHandler:
@@ -46,7 +47,10 @@ class CommunicationHandler:
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
     async def handle_audio_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait",
+        # wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} is thinking … Please wait",
+        #                                            parse_mode=ParseMode.HTML)
+
+        wait_message = await self.bot.send_message(self.chat_id, get_bot_waiting_message(self.speaker),
                                                    parse_mode=ParseMode.HTML)
 
         await self.bot.send_chat_action(chat_id=self.chat_id, action='record_audio')
@@ -68,7 +72,10 @@ class CommunicationHandler:
         await self.save_render_in_context(render)
 
     async def handle_text_message(self):
-        wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} thinks… Please wait",
+        # wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker}  is thinking … Please wait",
+        #                                            parse_mode=ParseMode.HTML)
+
+        wait_message = await self.bot.send_message(self.chat_id, get_bot_waiting_message(self.speaker),
                                                    parse_mode=ParseMode.HTML)
         await self.bot.send_chat_action(chat_id=self.chat_id, action='typing')
 
@@ -84,9 +91,8 @@ class CommunicationHandler:
             user_message_id=written_messages[0].id, bot_message_id=written_messages[1].id
         ).render()
 
-        # message_history = await UserService().count_message_history(self.chat_id)
-        # ToDo fix it
-        # await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
+        message_history = await UserService().count_message_history(self.chat_id)
+        await send_pin_message(self.bot, self.chat_id, self.speaker, message_history)
 
         await self.render_text_answer(render)
         await self.bot.delete_message(self.chat_id, wait_message.message_id)

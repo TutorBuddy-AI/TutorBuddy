@@ -11,13 +11,13 @@ class RenderHelper:
             self) -> Render:
         state_data = await self.state.get_data()
         render = Render(
-            answer_text = state_data["answer_text"],
-            reply_to_message_id = state_data["reply_to_message_id"],
-            is_generation_successful = state_data["is_generation_successful"],
-            user_message_markup = state_data["user_message_markup"],
-            bot_message_markup = state_data["bot_message_markup"],
-            message_text = state_data["message_text"],
-            message_type = state_data["message_type"]
+            answer_text=state_data["answer_text"],
+            reply_to_message_id=state_data["reply_to_message_id"],
+            is_generation_successful=state_data["is_generation_successful"],
+            user_message_markup=state_data["user_message_markup"],
+            bot_message_markup=state_data["bot_message_markup"],
+            message_text=state_data["message_text"],
+            message_type=state_data["message_type"]
         )
         return render
 

@@ -1,4 +1,5 @@
 import json
+import logging
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.filters.callback_data import CallbackData
@@ -20,11 +21,17 @@ class MistakesData(CallbackData, prefix="mistakes"):
     user_message_tgid: str
 
 
+class StickerTranslate(CallbackData, prefix="sticker"):
+    action: str
+    key_word: str
+
+
 class AnswerRenderer:
     """Class to present generation results in messages"""
+
     def __init__(
-        self, answer: Answer, message_text: str, reply_to_message_id, message_type: str,
-        bot_message_id: str, user_message_id: str
+            self, answer: Answer, message_text: str, reply_to_message_id, message_type: str,
+            bot_message_id: str, user_message_id: str
     ):
         self.answer = answer
         self.answer_text = answer.answer_text
@@ -175,3 +182,18 @@ class AnswerRenderer:
         )
         bot_message_markup = InlineKeyboardMarkup(inline_keyboard=[[get_translation_btn]])
         return bot_message_markup
+
+    @staticmethod
+    def get_button_sticker_translation(text: str) -> InlineKeyboardButton:
+        return InlineKeyboardButton(
+            text='📖 Translate',
+            callback_data=StickerTranslate(
+                action="sticker_translate",
+                key_word=text
+            ).pack()
+        )
+
+    @staticmethod
+    def get_markup_sticker_translation(text: str) -> InlineKeyboardMarkup:
+        get_translation_brn = AnswerRenderer.get_button_sticker_translation(text)
+        return InlineKeyboardMarkup(inline_keyboard=[[get_translation_brn]])

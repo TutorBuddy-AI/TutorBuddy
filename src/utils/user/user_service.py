@@ -34,7 +34,7 @@ class UserService:
             goal=user_info["goal"],
             native_lang=user_info["native_lang"],
             topic=user_info["topic"],
-            additional_topic = user_info["additional_topic"],
+            additional_topic=user_info["additional_topic"],
             english_level=user_info["english_level"]
         )
 
@@ -73,7 +73,7 @@ class UserService:
         return results
 
     async def count_message_history(self, tg_id) -> int:
-        query = text("SELECT COUNT(*) AS message_count FROM message_history WHERE tg_id = :tg_id")
+        query = text("SELECT COUNT(*) AS message_count FROM message_history WHERE tg_id = :tg_id and role = 'user';")
         result = await session.execute(query, {"tg_id": str(tg_id)})
         return result.scalar()
 

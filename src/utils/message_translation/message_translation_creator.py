@@ -23,12 +23,13 @@ class MessageTranslationCreator:
         else:
             return "Oooops, something wrong. Try request again later..."
 
-    async def create_communication_message_text_standalone(self, message_text: str, lang: str) -> str:
+    async def create_communication_message_text_standalone(self, message_text: str, lang: str,
+                                                           max_tokens: int = 100) -> str:
         generated_text = await StandaloneTranslator(
             tg_id=str(self.tg_id),
             message_text=message_text,
             lang=lang
-        ).translate()
+        ).translate(max_tokens)
 
         if generated_text is not None:
             return generated_text

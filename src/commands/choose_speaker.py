@@ -15,11 +15,11 @@ from src.utils.user import UserService
 from aiogram import types, F, Router
 
 from src.states.form import FormInitTalk
-from src.texts.texts import get_choice_is_done, get_start_talk, get_start_person_talk, get_check_text
+from src.texts.texts import get_choice_is_done, get_start_talk, get_start_person_talk, get_check_text, \
+    get_bot_waiting_message
 from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
-
 
 choose_speaker_router = Router(name=__name__)
 
@@ -83,6 +83,7 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     await state.set_state(FormInitTalk.init_user_message)
 
 
+# TODO: Modify this function
 async def continue_dialogue_with_person(message: Message, state: FSMContext):
     tg_id = message.chat.id
 
@@ -92,7 +93,10 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     speaker = user_info["speaker_id"]
     speaker_short_name = user_info["speaker_short_name"]
 
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 
     welcome_text = get_start_person_talk(speaker_short_name)
@@ -117,7 +121,20 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
 
     check_text = get_check_text()
 
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+    # await StickerSender(bot, message.chat.id, speaker).send_fabulous()
+
+    await StickerSender(bot, message.chat.id, speaker).send_fabulous()
+    # await sender.send_problem_sticker()
+    # await sender.send_miss_you_sticker()
+    # await sender.send_you_rock_sticker()
+    # await sender.send_fabulous()
+    # await sender.send_yas_sticker()
+    # await sender.send_how_you_doin_sticker()
+
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
@@ -130,6 +147,8 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
             parse_mode=ParseMode.HTML,
             reply_markup=audio_markup)
     await bot.delete_message(message.chat.id, wait_message.message_id)
+
+
     await state.set_state(FormInitTalk.init_user_message)
 
 
@@ -138,8 +157,13 @@ async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
     speaker = user_info["speaker_id"]
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+    #
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
+
     await start_small_talk(message, state, wait_message, message_text=message.text)
 
 
@@ -148,8 +172,13 @@ async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
     speaker = user_info["speaker_id"]
-    wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} thinks… Please wait",
+
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
+
     message_text = await SpeechToText(file_id=message.voice.file_id).get_text()
     await bot.send_message(
         message.chat.id, f"🎙 Transcript:\n<code>{message_text}</code>", parse_mode=ParseMode.HTML,
@@ -183,4 +212,3 @@ async def start_small_talk(message: types.Message, state: FSMContext, wait_messa
         )
     await bot.delete_message(message.chat.id, wait_message.message_id)
     await state.clear()
-
