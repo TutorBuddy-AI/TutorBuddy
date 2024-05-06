@@ -12,6 +12,8 @@ from src.states import FormName, FormNativeLanguage, FormEnglishLevel, FormCity
 from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
+from src.database.session import async_session_factory
+from src.database.models.user import UserLocation
 
 edit_profile_router = Router(name=__name__)
 
@@ -62,8 +64,18 @@ async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
 @edit_profile_router.message(FormCity.new_city)
 async def new_city_handler(message: types.Message, state: FSMContext):
     city = message.text
-    await UserService().change_user_city(tg_id=str(message.chat.id), new_city=city)
-    await bot.send_message(message.chat.id, f"Your city has been successfully updated to: {city}")
+    async with async_session_factory() as session:
+        existing_location = await session.get(UserLocation, str(message.chat.id))
+        if existing_location:
+            existing_location.city_name = city
+            await session.commit()
+            await bot.send_message(message.chat.id, f"Your city has been successfully updated to: {city}")
+        else:
+            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city)
+            session.add(user_location)
+            await session.commit()
+            await bot.send_message(message.chat.id, f"Your city has been successfully set to: {city}")
+
     await state.clear()
 
 

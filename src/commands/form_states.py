@@ -29,6 +29,9 @@ from aiogram.enums.parse_mode import ParseMode
 
 from utils.user.schemas import UserInfo
 
+from src.database.models.user import UserLocation
+from src.database.session import session
+
 form_router = Router(name=__name__)
 
 
@@ -186,8 +189,15 @@ async def process_city_question(message: types.Message, state: FSMContext):
 @form_router.message(state="city_question")
 async def process_city_answer(message: types.Message, state: FSMContext):
     city_name = message.text
-    await state.update_data({"city": city_name})
-    await bot.send_message(message.chat.id, "Thanks for letting me know!")
+    async with session() as db_session:
+        existing_location = await db_session.get(UserLocation, str(message.chat.id))
+        if existing_location:
+            await bot.send_message(message.chat.id, "We already have your city information on record!")
+        else:
+            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city_name)
+            db_session.add(user_location)
+            await db_session.commit()
+            await bot.send_message(message.chat.id, "Thanks for letting me know!")
 
     await process_other_language(message, state)
 
