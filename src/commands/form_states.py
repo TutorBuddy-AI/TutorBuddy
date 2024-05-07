@@ -10,13 +10,15 @@ from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
-    get_meet_nastya_message
+    get_meet_nastya_message, get_bot_waiting_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
     get_choose_english_level_keyboard, get_choose_topic_keyboard, get_choose_bot_keyboard
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.database.models.setting import Setting
+
+from src.utils.stciker.sticker_sender import StickerSender
 
 from src.utils.user import UserService, UserHelper
 
@@ -246,7 +248,10 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
 async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
     await asyncio.sleep(1)
-    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait",
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message("TutorBuddy"),
                                           parse_mode=ParseMode.HTML)
 
     caption_markup = AnswerRenderer.get_markup_caption_translation_standalone()
@@ -268,8 +273,14 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
             parse_mode=ParseMode.HTML
         )
 
-    wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy thinks… Please wait",
+    await StickerSender(bot, message.chat.id, "TutorBuddy").send_fabulous()
+
+    # wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy is thinking … Please wait",
+    #                                       parse_mode=ParseMode.HTML)
+
+    wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message("TutorBuddy"),
                                           parse_mode=ParseMode.HTML)
+
     meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
     audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
     await bot.send_photo(
