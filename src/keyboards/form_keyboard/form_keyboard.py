@@ -103,22 +103,9 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
         innovations = InlineKeyboardButton(text='Innovations 💡', callback_data='topic_innovations')
 
         fashion = InlineKeyboardButton(text='Fashion 🕶', callback_data='topic_fashion')
-        art_and_design = InlineKeyboardButton(text='Art & Design 🎨', callback_data='topic_art_and_design')
-
-        games = InlineKeyboardButton(text='Games 🕹', callback_data='topic_games')
-        science = InlineKeyboardButton(text='Science 🧬', callback_data='topic_science')
-
-        travel = InlineKeyboardButton(text='Travel ✈️', callback_data='topic_travel')
-        book = InlineKeyboardButton(text='Books 📚', callback_data='topic_books')
-
-        sports = InlineKeyboardButton(text='Sports ⚽️', callback_data='topic_sports')
         health = InlineKeyboardButton(text='Health 🫁', callback_data='topic_health')
 
-        movies = InlineKeyboardButton(text='Movies 🍿', callback_data='topic_movies')
         other = InlineKeyboardButton(text='Other ✍️', callback_data='topic_other')
-
-        # news = InlineKeyboardButton(text='News 📰', callback_data='topic_news')
-        # career = InlineKeyboardButton(text='Career 💼', callback_data='topic_career')
 
         done_button = InlineKeyboardButton(text='Accept ✅', callback_data='done')
 
@@ -130,11 +117,8 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
         choose_topic_inline_kb = InlineKeyboardMarkup(inline_keyboard=[
             [psychology, business],
             [startups, innovations],
-            [fashion, art_and_design],
-            [games, science],
-            [travel, book],
-            [sports, health],
-            [movies, other],
+            [fashion, health],
+            [other],
             [done_button],
             [translate_button]]
         )
