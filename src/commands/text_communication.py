@@ -91,7 +91,6 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
     Callback to translate message caption. Text is provided in query message,
     Message ids are provided in callback_data
     """
-    logging.info("[FUNCTION] handle_get_translation[85]")
     message = query.message
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_person(tg_id=str(message.chat.id))
@@ -126,7 +125,6 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
     """
     Callback to translate standalone message text, when user is not logged in
     """
-    logging.info("[FUNCTION] handle_get_translation_text_standalone [115]")
     state_data = await state.get_data()
     message = query.message
     if not message.text.count(" Translated text:\n"):
@@ -150,7 +148,6 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     """
     Callback to translate standalone message caption, when user is not logged in
     """
-    logging.info("[FUNCTION] handle_get_translation_standalone [135]")
     state_data = await state.get_data()
     message = query.message
     if not message.caption.count(" Translated text:\n"):
@@ -173,7 +170,6 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
     """
     Callback to translate standalone message text, when user is not logged in
     """
-    logging.info("[FUNCTION] handle_get_translation_text_standalone_for_user[175]")
     message = query.message
     if not message.text.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
@@ -197,7 +193,6 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     """
     Callback to translate standalone message caption, when user is not logged in
     """
-    logging.info("[FUNCTION] handle_get_translation_standalone[199]")
     message = query.message
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
@@ -219,7 +214,6 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 @text_comm_router.callback_query(F.data == "pin_message_translate")
 async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
     message = query.message
-    logging.info("[FUNCTION] handle_get_translation_pin_message[220]")
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
         lang = user_info["native_lang"]
