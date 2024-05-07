@@ -235,9 +235,13 @@ async def handle_get_translation_sticker(query: CallbackQuery, state: FSMContext
     user_info = await UserService().get_user_info(str(message.chat.id))
     emoji_dict = {"problem": "😧", "miss_you": "😓", "yas": "👍", "you_rock": "😎", "how_you_doin": "✌🏻", "fabulous": "👏"}
     key_word = query.data.split(':')[-1]
+    text = sticker_text[pack_map[user_info["speaker"]][key_word]]
+    generated_text = await MessageTranslationCreator(
+        tg_id=str(message.chat.id)
+    ).create_communication_message_text_standalone(text,
+                                                   user_info["native_lang"])
     await bot.send_message(chat_id=message.chat.id,
-                           text=emoji_dict[key_word] + sticker_text_translate[
-                               sticker_text[pack_map[user_info["speaker"]][key_word]]],
+                           text=emoji_dict[key_word] + generated_text.rstrip(),
                            parse_mode=ParseMode.HTML,
                            reply_to_message_id=message.message_id)
 
