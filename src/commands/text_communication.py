@@ -289,20 +289,20 @@ async def handle_get_paraphrase(query: CallbackQuery, state: FSMContext):
 
 @text_comm_router.message(IsRegister(), F.video)
 async def handle_video_message(message: Message):
-    user_info = await UserService().get_user_info(message.chat.id)
+    user_info = await UserService().get_user_info(str(message.chat.id))
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @text_comm_router.message(IsRegister(), F.sticker)
 async def handle_sticker_message(message: Message):
-    user_info = await UserService().get_user_info(message.chat.id)
+    user_info = await UserService().get_user_info(str(message.chat.id))
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
 
 
 @text_comm_router.message(IsRegister(), F.video_note)
 async def handle_video_note_message(message: Message):
-    user_info = await UserService().get_user_info(message.chat.id)
+    user_info = await UserService().get_user_info(str(message.chat.id))
     sticker_sender = StickerSender(bot, message.chat.id, speaker=user_info["speaker"])
     await sticker_sender.send_you_rock_sticker()
