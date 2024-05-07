@@ -12,3 +12,4 @@ from src.database.models.message_paraphrase import MessageParaphrase
 from src.database.models.message_translation import MessageTranslation
 from src.database.models.message_for_users import MessageForUsers
 from src.database.models.admin import Admin
+from src.database.models.time_zone import update_user_timezone
