@@ -9,7 +9,10 @@ sticker_text_translate = {
     "Well done!": "Молодец!",
     "Keep it up!": "Продолжай в том же духе!",
     "What's new?": "Что нового?",
-    "Blinding!": "Ослепительно!"
+    "Blinding!": "Ослепительно!",
+    "You're the best": "Ты лучший",
+    "What the hell": "Какого черта",
+    "You don't love me": "Ты меня не любишь",
 }
 
 sticker_text = {
@@ -40,7 +43,14 @@ sticker_text = {
     "CAACAgIAAxkBAAEqXjxl-wRCgxggWGXgbmd8wsyY2CugbgACY0YAAkadcEsnvZ6LuGEe9TQE": "Yas!",
     "CAACAgIAAxkBAAEqXkZl-wTbA3qbJS_a3U3LY1Mau3Wz7AACyUcAArfPcUu0fdprWC9nTDQE": "You rock",
     "CAACAgIAAxkBAAEqXkRl-wTDHf4E_od_e98PMcDdvni1egACSEAAArydcUvryFJpyFB9jjQE": "How you doin?",
-    "CAACAgIAAxkBAAEqXkBl-wSrVt8uEgKDzCSfVHKUM6s_8QACw0IAAvy5cEuGXaGFZsZRqzQE": "Fabulous!"
+    "CAACAgIAAxkBAAEqXkBl-wSrVt8uEgKDzCSfVHKUM6s_8QACw0IAAvy5cEuGXaGFZsZRqzQE": "Fabulous!",
+    # victoria_pack
+    "CAACAgIAAxkBAAErQedmOTfXjvqao2AOO51mtbWqMp3p5wACfUYAAng2YUng2hyG3RkGzTUE": "What the hell",
+    "CAACAgIAAxkBAAErQeVmOTezU86EC083FjEfMVFrVymaYgAChUIAAoO3WUk-5cT-jqM0DjUE": "You don't love me",
+    "CAACAgIAAxkBAAErQctmOTPh0OZe6eIaXjbOFEOUptXAAAMXTwACYEFhScC0TQFb7-rUNQQ": "Yas!",
+    "CAACAgIAAxkBAAErQc1mOTPoR2IPLQOgLCsAAca6cB1yQOMAAmNJAAKsc2FJuwKuD51MVBg1BA": "You rock",
+    "CAACAgIAAxkBAAErQc9mOTPzNeW_VqPt7AVHes1u3tdoNwADUwACGU1gSTVAZ4tVRc26NQQ": "How you doin?",
+    "CAACAgIAAxkBAAErQelmOTgCTFsgY1Jl6ajcYmzmZ9KbmwACiEkAArzfWEnBgE3G7qzheDUE": "You're the best"
 }
 
 anastasias_pack = {

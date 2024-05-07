@@ -24,9 +24,6 @@ async def send_pin_message(bot, chat_id, speaker, message_history):
                 file_path_img = "./files/pin_message_bot.jpg"
                 file_path_voice = "./files/bot_pin_message.opus"
 
-        # await bot.send_photo(chat_id, photo=types.InputFile(file_path_img),
-        #                      caption=get_pin_message(translate=False), reply_markup=markup_translate)
-
         await bot.send_photo(chat_id,
                              photo=FSInputFile(file_path_img),
                              caption=get_pin_message(),
