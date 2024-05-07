@@ -83,7 +83,6 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     await state.set_state(FormInitTalk.init_user_message)
 
 
-# TODO: Modify this function
 async def continue_dialogue_with_person(message: Message, state: FSMContext):
     tg_id = message.chat.id
 
@@ -92,9 +91,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     user_info = await user_service.get_user_person(tg_id=str(tg_id))
     speaker = user_info["speaker_id"]
     speaker_short_name = user_info["speaker_short_name"]
-
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
 
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
@@ -121,11 +117,12 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
 
     check_text = get_check_text()
 
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=speaker)
+    await sticker_sender.send_fabulous()
+
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
-
     audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
-
     with AudioConverter(audio) as ogg_file:
         await bot.send_voice(
             message.chat.id,
@@ -135,7 +132,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
             reply_markup=audio_markup)
     await bot.delete_message(message.chat.id, wait_message.message_id)
 
-
     await state.set_state(FormInitTalk.init_user_message)
 
 
@@ -144,10 +140,6 @@ async def start_talk(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
     speaker = user_info["speaker_id"]
-    #
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
-
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 
@@ -159,13 +151,8 @@ async def start_talk_audio(message: types.Message, state: FSMContext):
     user_service = UserService()
     user_info = await user_service.get_user_person(tg_id=str(message.chat.id))
     speaker = user_info["speaker_id"]
-
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
-
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
-
     message_text = await SpeechToText(file_id=message.voice.file_id).get_text()
     await bot.send_message(
         message.chat.id, f"🎙 Transcript:\n<code>{message_text}</code>", parse_mode=ParseMode.HTML,
