@@ -27,8 +27,12 @@ class NewsletterChoiceData(CallbackData, prefix="gallery_choose"):
 class NewsGallery:
     async def send_news_gallery(self):
         user_galleries = await NewsletterService.get_fresh_user_topics_and_preview(date.today())
-        for user_summary, gallery_preview in user_galleries:
-            await self.send_user_gallery(user_summary, gallery_preview)
+        for user_news_summary, gallery_preview in user_galleries:
+            bot.send_message(
+                chat_id=int(user_news_summary.tg_id),
+                text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
+                parse_mode=ParseMode.HTML)
+            await self.send_user_gallery(user_news_summary, gallery_preview)
 
     async def send_user_gallery(self, user_news_summary: UserNewsSummary, gallery_preview: NewsletterGaleryPreview):
         if (user_news_summary is not None) and (user_news_summary.num_newsletters != 0):
@@ -126,7 +130,7 @@ class NewsGallery:
 
         if is_active:
             keyboard = InlineKeyboardMarkup(
-                inline_keyboard=[[prev_button, index_button, next_button], [discuss_button], [go_back_btn]])
+                inline_keyboard=[[discuss_button], [prev_button, index_button, next_button], [go_back_btn]])
         else:
             keyboard = InlineKeyboardMarkup(
                 inline_keyboard=[[prev_button, index_button, next_button], [go_back_btn]])
