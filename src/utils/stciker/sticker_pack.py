@@ -12,7 +12,7 @@ sticker_text_translate = {
     "Blinding!": "Ослепительно!",
     "You're the best": "Ты лучший",
     "What the hell": "Какого черта",
-    "You don't love me": "Ты меня не любишь",
+    "You don't love me": "Ты меня не любишь"
 }
 
 sticker_text = {
