@@ -129,14 +129,14 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
     message = query.message
     if not message.text.count(" Translated text:\n"):
         lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
-        token = await get_text_token_size(len(message.text) + len(get_translation_text(lang)))
+        token = await get_text_token_size(len(message.text) + len(get_translation_text(lang.lower())))
 
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.text, lang, token)
 
         await bot.edit_message_text(
-            text=message.text + get_translation_text(lang) + generated_text,
+            text=message.text + get_translation_text(lang.lower()) + generated_text,
             chat_id=message.chat.id,
             message_id=message.message_id,
             parse_mode=ParseMode.HTML,
@@ -152,13 +152,13 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     message = query.message
     if not message.caption.count(" Translated text:\n"):
         lang = state_data["tg_language"] if "tg_language" in state_data else "RU"
-        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang)))
+        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang.lower())))
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
 
         await bot.edit_message_caption(
-            caption=message.caption + get_translation_text(lang) + generated_text,
+            caption=message.caption + get_translation_text(lang.lower()) + generated_text,
             chat_id=message.chat.id,
             message_id=message.message_id,
             parse_mode=ParseMode.HTML,
@@ -174,14 +174,14 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
     if not message.text.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
         lang = user_info["native_lang"]
-        token = await get_text_token_size(len(message.text) + len(get_translation_text(lang)))
+        token = await get_text_token_size(len(message.text) + len(get_translation_text(lang.lower())))
 
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.text, lang, token)
 
         await bot.edit_message_text(
-            text=message.text + get_translation_text(lang) + generated_text,
+            text=message.text + get_translation_text(lang.lower()) + generated_text,
             chat_id=message.chat.id,
             message_id=message.message_id,
             parse_mode=ParseMode.HTML,
@@ -197,13 +197,13 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
         lang = user_info["native_lang"]
-        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang)))
+        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang.lower())))
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
 
         await bot.edit_message_caption(
-            caption=message.caption + get_translation_text(lang) + generated_text,
+            caption=message.caption + get_translation_text(lang.lower()) + generated_text,
             chat_id=message.chat.id,
             message_id=message.message_id,
             parse_mode=ParseMode.HTML,
@@ -217,14 +217,14 @@ async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMCon
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
         lang = user_info["native_lang"]
-        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang)))
+        token = await get_caption_token_size(len(message.caption) + len(get_translation_text(lang.lower())))
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
 
         await bot.edit_message_caption(chat_id=message.chat.id,
                                        message_id=message.message_id,
-                                       caption=message.caption + get_translation_text(lang) + generated_text,
+                                       caption=message.caption + get_translation_text(lang.lower()) + generated_text,
                                        parse_mode=ParseMode.HTML,
                                        reply_markup=message.reply_markup)
 
