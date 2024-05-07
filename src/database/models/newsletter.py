@@ -3,8 +3,8 @@ from src.database import Base
 from src.database.mixins import TimestampMixin
 
 
-class DailyNews(Base, TimestampMixin):
-    __tablename__ = "daily_news"
+class Newsletter(Base, TimestampMixin):
+    __tablename__ = "newsletter"
 
     id = Column(Integer, primary_key=True)
     message = Column(String, nullable=True)

@@ -1,1 +1,1 @@
-from src.utils.daily_news.daily_news import DailyNew
+from src.utils.daily_news.daily_news import Newsletter

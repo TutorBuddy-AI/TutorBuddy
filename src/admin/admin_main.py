@@ -1,25 +1,32 @@
-from datetime import datetime
+import tempfile
+from datetime import datetime, date
 import base64
 import os
+from typing import Any
+
 from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
-from sqlalchemy import select, desc, text, delete
+from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
 
 from config import config
-from src.admin.newsletter_admin.newsletter_admin import Newsletter
+from database.models import NewsletterAudio
+from src.admin.newsletter_admin.newsletter_admin import Newsletter, NewsletterPublisher
 from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (app, templates, image_directory,
-                                    generate_token_and_redirect)
+                                    generate_token_and_redirect, audio_directory)
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
-from src.database.models import User, MessageHistory, DailyNews, MessageForUsers, MessageMistakes
+from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
 
 from src.database import session
-
+from utils.audio_converter.audio_converter_cache import AudioConverterCache
+from utils.news_gallery.news_gallery import NewsGallery
+from utils.newsletter.newsletter_service import NewsletterService
+from utils.transcriber.text_to_speech import TextToSpeech
 
 """Docs /docs"""
 
@@ -161,7 +168,7 @@ async def save_newsletter(
         with open(image_path, "wb") as image_file:
             image_file.write(image_data_decoded)
 
-        new_newsletter = DailyNews(
+        new_newsletter = Newsletter(
             message=message,
             topic=topic,
             url=url,
@@ -174,9 +181,39 @@ async def save_newsletter(
         session.add(new_newsletter)
         await session.commit()
 
+        post_text = await NewsletterPublisher.formatting_post_text(new_newsletter)
+        cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
+
+        audio_files = await save_newsletter_audio(cleaned_post_text)
+        newsletter_audio = [
+            NewsletterAudio(
+                newsletter_id=new_newsletter.id,
+                speaker_id=audio_speaker,
+                file_path=audio_file
+            ) for audio_speaker, audio_file in audio_files.items()]
+        session.add_all(newsletter_audio)
+        await session.commit()
         return JSONResponse(content={"message": "Newsletter successfully saved"})
     except Exception as e:
         return JSONResponse(content={"error": f"Failed to save the newsletter. {str(e)}"}, status_code=500)
+
+
+async def save_newsletter_audio(post_text: str):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    if config.BOT_TYPE == "original":
+        audio = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+            'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', post_text)
+        }
+    else:
+        audio = {
+            config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, post_text)
+        }
+    audio_output_files = {
+        key: os.path.join(audio_directory, f"newsletter_audio_{timestamp}_{key}.ogg") for key in audio.keys()}
+    print(audio_output_files)
+    AudioConverterCache(audio).convert_audio_to_ogg_fixed_files(audio_output_files)
+    return audio_output_files
 
 
 @app.post("/save-message")
@@ -238,7 +275,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
     ]
     ```
     """
-    query = select(DailyNews)
+    query = select(Newsletter)
     result = await session.execute(query)
     newsletters = result.scalars().unique().all()
 
@@ -258,6 +295,44 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
         return {"status": "empty"}
 
 
+@app.get("/get_fresh_newsletters")
+async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
+    """
+    Возвращает информацию о всех рассылках пользователей.
+    Пример успешного ответа:
+    ```json
+    [
+        {
+            "id": 7,
+            "message": "fdsfsdfsdfsdf",
+            "topic": "dfssdf",
+            "url": "http://127.0.0.1:8000/admin#",
+            "path_to_data": "static/img/img_newsletter/newsletter_image_20240311023457.jpg"
+        }
+    ]
+    ```
+    """
+    query = select(Newsletter).where(func.date(Newsletter.created_at) == date.today())
+    print(query)
+    result = await session.execute(query)
+    newsletters = result.scalars().unique().all()
+
+    if newsletters:
+        newsletters_list = [
+            {
+                "id": newsletter.id,
+                "message": newsletter.message,
+                "topic": newsletter.topic,
+                "url": newsletter.url,
+                "path_to_data": newsletter.path_to_data,
+            }
+            for newsletter in newsletters
+        ]
+        return JSONResponse(content=newsletters_list)
+    else:
+        return JSONResponse(content=[])
+
+
 @app.get("/get_newsletter_info/{newsletter_id}")
 async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
     """
@@ -274,7 +349,7 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_au
     }
     ```
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
+    query = select(Newsletter).where(Newsletter.id == newsletter_id)
     result = await session.execute(query)
     newsletter = result.scalars().first()
 
@@ -306,7 +381,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
     ```
     """
     try:
-        query = select(DailyNews).where(DailyNews.id == newsletter.newsletter_id)
+        query = select(Newsletter).where(Newsletter.id == newsletter.newsletter_id)
         result = await session.execute(query)
         newsletter_info = result.scalars().first()
         setattr(newsletter_info, newsletter.column, newsletter.changed_text)
@@ -328,16 +403,7 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authent
     }
     ```
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(query)
-    newsletter = result.scalars().first()
-
-    if os.path.exists(newsletter.path_to_data):
-        os.remove(newsletter.path_to_data)
-
-    delete_query = delete(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(delete_query)
-    await session.commit()
+    await NewsletterService.delete_newsletter(newsletter_id)
 
     return {"status": f"success delete newsletter with id: {newsletter_id}"}
 
@@ -347,10 +413,27 @@ async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authen
     """
     Отправляет рассылку по newsletter_id
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(query)
-    newsletter = result.scalars().first()
-    await Newsletter().send_newsletter(newsletter)
+    newsletter = await NewsletterService.get_newsletter(newsletter_id)
+    await NewsletterPublisher().send_newsletter(newsletter)
+    return {"message": "Рассылка успешно отправлена"}
+
+
+@app.get("/send_newsletter/{newsletter_id}/{tg_id}")
+async def send_newsletter_in_chat(newsletter_id: int, tg_id: str, is_valid: bool = Depends(is_authenticated)):
+    """
+    Отправляет рассылку по newsletter_id
+    """
+    newsletter = await NewsletterService.get_newsletter(newsletter_id)
+    await NewsletterPublisher().send_newsletter_to_chat(newsletter, tg_id)
+    return {"message": "Рассылка успешно отправлена"}
+
+
+@app.get("/send_news_gallery")
+async def send_news_gallery():
+    """
+    Отправляет рассылку по newsletter_id
+    """
+    await NewsGallery().send_news_gallery()
     return {"message": "Рассылка успешно отправлена"}
 
 
@@ -359,7 +442,7 @@ async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: boo
     """
     Отправляет рассылку по newsletter_id в дату datetime
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_data.newsletter_id)
+    query = select(Newsletter).where(Newsletter.id == newsletter_data.newsletter_id)
     result = await session.execute(query)
     newsletter = result.scalars().first()
 

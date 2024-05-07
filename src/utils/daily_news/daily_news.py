@@ -1,5 +1,5 @@
 import asyncio
-from src.database.models import DailyNews
+from src.database.models import Newsletter
 from src.database import session, Transactional
 from src.database.models.enums.daily_news import DailyNewsEnum
 from sqlalchemy import select, delete
@@ -7,14 +7,14 @@ from sqlalchemy import select, delete
 from daily_news_history import GetUserDailyNewsHistory
 
 
-class DailyNew:
+class DailyNews:
     def __init__(self):
         ...
 
     @Transactional()
     async def add_news(self, topic: str, message: str, new_types: DailyNewsEnum.NEWS_TYPE__TEXT,
                        path_to_data: str) -> None:
-        daily_news = DailyNews(
+        daily_news = Newsletter(
             topic=topic,
             message=message,
             type=new_types.name,
@@ -28,7 +28,7 @@ class DailyNew:
             topic: str,
             limit: int = 25
     ) -> GetUserDailyNewsHistory:
-        query = select(DailyNews).where(DailyNews.topic == str(topic)).limit(limit)
+        query = select(Newsletter).where(Newsletter.topic == str(topic)).limit(limit)
         result = await session.execute(query)
 
         result = result.scalars()
@@ -38,6 +38,6 @@ class DailyNew:
 
     @Transactional()
     async def delete_user_questions_history(self, topic: str) -> None:
-        delete_query = delete(DailyNews).where(DailyNews.topic == topic)
+        delete_query = delete(Newsletter).where(Newsletter.topic == topic)
         await session.execute(delete_query)
 

@@ -13,6 +13,7 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 image_directory = "static/img/img_newsletter"
+audio_directory = "static/audio/newsletter_audio"
 
 
 def create_jwt_token(data: dict):

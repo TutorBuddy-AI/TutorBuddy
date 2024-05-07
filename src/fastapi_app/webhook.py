@@ -2,6 +2,7 @@ import traceback
 
 from aiogram.types import BotCommand
 
+from commands.news_gallery import news_gallery_router
 from commands.scenario.scenario import scenario_router
 from src.commands.start import start_router, start_router_person
 from src.config import config
@@ -38,12 +39,13 @@ app = FastAPI()
 routers = []
 
 if config.BOT_TYPE == "original":
-    routers = [go_back_router, error_router, form_router, choose_speaker_router, edit_speaker_router,
+    routers = [go_back_router, error_router, form_router, news_gallery_router,
+               choose_speaker_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-               summaries_router, cancel_router, scenario_router, edit_profile_router, text_comm_router, audio_comm_router,
-               start_router]
+               summaries_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
+               audio_comm_router, start_router]
 else:
-    routers = [go_back_router, error_router, form_router, edit_speaker_router,
+    routers = [go_back_router, error_router, form_router, news_gallery_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
                summaries_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
                audio_comm_router, start_router_person]
@@ -69,6 +71,7 @@ async def on_startup():
     bot_commands_1 = [
         BotCommand(command="/restart", description="⚙ Restart the bot"),
         BotCommand(command="/cancel", description="🔧Cancel current state (use if something went wrong)"),
+        BotCommand(command="/summaries", description="📃 Summaries"),
         BotCommand(command="/scenario", description="🎬 Choose a scenario (soon)"),
         BotCommand(command="/changetopic", description="🔁 Change topic"),
         BotCommand(command="/editprofile", description="✏ Edit profile"),
@@ -125,10 +128,10 @@ async def receive_update(update: Dict, request: Request):
     return {"status_code": 200}
 
 
-@app.get('/start_newsletter')
-async def send_newsletter():
-    try:
-        await Newsletter().send_newsletter()
-        return {'message': 'Newsletter sent'}
-    except Exception as e:
-        traceback.print_exc()
+# @app.get('/start_newsletter')
+# async def send_newsletter():
+#     try:
+#         await Newsletter().send_newsletter()
+#         return {'message': 'Newsletter sent'}
+#     except Exception as e:
+#         traceback.print_exc()

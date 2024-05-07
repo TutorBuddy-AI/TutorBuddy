@@ -21,6 +21,7 @@
     padding: 20px;
     overflow-y: auto;
     max-height: 700px;
+
 }
 
 
@@ -44,6 +45,8 @@
 
 button.send-button,
 button.delete-button,
+button.send-chat-button,
+button.send-gallery-button,
 button.send-datetime-button{
     padding: 10px;
     margin: 5px auto;
@@ -58,6 +61,18 @@ button.send-datetime-button{
 button.send-button{
     background-color: #4CAF50;
     color: #fff;
+}
+
+button.send-chat-button{
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+button.send-gallery-button{
+    position: relative;
+    background-color: #4CAF50;
+    color: #fff;
+    left: 30%;
 }
 
 button.delete-button {
@@ -187,4 +202,15 @@ button.send-datetime-button{
 
 .tg-spoiler:hover, .tg-spoiler:hover a {
   color: black;
+}
+
+.newsletter-info-block [contenteditable="true"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin: auto;
+  width: 200px;
+  box-sizing: border-box;
 }

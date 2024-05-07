@@ -122,8 +122,16 @@ def get_check_text():
         "Tell me, how is your day going?")
 
 
-def get_start_person_talk(person_name: str):
-    return (
+def get_start_person_talk(person_id: str, person_name: str):
+    if person_id == "Victoria":
+        persons_text = (
+            f"My name is Victoria. "
+            f"I’m an English teacher for adults. "
+            f"I hold a degree in English language and linguistics and utilize a variety of teaching approaches. "
+            f"I can help you with improving your pronunciation, speaking, "
+            f"and I can also be your perfect English friend and mentor, ensuring your English improves significantly!")
+    else:
+        persons_text = (
             f"My name is {person_name} and I'm a certified English teacher. "
             "I specialize in teaching Business English to tech professionals, IT and digital experts and entrepreneurs."
             "\n\n"
@@ -131,6 +139,7 @@ def get_start_person_talk(person_name: str):
             "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
             "and even have friendly debates! "
             "This personal touch will truly level up your English fluency.")
+    return persons_text
 
 
 def get_meet_bot_text():
