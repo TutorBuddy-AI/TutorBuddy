@@ -180,11 +180,16 @@ def get_first_summary(name):
            f"Later on I will also share summaries of videos and podcasts 🎧 Are you interested? 😎"
 
 
-def get_pin_message(translate: bool):
+def get_pin_message(translate: bool = False):
     if translate:
-        return md.escape_md('Кстати, чтобы не потерять наш чат, предлагаю закрепить его в ленте 😉 Это можно сделать просто нажав на него в ленте чатов и выбрав "Закрепить" 📌')
+        return 'Кстати, чтобы не потерять наш чат, предлагаю закрепить его в ленте 😉 Это можно сделать просто нажав на него в ленте чатов и выбрав "Закрепить" 📌'
     else:
-        return md.escape_md("By the way, I'm afraid you can lose our chat and your opportunity to become a fluent speaker. Make me your first priority! All you need to do is to open your chat list, long press our chat and tap 'pin', so you will see it on top! 📌")
+        return "By the way, I'm afraid you can lose our chat and your opportunity to become a fluent speaker. Make me your first priority! All you need to do is to open your chat list, long press our chat and tap 'pin', so you will see it on top! 📌"
+
+
+def get_bot_waiting_message(speaker: str) -> str:
+    return f"⏳ {speaker} is thinking … Please wait"
+
 
 # def get_models_text():
 #     return md.text(
