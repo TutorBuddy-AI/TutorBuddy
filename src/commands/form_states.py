@@ -296,9 +296,6 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
             parse_mode=ParseMode.HTML
         )
 
-    await StickerSender(bot, message.chat.id, "Anastasia").send_fabulous()
-
-
     await bot.send_message(
         message.chat.id, text="Who would you like to talk to?", parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_bot_keyboard(is_caption=False))

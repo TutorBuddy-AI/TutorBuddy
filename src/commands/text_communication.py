@@ -27,6 +27,8 @@ from src.utils.stciker.sticker_pack import pack_map, sticker_text, sticker_text_
 
 from src.utils.user import UserService
 from src.texts.texts import get_pin_message
+from utils.audio_converter.audio_converter import AudioConverter
+from utils.transcriber.text_to_speech import TextToSpeech
 
 text_comm_router = Router(name=__name__)
 

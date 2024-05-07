@@ -28,7 +28,7 @@ class NewsGallery:
     async def send_news_gallery(self):
         user_galleries = await NewsletterService.get_fresh_user_topics_and_preview(date.today())
         for user_news_summary, gallery_preview in user_galleries:
-            bot.send_message(
+            await bot.send_message(
                 chat_id=int(user_news_summary.tg_id),
                 text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
                 parse_mode=ParseMode.HTML)

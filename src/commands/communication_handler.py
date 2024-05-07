@@ -116,8 +116,8 @@ class CommunicationHandler:
             self.chat_id, from_chat_id=self.chat_id, message_id=state_data["answer_message_id"],
             parse_mode=ParseMode.HTML, reply_markup=render.bot_message_markup,
             reply_to_message_id=render.reply_to_message_id)
-        await self.clear_old_menus()
-        await self.regsiter_menu(answer_message.message_id, None)
+        # await self.clear_old_menus()
+        # await self.regsiter_menu(answer_message.message_id, None)
 
     async def copy_audio_message(self, render: Render):
         state_data = await self.state.get_data()
@@ -128,8 +128,8 @@ class CommunicationHandler:
             self.chat_id, from_chat_id=self.chat_id, message_id=state_data["answer_message_id"],
             parse_mode=ParseMode.HTML, reply_markup=render.bot_message_markup,
             reply_to_message_id=render.reply_to_message_id)
-        await self.clear_old_menus()
-        await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
+        # await self.clear_old_menus()
+        # await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
 
     async def render_text_answer(self, render: Render):
         additional_menu_message = None
@@ -146,8 +146,8 @@ class CommunicationHandler:
                     reply_markup=render.bot_message_markup,
                     reply_to_message_id=render.reply_to_message_id)
 
-            await self.clear_old_menus()
-            await self.regsiter_menu(answer_message.message_id, additional_menu_message)
+            # await self.clear_old_menus()
+            # await self.regsiter_menu(answer_message.message_id, additional_menu_message)
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(self.chat_id,
@@ -176,8 +176,8 @@ class CommunicationHandler:
                                        reply_to_message_id=render.reply_to_message_id
                                       )
 
-            await self.clear_old_menus()
-            await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
+            # await self.clear_old_menus()
+            # await self.regsiter_menu(answer_message.message_id, additional_menu_message.message_id)
         else:
             with AudioConverter(audio) as ogg_file:
                 await self.bot.send_voice(

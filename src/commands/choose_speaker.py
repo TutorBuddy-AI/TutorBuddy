@@ -121,19 +121,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
 
     check_text = get_check_text()
 
-    # await StickerSender(bot, message.chat.id, speaker).send_fabulous()
-
-    await StickerSender(bot, message.chat.id, speaker).send_fabulous()
-    # await sender.send_problem_sticker()
-    # await sender.send_miss_you_sticker()
-    # await sender.send_you_rock_sticker()
-    # await sender.send_fabulous()
-    # await sender.send_yas_sticker()
-    # await sender.send_how_you_doin_sticker()
-
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
-
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 

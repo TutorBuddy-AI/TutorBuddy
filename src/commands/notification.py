@@ -17,6 +17,9 @@ async def send_pin_message(bot, chat_id, speaker, message_history):
             case "Oksana":
                 file_path_img = "./files/pin_message_oksana.png"
                 file_path_voice = "./files/oksana_pin_message.ogg"
+            case "Victoria":
+                file_path_img = "./files/pin_message_victoria.jpg"
+                file_path_voice = "./files/victoria_pin_message.ogg"
             case _:  # TutorBuddy default variables.
                 file_path_img = "./files/pin_message_bot.jpg"
                 file_path_voice = "./files/bot_pin_message.opus"
