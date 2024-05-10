@@ -420,6 +420,20 @@ async def renew_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authe
     ```
     """
     await NewsletterService.renew_newsletter(newsletter_id)
+    new_newsletter = await NewsletterService.get_newsletter(newsletter_id)
+
+    post_text = await NewsletterPublisher.formatting_post_text(new_newsletter)
+    cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
+
+    audio_files = await save_newsletter_audio(cleaned_post_text)
+    newsletter_audio = [
+        NewsletterAudio(
+            newsletter_id=new_newsletter.id,
+            speaker_id=audio_speaker,
+            file_path=audio_file
+        ) for audio_speaker, audio_file in audio_files.items()]
+    session.add_all(newsletter_audio)
+    await session.commit()
 
     return {"status": f"success renewed newsletter with id: {newsletter_id}"}
 

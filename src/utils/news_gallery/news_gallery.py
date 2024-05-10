@@ -1,4 +1,5 @@
 import html
+import traceback
 from datetime import date
 from typing import List, Optional
 
@@ -41,11 +42,14 @@ class NewsGallery:
     async def send_news_gallery(self):
         user_galleries = await NewsletterService.get_fresh_user_topics_and_preview(date.today())
         for user_news_summary, gallery_preview in user_galleries:
-            await bot.send_message(
-                chat_id=int(user_news_summary.tg_id),
-                text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
-                parse_mode=ParseMode.HTML)
-            await self.send_user_gallery(user_news_summary, gallery_preview)
+            try:
+                await bot.send_message(
+                    chat_id=int(user_news_summary.tg_id),
+                    text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
+                    parse_mode=ParseMode.HTML)
+                await self.send_user_gallery(user_news_summary, gallery_preview)
+            except Exception as e:
+                traceback.print_exc()
 
     async def send_user_gallery(self, user_news_summary: UserNewsSummary, gallery_preview: NewsletterGaleryPreview):
         if (user_news_summary is not None) and (user_news_summary.num_newsletters != 0):
