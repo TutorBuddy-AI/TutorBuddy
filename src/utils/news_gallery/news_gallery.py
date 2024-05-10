@@ -20,6 +20,19 @@ class GalleryButtonClickData(CallbackData, prefix="gallery_scroll"):
     num_newsletters: int
 
 
+num_topics_map = {str(num): topic for num, topic in
+    enumerate(["psychology", "business", "startups", "innovations", "fashion", "health"])}
+
+
+def topics_encode(list_topics: List[str]) -> List[str]:
+    reversed_topics_map = {topic: num for num, topic in num_topics_map.items()}
+    return [reversed_topics_map[key] for key in list_topics]
+
+
+def topics_decode(list_encoded_topics: List[str]) -> List[str]:
+    return [num_topics_map[key] for key in list_encoded_topics]
+
+
 class NewsletterChoiceData(CallbackData, prefix="gallery_choose"):
     newsletter_index: int
 
@@ -102,7 +115,7 @@ class NewsGallery:
             text="⬅️",
             callback_data=GalleryButtonClickData(
                 action="prev",
-                topics=",".join(topics),
+                topics=",".join(topics_encode(topics)),
                 target_date=target_date,
                 newsletter_index=gallery_index,
                 num_newsletters=total_elements
@@ -114,7 +127,7 @@ class NewsGallery:
             text="➡️",
             callback_data=GalleryButtonClickData(
                 action="next",
-                topics=",".join(topics),
+                topics=",".join(topics_encode(topics)),
                 target_date=target_date,
                 newsletter_index=gallery_index,
                 num_newsletters=total_elements
