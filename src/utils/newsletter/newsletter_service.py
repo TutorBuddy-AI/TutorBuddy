@@ -50,12 +50,12 @@ class NewsletterService:
         query = (
             select(
                 User.tg_id,
-                func.array_agg(Newsletter.topic).label("topics"),
-                func.count(Newsletter.id).label("num_newsletters")
+                func.array_agg(Newsletter.topic).over(partition_by=User.tg_id).label("topics"),
+                func.count(Newsletter.id).over(partition_by=User.tg_id).label("num_newsletters"),
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
+            .distinct(User.tg_id)
             .filter(func.date(Newsletter.updated_at) == target_date)
-            .group_by(User.tg_id)
         )
         result = await session.execute(query)
 
@@ -122,13 +122,13 @@ class NewsletterService:
         query = (
             select(
                 User.tg_id,
-                func.array_agg(Newsletter.topic).label("topics"),
-                func.count(Newsletter.id).label("num_newsletters")
+                func.array_agg(Newsletter.topic).over(partition_by=User.tg_id).label("topics"),
+                func.count(Newsletter.id).over(partition_by=User.tg_id).label("num_newsletters")
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
+            .distinct(User.tg_id)
             .filter(func.date(Newsletter.updated_at) == target_date)
             .filter(User.tg_id == tg_id)
-            .group_by(User.tg_id)
         )
         result = await session.execute(query)
         user_summary = result.first()

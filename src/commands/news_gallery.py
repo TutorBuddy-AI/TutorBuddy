@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram import types
 from aiogram.enums.parse_mode import ParseMode
 
-from utils.news_gallery.news_gallery import NewsGallery, GalleryButtonClickData, NewsletterChoiceData
+from utils.news_gallery.news_gallery import NewsGallery, GalleryButtonClickData, NewsletterChoiceData, topics_decode
 from utils.newsletter.newsletter_service import NewsletterService
 from aiogram import Router
 
@@ -53,7 +53,7 @@ async def handle_inline_buttons(callback_query: types.CallbackQuery, callback_da
     elif callback_data.action == "next":
         current_index = (current_index + 1) % num_news
 
-    topics = callback_data.topics.split(",")
+    topics = topics_decode(callback_data.topics.split(","))
     curr_newsletter_preivew = await NewsletterService.get_topics_newsletter_preview_on_date(
         topics, callback_data.target_date, current_index)
 
