@@ -89,6 +89,14 @@
     </div>
 </div>
 
+<div id="renewConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('renewConfirmationModal')">&times;</span>
+        <p>Are you sure you want to renew the newsletter with ID <span id="renewModalNewsletterId"></span>?</p>
+        <button class="confirm-button" onclick="confirmRenewal()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('renewConfirmationModal')">Cancel</button>
+    </div>
+</div>
 
 <div id="sendConfirmationModal" class="modal">
     <div class="modal-content">

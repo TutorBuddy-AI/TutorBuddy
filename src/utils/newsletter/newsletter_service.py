@@ -1,11 +1,11 @@
 import os
-from datetime import date
+from datetime import date, datetime
 from typing import List, Optional, Tuple
 
 from database.models import Newsletter, User
 from database.models import NewsletterAudio
 from src.database import session
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.sql import func
 
 from utils.newsletter.schema.newsletter import NewsletterGaleryPreview, UserNewsSummary
@@ -54,7 +54,7 @@ class NewsletterService:
                 func.count(Newsletter.id).label("num_newsletters")
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
-            .filter(func.date(Newsletter.created_at) == target_date)
+            .filter(func.date(Newsletter.updated_at) == target_date)
             .group_by(User.tg_id)
         )
         result = await session.execute(query)
@@ -92,7 +92,7 @@ class NewsletterService:
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
             .distinct(User.tg_id)
-            .filter(func.date(Newsletter.created_at) == target_date)
+            .filter(func.date(Newsletter.updated_at) == target_date)
         )
         result = await session.execute(query)
 
@@ -126,7 +126,7 @@ class NewsletterService:
                 func.count(Newsletter.id).label("num_newsletters")
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
-            .filter(func.date(Newsletter.created_at) == target_date)
+            .filter(func.date(Newsletter.updated_at) == target_date)
             .filter(User.tg_id == tg_id)
             .group_by(User.tg_id)
         )
@@ -170,7 +170,7 @@ class NewsletterService:
                 Newsletter.message,
                 Newsletter.path_to_data
             )
-            .filter(func.date(Newsletter.created_at) == target_date)
+            .filter(func.date(Newsletter.updated_at) == target_date)
             .filter(Newsletter.topic.in_(topics))
             .order_by(Newsletter.id)
         )
@@ -200,6 +200,15 @@ class NewsletterService:
 
         delete_query = delete(Newsletter).where(Newsletter.id == newsletter_id)
         await session.execute(delete_query)
+        await session.commit()
+
+    @staticmethod
+    async def renew_newsletter(newsletter_id: int):
+        await NewsletterService.delete_newsletter_audio(newsletter_id)
+
+        query = update(Newsletter).where(Newsletter.id == newsletter_id).values(updated_at=datetime.now())
+
+        await session.execute(query)
         await session.commit()
 
     @staticmethod
