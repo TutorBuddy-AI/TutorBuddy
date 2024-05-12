@@ -3,26 +3,32 @@ from aiogram.enums.parse_mode import ParseMode
 from src.texts.texts import get_pin_message
 from aiogram import types
 
+from utils.audio_converter.audio_converter import AudioConverter
+from utils.transcriber.text_to_speech import TextToSpeech
+
 
 async def send_pin_message(bot, chat_id, speaker, message_history):
     """after 7 messages from user send post_message"""
-    if message_history == 7:
+    if message_history == 2:
         match speaker:
             case "Anastasia":
                 file_path_img = "./files/pin_message_nastya.jpg"
-                file_path_voice = "./files/nastya_pin_message.opus"
+                file_path_voice = "./files/pin_message_nastya.opus"
             case "AA_Lingua":
                 file_path_img = "./files/pin_message_aa_linqua.png"
-                file_path_voice = "./files/aa_linqua_pin_message.ogg"
+                file_path_voice = "./files/pin_message_aa_linqua.ogg"
             case "Oksana":
                 file_path_img = "./files/pin_message_oksana.png"
-                file_path_voice = "./files/oksana_pin_message.ogg"
+                file_path_voice = "./files/pin_message_oksana.ogg"
             case "Victoria":
                 file_path_img = "./files/pin_message_victoria.jpg"
-                file_path_voice = "./files/victoria_pin_message.ogg"
+                file_path_voice = "./files/pin_message_victoria.ogg"
+            case "Ekaterina":
+                file_path_img = "./files/pin_message_ekaterina.png"
+                file_path_voice = "./files/pin_message_ekaterina.ogg"
             case _:  # TutorBuddy default variables.
                 file_path_img = "./files/pin_message_bot.jpg"
-                file_path_voice = "./files/bot_pin_message.opus"
+                file_path_voice = "./files/pin_message_bot.opus"
 
         # await bot.send_photo(chat_id, photo=types.InputFile(file_path_img),
         #                      caption=get_pin_message(translate=False), reply_markup=markup_translate)
