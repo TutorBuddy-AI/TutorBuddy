@@ -138,7 +138,7 @@ class NewsGallery:
             ).pack())
 
         discuss_button = InlineKeyboardButton(
-            text="Let's Discuss",
+            text="Read and discuss 🔽📃",
             callback_data=NewsletterChoiceData(
                 newsletter_index=curr_newsletter_id
             ).pack())

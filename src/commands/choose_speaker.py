@@ -100,7 +100,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
                                           parse_mode=ParseMode.HTML)
 
     welcome_text = get_start_person_talk(speaker, speaker_short_name)
-    audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     logging.info(f"./files/meet_{config.BOT_PERSON.lower()}.jpg")
     await bot.send_photo(
@@ -111,11 +110,10 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
         reply_markup=audio_markup
     )
 
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            FSInputFile(ogg_file),
-            parse_mode=ParseMode.HTML)
+    await bot.send_voice(
+        message.chat.id,
+        FSInputFile(f"./files/meet_{speaker.lower()}.ogg"),
+        parse_mode=ParseMode.HTML)
 
     await bot.delete_message(message.chat.id, wait_message.message_id)
 
@@ -124,17 +122,13 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 
-    audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
-
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            FSInputFile(ogg_file),
-            caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
-            parse_mode=ParseMode.HTML,
-            reply_markup=audio_markup)
+    await bot.send_voice(
+        message.chat.id,
+        FSInputFile(f"./files/check_{speaker.lower()}.ogg"),
+        caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
+        parse_mode=ParseMode.HTML,
+        reply_markup=audio_markup)
     await bot.delete_message(message.chat.id, wait_message.message_id)
-
 
     await state.set_state(FormInitTalk.init_user_message)
 
