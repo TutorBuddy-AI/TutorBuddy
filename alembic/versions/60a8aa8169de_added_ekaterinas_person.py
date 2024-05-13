@@ -23,12 +23,12 @@ def upgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
 
-    session.add(Person(id="Ekaterina", short_name="Katya", full_name="Ekaterina"))
+    session.add(Person(id="Katya", short_name="Katya", full_name="Ekaterina"))
     session.commit()
 
 
 def downgrade() -> None:
     bind = op.get_bind()
     session = orm.Session(bind=bind)
-    session.query(Person).filter(Person.id == "Ekaterina").delete()
+    session.query(Person).filter(Person.id == "Katya").delete()
     session.commit()

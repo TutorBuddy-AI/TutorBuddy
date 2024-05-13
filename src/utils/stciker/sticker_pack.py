@@ -124,5 +124,5 @@ pack_map = {
     "Anastasia": anastasias_pack,
     "TutorBuddy": tutorbots_pack,
     "Victoria": victorias_pack,
-    "Ekaterina": ekaterinas_pack
+    "Katya": ekaterinas_pack
 }

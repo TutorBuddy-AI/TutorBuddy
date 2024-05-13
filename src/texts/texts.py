@@ -132,7 +132,7 @@ def get_start_person_talk(person_id: str, person_name: str):
                 f"I can help you with improving your pronunciation, speaking, "
                 f"and I can also be your perfect English friend and mentor, "
                 f"ensuring your English improves significantly!")
-        case "Ekaterina":
+        case "Katya":
             persons_text = (
                 f"My name is Katya, and I'm here to help you excel in English. "
                 f"Whether you're preparing for interviews, gearing up for a move to an English-speaking country, "
