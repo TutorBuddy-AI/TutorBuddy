@@ -57,7 +57,7 @@ def create_inline_keyboard(current_index, total_elements):
 async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMContext):
 
     storage = await state.get_data()
-    if "current_index" in storage:
+    if "current_index" in storage.keys():
         current_index = storage["current_index"]
         data = storage["mistakes"]
 
