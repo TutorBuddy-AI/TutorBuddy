@@ -30,14 +30,14 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
-    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="TutorBuddy")
-    await sticker_sender.send_fabulous()
-
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await bot.send_message(
         tg_id, get_choice_is_done(), reply_markup=markup,
         parse_mode=ParseMode.HTML)
+
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="TutorBuddy")
+    await sticker_sender.send_fabulous()
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
@@ -60,13 +60,13 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
 
-    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="Anastasia")
-    await sticker_sender.send_fabulous()
-
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup,
                            parse_mode=ParseMode.HTML)
+
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_fabulous()
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
@@ -93,9 +93,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     speaker = user_info["speaker_id"]
     speaker_short_name = user_info["speaker_short_name"]
 
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ {speaker} is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
-
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
 
@@ -116,6 +113,9 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
         parse_mode=ParseMode.HTML)
 
     await bot.delete_message(message.chat.id, wait_message.message_id)
+
+    sticker_sender = StickerSender(bot, message.chat.id, speaker=speaker)
+    await sticker_sender.send_fabulous()
 
     check_text = get_check_text()
 

@@ -9,7 +9,7 @@ from utils.transcriber.text_to_speech import TextToSpeech
 
 async def send_pin_message(bot, chat_id, speaker, message_history):
     """after 7 messages from user send post_message"""
-    if message_history == 2:
+    if message_history == 7:
         match speaker:
             case "Anastasia":
                 file_path_img = "./files/pin_message_nastya.jpg"
@@ -23,9 +23,9 @@ async def send_pin_message(bot, chat_id, speaker, message_history):
             case "Victoria":
                 file_path_img = "./files/pin_message_victoria.jpg"
                 file_path_voice = "./files/pin_message_victoria.ogg"
-            case "Ekaterina":
-                file_path_img = "./files/pin_message_ekaterina.png"
-                file_path_voice = "./files/pin_message_ekaterina.ogg"
+            case "Katya":
+                file_path_img = "./files/pin_message_katya.png"
+                file_path_voice = "./files/pin_message_katya.ogg"
             case _:  # TutorBuddy default variables.
                 file_path_img = "./files/pin_message_bot.jpg"
                 file_path_voice = "./files/pin_message_bot.opus"
