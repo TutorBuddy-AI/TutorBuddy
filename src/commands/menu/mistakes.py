@@ -57,28 +57,28 @@ def create_inline_keyboard(current_index, total_elements):
 async def handle_inline_buttons(callback_query: types.CallbackQuery, state: FSMContext):
 
     storage = await state.get_data()
+    if "current_index" in storage:
+        current_index = storage["current_index"]
+        data = storage["mistakes"]
 
-    current_index = storage["current_index"]
-    data = storage["mistakes"]
+        if callback_query.data == "prev":
+            current_index = (current_index - 1) % len(data)
+        elif callback_query.data == "next":
+            current_index = (current_index + 1) % len(data)
 
-    if callback_query.data == "prev":
-        current_index = (current_index - 1) % len(data)
-    elif callback_query.data == "next":
-        current_index = (current_index + 1) % len(data)
+        await state.update_data(current_index=current_index)
 
-    await state.update_data(current_index=current_index)
+        await state.update_data(id_mistakes=callback_query.message.message_id + 1)
+        message_id = storage["id_mistakes"]
 
-    await state.update_data(id_mistakes=callback_query.message.message_id + 1)
-    message_id = storage["id_mistakes"]
-
-    await send_data(callback_query.message.chat.id, data[current_index],
-                    create_inline_keyboard(current_index, len(data)), message_id)
-    try:
-        await bot.delete_message(
-            chat_id=callback_query.message.chat.id,
-            message_id=callback_query.message.message_id)
-    except:
-        pass
+        await send_data(callback_query.message.chat.id, data[current_index],
+                        create_inline_keyboard(current_index, len(data)), message_id)
+        try:
+            await bot.delete_message(
+                chat_id=callback_query.message.chat.id,
+                message_id=callback_query.message.message_id)
+        except:
+            pass
 
 
 async def send_data(chat_id, data_element, keyboard, message_id):
