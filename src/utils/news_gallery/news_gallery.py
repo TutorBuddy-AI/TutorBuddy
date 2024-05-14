@@ -22,7 +22,7 @@ class GalleryButtonClickData(CallbackData, prefix="gallery_scroll"):
 
 
 num_topics_map = {str(num): topic for num, topic in
-    enumerate(["psychology", "business", "startups", "innovations", "fashion", "health"])}
+                  enumerate(["psychology", "business", "startups", "innovations", "fashion", "health"])}
 
 
 def topics_encode(list_topics: List[str]) -> List[str]:
@@ -45,7 +45,8 @@ class NewsGallery:
             try:
                 await bot.send_message(
                     chat_id=int(user_news_summary.tg_id),
-                    text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
+                    text="Hey! I have brought some fresh news summaries on your favourite topics! \n"
+                         "Go check them out 🗞️",
                     parse_mode=ParseMode.HTML)
                 await self.send_user_gallery(user_news_summary, gallery_preview)
             except Exception as e:
@@ -102,11 +103,17 @@ class NewsGallery:
                 reply_markup=keyboard)
 
     @staticmethod
-    def formatting_post_text(daily_news) -> str:
-        post_text = f"#{daily_news.topic}\n\n"
-        post_text += f"<b>{daily_news.title}</b>"
+    def formatting_post_text(newsletter) -> str:
+        post_text = f"#{newsletter.topic}\n\n"
+        post_text += f"<b>{newsletter.title}</b>"
 
-        post_text += f"\n\n{daily_news.short_content}..."
+        if newsletter.publisher:
+            post_text += f"\n{newsletter.publisher}"
+        if newsletter.publication_date:
+            post_text += f"\n{newsletter.publication_date}"
+
+        post_text += "\n\n<u>Article summary:</u>"
+        post_text += f"\n{newsletter.short_content}..."
         # Заменяем <br> на \n
         formatting_post_text = html.unescape(post_text.replace('<br>', ''))
         return formatting_post_text
