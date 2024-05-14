@@ -83,6 +83,12 @@ class NewsletterService:
                 func.first_value(Newsletter.title).over(
                     partition_by=User.tg_id,
                     order_by=Newsletter.id).label("title"),
+                func.first_value(Newsletter.publisher).over(
+                    partition_by=User.tg_id,
+                    order_by=Newsletter.id).label("publisher"),
+                func.first_value(Newsletter.publication_date).over(
+                    partition_by=User.tg_id,
+                    order_by=Newsletter.id).label("publication_date"),
                 func.first_value(Newsletter.message).over(
                     partition_by=User.tg_id,
                     order_by=Newsletter.id).label("message"),
@@ -103,6 +109,8 @@ class NewsletterService:
                     id=row.id,
                     topic=row.topic,
                     title=row.title,
+                    publisher=row.publisher,
+                    publication_date=row.publication_date,
                     short_content=NewsletterService.cut_content(row.message),
                     img=row.path_to_data)
             )
@@ -111,7 +119,7 @@ class NewsletterService:
 
     @staticmethod
     def cut_content(content):
-        len_short_content = len(content) if len(content) < 101 else 100
+        len_short_content = len(content) if len(content) < 201 else 200
         return content[:len_short_content]
 
     @staticmethod
@@ -168,6 +176,8 @@ class NewsletterService:
                 Newsletter.topic,
                 Newsletter.title,
                 Newsletter.message,
+                Newsletter.publisher,
+                Newsletter.publication_date,
                 Newsletter.path_to_data
             )
             .filter(func.date(Newsletter.updated_at) == target_date)
@@ -183,6 +193,8 @@ class NewsletterService:
             id=newsletter_preview.id,
             topic=newsletter_preview.topic,
             title=newsletter_preview.title,
+            publisher=newsletter_preview.publisher,
+            publication_date=newsletter_preview.publication_date,
             short_content=NewsletterService.cut_content(newsletter_preview.message),
             img=newsletter_preview.path_to_data
         )

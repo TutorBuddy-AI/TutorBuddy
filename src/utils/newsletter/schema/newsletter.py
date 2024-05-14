@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -7,6 +7,8 @@ class NewsletterGaleryPreview(BaseModel):
     id: int
     topic: str
     title: str
+    publisher: Optional[str]
+    publication_date: Optional[str]
     short_content: str
     img: str
 
