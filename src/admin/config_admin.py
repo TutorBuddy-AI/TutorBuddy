@@ -3,7 +3,6 @@ from fastapi.responses import RedirectResponse
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 import jwt
 
 from config.config import config
