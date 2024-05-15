@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 
 from src.commands.communication_handler import CommunicationHandler
@@ -132,13 +133,14 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang, token)
-
-    await bot.edit_message_text(text=message.text + f"\n\n{lang} Translated text:\n" + generated_text,
-                                chat_id=message.chat.id,
-                                message_id=message.message_id,
-                                parse_mode=ParseMode.HTML,
-                                reply_markup=message.reply_markup)
-
+    try:
+        await bot.edit_message_text(text=message.text + f"\n\n{lang} Translated text:\n" + generated_text,
+                                    chat_id=message.chat.id,
+                                    message_id=message.message_id,
+                                    parse_mode=ParseMode.HTML,
+                                    reply_markup=message.reply_markup)
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
     # await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML,
     #                        reply_to_message_id=message.message_id)
 
@@ -156,13 +158,14 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     generated_text = await MessageTranslationCreator(
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.caption, lang, token)
-
-    await bot.edit_message_caption(caption=message.caption + f"\n\n{lang} Translated text:\n" + generated_text,
-                                   chat_id=message.chat.id,
-                                   message_id=message.message_id,
-                                   parse_mode=ParseMode.HTML,
-                                   reply_markup=message.reply_markup)
-
+    try:
+        await bot.edit_message_caption(caption=message.caption + f"\n\n{lang} Translated text:\n" + generated_text,
+                                       chat_id=message.chat.id,
+                                       message_id=message.message_id,
+                                       parse_mode=ParseMode.HTML,
+                                       reply_markup=message.reply_markup)
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
     # await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML,
     #                        reply_to_message_id=message.message_id)
 
@@ -183,12 +186,14 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(message.text, lang, token)
 
-    await bot.edit_message_text(text=message.text + f"\n\n{lang} Translated text:\n" + generated_text,
-                                chat_id=message.chat.id,
-                                message_id=message.message_id,
-                                parse_mode=ParseMode.HTML,
-                                reply_markup=message.reply_markup)
-
+    try:
+        await bot.edit_message_text(text=message.text + f"\n\n{lang} Translated text:\n" + generated_text,
+                                    chat_id=message.chat.id,
+                                    message_id=message.message_id,
+                                    parse_mode=ParseMode.HTML,
+                                    reply_markup=message.reply_markup)
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
     # await bot.send_message(message.chat.id, generated_text, parse_mode=ParseMode.HTML,
     #                        reply_to_message_id=message.message_id)
 
@@ -209,13 +214,15 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 
     # await bot.send_message(message.chat.id, generated_text,
     #                        parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
-
-    await bot.edit_message_caption(caption=message.caption + f"\n\n{lang} Translated text:\n" + generated_text,
-                                   chat_id=message.chat.id,
-                                   message_id=message.message_id,
-                                   parse_mode=ParseMode.HTML,
-                                   reply_markup=message.reply_markup
-                                   )
+    try:
+        await bot.edit_message_caption(
+            caption=message.caption + f"\n\n{lang} Translated text:\n" + generated_text,
+            chat_id=message.chat.id,
+            message_id=message.message_id,
+            parse_mode=ParseMode.HTML,
+            reply_markup=message.reply_markup)
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
 
 
 @text_comm_router.callback_query(F.data == "pin_message_translate")

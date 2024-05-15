@@ -78,31 +78,34 @@ async function openSubAddNewsletter() {
                         image: imageBase64,
                     };
 
-                    try {
-                        const response = await fetch('./save-newsletter', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(requestData),
-                        });
+                    const urls = ['https://admin.tutorbuddyai.tech/original/save-newsletter', 'https://admin.tutorbuddyai.tech/oksana/save-newsletter']
+                    for (const url of urls) {
+                        try {
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(requestData),
+                            });
 
-                        const result = await response.json();
+                            const result = await response.json();
 
 
-                        const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="success-add-newsletter">${JSON.stringify(result)}</p>`;
-                        document.getElementById('addNewsletterForm').reset();
+                            const resultContainer = document.getElementById('resultContainer');
+                            resultContainer.innerHTML += `<p class="success-add-newsletter">${JSON.stringify(result)}</p>`;
+                            document.getElementById('addNewsletterForm').reset();
 
-                        subAddNewsletterExists = true;
-                        closeBlock('.dialog-block');
-                        closeBlock('.profile-block');
-                        closeBlock('.statistic-block');
-                        closeBlock('.newsletter-info-block');
-                        closeBlock('.add-message-block');
-                    } catch (error) {
-                        const resultContainer = document.getElementById('resultContainer');
-                        resultContainer.innerHTML = `<p class="error-add-newsletter">Error while saving newsletter: ${JSON.stringify(error)}</p>`;
+                            subAddNewsletterExists = true;
+                            closeBlock('.dialog-block');
+                            closeBlock('.profile-block');
+                            closeBlock('.statistic-block');
+                            closeBlock('.newsletter-info-block');
+                            closeBlock('.add-message-block');
+                        } catch (error) {
+                            const resultContainer = document.getElementById('resultContainer');
+                            resultContainer.innerHTML += `<p class="error-add-newsletter">Error while saving newsletter: ${JSON.stringify(error)}</p>`;
+                        }
                     }
                 };
 
@@ -111,3 +114,4 @@ async function openSubAddNewsletter() {
         });
     }
 }
+

@@ -54,7 +54,20 @@
     cursor: pointer;
 }
 
+.add-newsletter-block input[type="submit_all"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .add-newsletter-block input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.add-newsletter-block input[type="submit_all"]:hover {
     background-color: #45a049;
 }
 
