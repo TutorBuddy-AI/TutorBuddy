@@ -191,18 +191,6 @@ class CommunicationHandler:
         state_data["answer_message_id"] = answer_message_id
         await self.state.update_data(state_data)
 
-    async def clear_old_menus(self):
-        state_data = await self.state.get_data()
-        if ("answer_message_id" in state_data) and state_data["answer_message_id"]:
-            await self.bot.edit_message_reply_markup(
-                chat_id=self.chat_id, message_id=state_data["answer_message_id"], reply_markup=None)
-            state_data["answer_message_id"] = None
-        if ("additional_menu_message_id" in state_data) and state_data["additional_menu_message_id"]:
-            # await self.bot.edit_message_reply_markup(
-            #     chat_id=self.chat_id, message_id=state_data["additional_menu_message_id"], reply_markup=None)
-            state_data["additional_menu_message_id"] = None
-        await self.state.update_data(state_data)
-
     async def send_missed_you_sticker(self, reply_to):
         await self.sticker_sender.send_miss_you_sticker(reply_to)
         state_data = await self.state.get_data()

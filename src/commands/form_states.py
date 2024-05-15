@@ -1,4 +1,7 @@
 import asyncio
+import logging
+
+from aiogram.exceptions import TelegramBadRequest
 
 from commands.choose_speaker import continue_dialogue_with_person
 from config import config
@@ -180,8 +183,11 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
 @form_router.callback_query(Form.topic, F.data.startswith("topic"))
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=await get_choose_topic_keyboard(callback_query))
+    try:
+        await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
+                                            reply_markup=await get_choose_topic_keyboard(callback_query))
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
 
 
 @form_router.callback_query(Form.topic, F.data == "done")

@@ -1,5 +1,8 @@
+import logging
+
 from aiogram import types, md, Router, F
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
@@ -44,9 +47,12 @@ async def change_topic_handler(query: CallbackQuery, state: FSMContext):
 
 @edit_topic_router.callback_query(F.data.startswith("topic"), FormTopic.new_topic)
 async def process_topic_handler(callback_query: types.CallbackQuery):
-    await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
-                                        reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True,
-                                                                                     is_caption=False))
+    try:
+        await bot.edit_message_reply_markup(
+            callback_query.message.chat.id, callback_query.message.message_id,
+            reply_markup=await get_choose_topic_keyboard(callback_query, for_user=True, is_caption=False))
+    except TelegramBadRequest:
+        logging.info("Can't send the same message")
 
 
 @edit_topic_router.callback_query(F.data == "done", FormTopic.new_topic)
