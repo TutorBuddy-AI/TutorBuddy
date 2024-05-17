@@ -55,28 +55,40 @@ async def edit_profile_handler(message: types.Message):
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
+
 @edit_profile_router.callback_query(F.data == "change_city")
 async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
+    popular_cities = ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg"]
+
+    def get_city_keyboard():
+        keyboard = InlineKeyboardMarkup()
+        for city in popular_cities:
+            keyboard.add(InlineKeyboardButton(text=city, callback_data=f"city_{city}"))
+        return keyboard
+
+    await bot.send_message(
+        query.message.chat.id,
+        "Please select your city:",
+        reply_markup=get_city_keyboard()
+    )
     await state.set_state(FormCity.new_city)
-    await bot.send_message(query.message.chat.id, "Please enter your city:")
 
 
-@edit_profile_router.message(FormCity.new_city)
-async def new_city_handler(message: types.Message, state: FSMContext):
-    city = message.text
+@edit_profile_router.callback_query(F.startswith("city_"))
+async def select_city_callback(query: CallbackQuery, state: FSMContext):
+    city = query.data.split("_")[1]
+
     async with async_session_factory() as session:
-        existing_location = await session.get(UserLocation, str(message.chat.id))
+        existing_location = await session.get(UserLocation, str(query.message.chat.id))
         if existing_location:
             existing_location.city_name = city
             await session.commit()
-            await bot.send_message(message.chat.id, f"Your city has been successfully updated to: {city}")
         else:
-            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city)
+            user_location = UserLocation(tg_id=str(query.message.chat.id), city_name=city)
             session.add(user_location)
             await session.commit()
-            await bot.send_message(message.chat.id, f"Your city has been successfully set to: {city}")
 
-    await state.clear()
+    await bot.send_message(query.message.chat.id, f"Your city has been successfully updated to: {city}")
 
 
 @edit_profile_router.callback_query(F.data == "change_name")

@@ -26,6 +26,7 @@ from aiogram import types, Router, F
 from aiogram.types import FSInputFile, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 from utils.user.schemas import UserInfo
 
@@ -182,7 +183,12 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
 @form_router.message(Form.other_language, state="*")
 async def process_city_question(message: types.Message, state: FSMContext):
-    await bot.send_message(message.chat.id, "Which city are you from?")
+    popular_cities = ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg"]
+
+    city_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
+    city_keyboard.add(*(KeyboardButton(city) for city in popular_cities))
+
+    await bot.send_message(message.chat.id, "Which city are you from?", reply_markup=city_keyboard)
     await state.set_state("city_question")
 
 
@@ -200,6 +206,7 @@ async def process_city_answer(message: types.Message, state: FSMContext):
             await bot.send_message(message.chat.id, "Thanks for letting me know!")
 
     await process_other_language(message, state)
+
 
 
 @form_router.callback_query(Form.topic, F.data.startswith("topic"))
