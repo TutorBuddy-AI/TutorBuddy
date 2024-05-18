@@ -22,7 +22,8 @@ from src.utils.paraphrasing import MessageParaphraseService
 from aiogram import types, md, Router, F
 from src.utils.paraphrasing.message_paraphrase_creator import MessageParaphraseCreator
 from src.utils.stciker.sticker_sender import StickerSender
-from src.utils.message.message_validator import get_text_token_size, get_caption_token_size
+from src.utils.message.message_validator import get_text_token_size, get_caption_token_size, get_text_size_valid, \
+    get_caption_size_valid
 from src.utils.stciker.sticker_pack import pack_map, sticker_text, sticker_text_translate
 
 from src.utils.user import UserService
@@ -87,6 +88,7 @@ async def handle_get_mistakes(query: CallbackQuery, callback_data: MistakesData)
 
 @text_comm_router.callback_query(TranslationData.filter())
 async def handle_get_translation(query: CallbackQuery, callback_data: TranslationData):
+    logging.info("[INFO] handle_get_translation [91]")
     """
     Callback to translate message caption. Text is provided in query message,
     Message ids are provided in callback_data
@@ -112,16 +114,24 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
 
         await MessageTranslationService().create_translation(helper_info)
         await bot.delete_message(message.chat.id, wait_message.message_id)
-        await bot.edit_message_caption(
-            caption=message.caption + get_translation_text(lang) + generated_text,
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            parse_mode=ParseMode.HTML,
-            reply_markup=message.reply_markup)
+        if get_caption_size_valid(token):
+            await bot.edit_message_caption(
+                caption=message.caption + get_translation_text(lang) + generated_text,
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup)
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(F.data == "request_text_translation_standalone")
 async def handle_get_translation_text_standalone(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO] handle_get_translation_text_standalone[133]")
     """
     Callback to translate standalone message text, when user is not logged in
     """
@@ -135,16 +145,24 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.text, lang, token)
 
-        await bot.edit_message_text(
-            text=message.text + get_translation_text(lang.lower()) + generated_text,
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            parse_mode=ParseMode.HTML,
-            reply_markup=message.reply_markup)
+        if get_text_size_valid(token):
+            await bot.edit_message_text(
+                text=message.text + get_translation_text(lang.lower()) + generated_text,
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup)
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(F.data == "request_caption_translation_standalone")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO] handle_get_translation_standalone[163]")
     """
     Callback to translate standalone message caption, when user is not logged in
     """
@@ -156,17 +174,24 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
         generated_text = await MessageTranslationCreator(
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
-
-        await bot.edit_message_caption(
-            caption=message.caption + get_translation_text(lang.lower()) + generated_text,
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            parse_mode=ParseMode.HTML,
-            reply_markup=message.reply_markup)
+        if get_caption_size_valid(token):
+            await bot.edit_message_caption(
+                caption=message.caption + get_translation_text(lang.lower()) + generated_text,
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup)
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(F.data == "request_text_translation_standalone_for_user")
 async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO] handle_get_translation_text_standalone_for_user[191]")
     """
     Callback to translate standalone message text, when user is not logged in
     """
@@ -180,16 +205,24 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.text, lang, token)
 
-        await bot.edit_message_text(
-            text=message.text + get_translation_text(lang.lower()) + generated_text,
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            parse_mode=ParseMode.HTML,
-            reply_markup=message.reply_markup)
+        if get_text_size_valid(token):
+            await bot.edit_message_text(
+                text=message.text + get_translation_text(lang.lower()) + generated_text,
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup)
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(F.data == "request_caption_translation_standalone_for_user")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO] handle_get_translation_standalone[221]")
     """
     Callback to translate standalone message caption, when user is not logged in
     """
@@ -202,17 +235,25 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
 
-        await bot.edit_message_caption(
-            caption=message.caption + get_translation_text(lang.lower()) + generated_text,
-            chat_id=message.chat.id,
-            message_id=message.message_id,
-            parse_mode=ParseMode.HTML,
-            reply_markup=message.reply_markup
-        )
+        if get_caption_size_valid(token):
+            await bot.edit_message_caption(
+                caption=message.caption + get_translation_text(lang.lower()) + generated_text,
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup
+            )
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(F.data == "pin_message_translate")
 async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO] handle_get_translation_pin_message[251]")
     message = query.message
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
@@ -222,15 +263,25 @@ async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMCon
             tg_id=str(message.chat.id)
         ).create_communication_message_text_standalone(message.caption, lang, token)
 
-        await bot.edit_message_caption(chat_id=message.chat.id,
-                                       message_id=message.message_id,
-                                       caption=message.caption + get_translation_text(lang.lower()) + generated_text,
-                                       parse_mode=ParseMode.HTML,
-                                       reply_markup=message.reply_markup)
+        if get_caption_size_valid(token):
+            await bot.edit_message_caption(
+                chat_id=message.chat.id,
+                message_id=message.message_id,
+                caption=message.caption + get_translation_text(
+                    lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=message.reply_markup)
+        else:
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text=get_translation_text(lang.lower()) + generated_text,
+                parse_mode=ParseMode.HTML,
+                reply_to_message_id=message.message_id)
 
 
 @text_comm_router.callback_query(StickerTranslate.filter())
 async def handle_get_translation_sticker(query: CallbackQuery, state: FSMContext):
+    logging.info("[INFO]")
     message = query.message
     user_info = await UserService().get_user_info(str(message.chat.id))
     emoji_dict = {"problem": "😧", "miss_you": "😓", "yas": "👍", "you_rock": "😎", "how_you_doin": "✌🏻", "fabulous": "👏"}
@@ -240,10 +291,11 @@ async def handle_get_translation_sticker(query: CallbackQuery, state: FSMContext
         tg_id=str(message.chat.id)
     ).create_communication_message_text_standalone(text,
                                                    user_info["native_lang"])
-    await bot.send_message(chat_id=message.chat.id,
-                           text=emoji_dict[key_word] + generated_text.rstrip(),
-                           parse_mode=ParseMode.HTML,
-                           reply_to_message_id=message.message_id)
+    await bot.send_message(
+        chat_id=message.chat.id,
+        text=emoji_dict[key_word] + generated_text.rstrip(),
+        parse_mode=ParseMode.HTML,
+        reply_to_message_id=message.message_id)
 
 
 # @dp.callback_query_handler(lambda query: query.data.startswith("request_translation:"))
