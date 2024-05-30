@@ -88,7 +88,6 @@ async def handle_get_mistakes(query: CallbackQuery, callback_data: MistakesData)
 
 @text_comm_router.callback_query(TranslationData.filter())
 async def handle_get_translation(query: CallbackQuery, callback_data: TranslationData):
-    logging.info("[INFO] handle_get_translation [91]")
     """
     Callback to translate message caption. Text is provided in query message,
     Message ids are provided in callback_data
@@ -131,7 +130,6 @@ async def handle_get_translation(query: CallbackQuery, callback_data: Translatio
 
 @text_comm_router.callback_query(F.data == "request_text_translation_standalone")
 async def handle_get_translation_text_standalone(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO] handle_get_translation_text_standalone[133]")
     """
     Callback to translate standalone message text, when user is not logged in
     """
@@ -162,7 +160,6 @@ async def handle_get_translation_text_standalone(query: CallbackQuery, state: FS
 
 @text_comm_router.callback_query(F.data == "request_caption_translation_standalone")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO] handle_get_translation_standalone[163]")
     """
     Callback to translate standalone message caption, when user is not logged in
     """
@@ -191,7 +188,6 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 
 @text_comm_router.callback_query(F.data == "request_text_translation_standalone_for_user")
 async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO] handle_get_translation_text_standalone_for_user[191]")
     """
     Callback to translate standalone message text, when user is not logged in
     """
@@ -222,7 +218,6 @@ async def handle_get_translation_text_standalone_for_user(query: CallbackQuery, 
 
 @text_comm_router.callback_query(F.data == "request_caption_translation_standalone_for_user")
 async def handle_get_translation_standalone(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO] handle_get_translation_standalone[221]")
     """
     Callback to translate standalone message caption, when user is not logged in
     """
@@ -253,7 +248,6 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
 
 @text_comm_router.callback_query(F.data == "pin_message_translate")
 async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO] handle_get_translation_pin_message[251]")
     message = query.message
     if not message.caption.count(" Translated text:\n"):
         user_info = await UserService().get_user_info(str(message.chat.id))
@@ -281,7 +275,6 @@ async def handle_get_translation_pin_message(query: CallbackQuery, state: FSMCon
 
 @text_comm_router.callback_query(StickerTranslate.filter())
 async def handle_get_translation_sticker(query: CallbackQuery, state: FSMContext):
-    logging.info("[INFO]")
     message = query.message
     user_info = await UserService().get_user_info(str(message.chat.id))
     emoji_dict = {"problem": "😧", "miss_you": "😓", "yas": "👍", "you_rock": "😎", "how_you_doin": "✌🏻", "fabulous": "👏"}

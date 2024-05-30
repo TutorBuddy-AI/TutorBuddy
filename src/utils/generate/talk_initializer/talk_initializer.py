@@ -40,6 +40,7 @@ class TalkInitializer:
         prompt_to_continue = (f"Regarding your question about how he's doing, the user replied '{self.text}'."
                               f"Continue this dialog.")
         prompt_to_insert = prompt_to_continue if self.text != "" else ""
+        logging.info(f"\n\nprompt_to_insert:\n{prompt_to_insert}\n")
         service_request = {
             "role": "system",
             "content": (f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."

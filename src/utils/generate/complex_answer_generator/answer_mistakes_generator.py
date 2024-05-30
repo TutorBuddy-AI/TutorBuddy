@@ -17,6 +17,7 @@ class AnswerMistakesGenerator:
     Class to generate AI's answer on user's message in JSON format
     with the list of user's mistakes
     """
+
     def __init__(
             self,
             tg_id: str,
@@ -64,17 +65,23 @@ class AnswerMistakesGenerator:
     async def get_user_message_history_with_service_text_request_and_prompt(self) -> GetUserMessageHistory:
         user_info = await UserService().get_user_person(self.tg_id)
         mapped_level = LANGUAGE_LEVEL_MAPPING[user_info['english_level']]
-
         service_request = {
             "role": "system",
-            "content": f"Your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'}."
-                       f" His English level is {mapped_level}, where 1 is the worst level of"
-                       f" English, and 4 is a good level of English. His goal is to study the English"
-                       f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
-                       f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
-                       f"You are English teacher and you need assist user to increase english level. "
+            # "content": f"Your student ."
+            #            f" His English level is {mapped_level}, where 1 is the worst level of"
+            #            f" English, and 4 is a good level of English. His goal is to study the English"
+            #            f" {user_info['goal']}, and his topics of interest are {user_info['topic']}."
+            #            f"You are {user_info['speaker_id']}. You are developed by AI TutorBuddy."
+            #            f"You are English teacher and you need assist user to increase english level. "
+            "content": f"You are an English teacher."
+                       f"I am your student {user_info['name'] if user_info['name'] is not None else 'didnt say name'} with English level {mapped_level}, let's chat for practice."
+                       f"I am interested in topics about {user_info['topic']} and my goals is {user_info['goal']}."
+                       f"Use colloquialisms in the dialogue."
+                       f"Don't send everything at once! Ask a question, wait for me to answer."
+                       f"If I answer briefly, don't repeat the question, but ask a detailed and new question, or ask a clarification or a new question."
+                       f"Always end with a question!"
+                       f"Add appropriate emoticons, as if we are communicating in a friendly way. "
         }
-
         extended_history = [service_request]
         extended_history.extend(self.user_message_history)
         extended_history.append({"role": "user", "content": self.prompt})
@@ -100,7 +107,7 @@ class AnswerMistakesGenerator:
             If the conversation shifts to a language other than English, kindly remind them to continue in English. 
             Always respond in English only.
             """ + f" Write your message using {mapped_level} English level, please"
-            "There should be nothing else in the text except this json"
+                  "There should be nothing else in the text except this json"
         }
 
         extended_history.append(answer_request)
