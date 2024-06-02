@@ -1,6 +1,6 @@
 from aiogram import md
 from aiogram.utils.markdown import bold
-
+from emoji import emojize
 from src.utils.payments.tariff_plans import get_tariff_plans
 
 
@@ -203,6 +203,9 @@ def get_pin_message(translate: bool = False):
 def get_bot_waiting_message(speaker: str) -> str:
     return f"⏳ {speaker} is thinking … Please wait"
 
+
+def get_translation_text(lang):
+    return f"\n\n{emojize(':' + lang + ':', language='alias')} Translated text:\n"
 
 # def get_models_text():
 #     return md.text(

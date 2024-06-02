@@ -16,7 +16,9 @@ sticker_text_translate = {
     "I'm all ears!": "Я вся во внимании!",
     "You've really got a knack for this": "У тебя действительно есть способности к этому",
     "Spot on": "В точку",
-    "Sweet stuff": "Сладость"
+    "Sweet stuff": "Сладость",
+    "What the hell": "Какого черта",
+    "You don't love me": "Ты меня не любишь"
 }
 
 sticker_text = {
