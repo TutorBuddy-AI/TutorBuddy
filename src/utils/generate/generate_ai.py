@@ -53,6 +53,7 @@ class GenerateAI:
                 await asyncio.sleep(0)  # it's needed to execute waiting task
 
             if response.status == 200:
+                logging.info(f"Good response [GenerateAI]: {response}")
                 content_type = response.headers.get("content-type").split("/")[1]
 
                 if content_type == self.COMMUNICATION_TYPE:
