@@ -123,22 +123,35 @@ def get_check_text():
 
 
 def get_start_person_talk(person_id: str, person_name: str):
-    if person_id == "Victoria":
-        persons_text = (
-            f"My name is Victoria. "
-            f"I’m an English teacher for adults. "
-            f"I hold a degree in English language and linguistics and utilize a variety of teaching approaches. "
-            f"I can help you with improving your pronunciation, speaking, "
-            f"and I can also be your perfect English friend and mentor, ensuring your English improves significantly!")
-    else:
-        persons_text = (
-            f"My name is {person_name} and I'm a certified English teacher. "
-            "I specialize in teaching Business English to tech professionals, IT and digital experts and entrepreneurs."
-            "\n\n"
-            "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
-            "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
-            "and even have friendly debates! "
-            "This personal touch will truly level up your English fluency.")
+    match person_id:
+        case "Victoria":
+            persons_text = (
+                f"My name is Victoria. "
+                f"I’m an English teacher for adults. "
+                f"I hold a degree in English language and linguistics and utilize a variety of teaching approaches. "
+                f"I can help you with improving your pronunciation, speaking, "
+                f"and I can also be your perfect English friend and mentor, "
+                f"ensuring your English improves significantly!")
+        case "Katya":
+            persons_text = (
+                f"My name is Katya, and I'm here to help you excel in English. "
+                f"Whether you're preparing for interviews, gearing up for a move to an English-speaking country, "
+                f"or adjusting to a new environment, I've got you covered."
+                "\n\n"
+                "I'm not your average chatbot – you'll get to know me through visuals and voice interactions. "
+                "Think of me as your conversation partner, ready to engage in friendly debates! "
+                "This personal touch will truly enhance your English fluency "
+                "and give you the confidence you need to succeed.")
+        case _:
+            persons_text = (
+                f"My name is {person_name} and I'm a certified English teacher. "
+                "I specialize in teaching Business English to tech professionals, "
+                "IT and digital experts and entrepreneurs."
+                "\n\n"
+                "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
+                "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
+                "and even have friendly debates! "
+                "This personal touch will truly level up your English fluency.")
     return persons_text
 
 

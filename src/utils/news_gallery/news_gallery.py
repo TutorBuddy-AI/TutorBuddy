@@ -1,4 +1,5 @@
 import html
+import traceback
 from datetime import date
 from typing import List, Optional
 
@@ -20,6 +21,19 @@ class GalleryButtonClickData(CallbackData, prefix="gallery_scroll"):
     num_newsletters: int
 
 
+num_topics_map = {str(num): topic for num, topic in
+                  enumerate(["psychology", "business", "startups", "innovations", "fashion", "health"])}
+
+
+def topics_encode(list_topics: List[str]) -> List[str]:
+    reversed_topics_map = {topic: num for num, topic in num_topics_map.items()}
+    return [reversed_topics_map[key] for key in list_topics]
+
+
+def topics_decode(list_encoded_topics: List[str]) -> List[str]:
+    return [num_topics_map[key] for key in list_encoded_topics]
+
+
 class NewsletterChoiceData(CallbackData, prefix="gallery_choose"):
     newsletter_index: int
 
@@ -28,11 +42,15 @@ class NewsGallery:
     async def send_news_gallery(self):
         user_galleries = await NewsletterService.get_fresh_user_topics_and_preview(date.today())
         for user_news_summary, gallery_preview in user_galleries:
-            await bot.send_message(
-                chat_id=int(user_news_summary.tg_id),
-                text="Hey! I have brought some fresh news summaries on your favourite topics! \nGo check them out 🗞️",
-                parse_mode=ParseMode.HTML)
-            await self.send_user_gallery(user_news_summary, gallery_preview)
+            try:
+                await bot.send_message(
+                    chat_id=int(user_news_summary.tg_id),
+                    text="Hey! I have brought some fresh news summaries on your favourite topics! \n"
+                         "Go check them out 🗞️",
+                    parse_mode=ParseMode.HTML)
+                await self.send_user_gallery(user_news_summary, gallery_preview)
+            except Exception as e:
+                traceback.print_exc()
 
     async def send_user_gallery(self, user_news_summary: UserNewsSummary, gallery_preview: NewsletterGaleryPreview):
         if (user_news_summary is not None) and (user_news_summary.num_newsletters != 0):
@@ -85,11 +103,17 @@ class NewsGallery:
                 reply_markup=keyboard)
 
     @staticmethod
-    def formatting_post_text(daily_news) -> str:
-        post_text = f"#{daily_news.topic}\n\n"
-        post_text += f"<b>{daily_news.title}</b>"
+    def formatting_post_text(newsletter) -> str:
+        post_text = f"#{newsletter.topic}\n\n"
+        post_text += f"<b>{newsletter.title}</b>"
 
-        post_text += f"\n\n{daily_news.short_content}..."
+        if newsletter.publisher:
+            post_text += f"\n{newsletter.publisher}"
+        if newsletter.publication_date:
+            post_text += f"\n{newsletter.publication_date}"
+
+        post_text += "\n\n<u>Article summary:</u>"
+        post_text += f"\n{newsletter.short_content}..."
         # Заменяем <br> на \n
         formatting_post_text = html.unescape(post_text.replace('<br>', ''))
         return formatting_post_text
@@ -102,7 +126,7 @@ class NewsGallery:
             text="⬅️",
             callback_data=GalleryButtonClickData(
                 action="prev",
-                topics=",".join(topics),
+                topics=",".join(topics_encode(topics)),
                 target_date=target_date,
                 newsletter_index=gallery_index,
                 num_newsletters=total_elements
@@ -114,14 +138,14 @@ class NewsGallery:
             text="➡️",
             callback_data=GalleryButtonClickData(
                 action="next",
-                topics=",".join(topics),
+                topics=",".join(topics_encode(topics)),
                 target_date=target_date,
                 newsletter_index=gallery_index,
                 num_newsletters=total_elements
             ).pack())
 
         discuss_button = InlineKeyboardButton(
-            text="Let's Discuss",
+            text="Read and discuss 🔽📃",
             callback_data=NewsletterChoiceData(
                 newsletter_index=curr_newsletter_id
             ).pack())

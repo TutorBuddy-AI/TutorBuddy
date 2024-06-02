@@ -12,7 +12,8 @@ voice_map = {
     "Anastasia": "LC58oHYbe1EOt8kPZizM",
     "AA_Lingua": "sKSCI18qgaDgCq3gTkK2",
     "Oksana": "YFczjBOHj0ctMzjDRucv",
-    "Victoria": "8I0H65fHjSCx1F4euIr2"
+    "Victoria": "8I0H65fHjSCx1F4euIr2",
+    "Katya": "5RllsHnSnaXfc2WZkmVt"
 }
 
 

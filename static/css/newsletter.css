@@ -45,6 +45,7 @@
 
 button.send-button,
 button.delete-button,
+button.renew-button,
 button.send-chat-button,
 button.send-gallery-button,
 button.send-datetime-button{
@@ -76,6 +77,11 @@ button.send-gallery-button{
 }
 
 button.delete-button {
+    background-color: #FF6347;
+    color: #fff;
+}
+
+button.renew-button {
     background-color: #FF6347;
     color: #fff;
 }

@@ -30,14 +30,14 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
-    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="TutorBuddy")
-    await sticker_sender.send_fabulous()
-
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await bot.send_message(
         tg_id, get_choice_is_done(), reply_markup=markup,
         parse_mode=ParseMode.HTML)
+
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="TutorBuddy")
+    await sticker_sender.send_fabulous()
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
@@ -60,13 +60,13 @@ async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMCo
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
 
-    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="Anastasia")
-    await sticker_sender.send_fabulous()
-
     markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await bot.send_message(tg_id, get_choice_is_done(), reply_markup=markup,
                            parse_mode=ParseMode.HTML)
+
+    sticker_sender = StickerSender(bot, query.message.chat.id, speaker="Anastasia")
+    await sticker_sender.send_fabulous()
 
     user_info = await user_service.get_user_info(tg_id=str(tg_id))
     check_text = get_start_talk(True, user_info["name"])
@@ -96,7 +96,6 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
                                           parse_mode=ParseMode.HTML)
 
     welcome_text = get_start_person_talk(speaker, speaker_short_name)
-    audio = await TextToSpeech(tg_id=str(tg_id), prompt=welcome_text).get_speech()
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     logging.info(f"./files/meet_{config.BOT_PERSON.lower()}.jpg")
     await bot.send_photo(
@@ -107,29 +106,27 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
         reply_markup=audio_markup
     )
 
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            FSInputFile(ogg_file),
-            parse_mode=ParseMode.HTML)
+    await bot.send_voice(
+        message.chat.id,
+        FSInputFile(f"./files/meet_{speaker.lower()}.ogg"),
+        parse_mode=ParseMode.HTML)
 
     await bot.delete_message(message.chat.id, wait_message.message_id)
-
-    check_text = get_check_text()
 
     sticker_sender = StickerSender(bot, message.chat.id, speaker=speaker)
     await sticker_sender.send_fabulous()
 
+    check_text = get_check_text()
+
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message(speaker),
                                           parse_mode=ParseMode.HTML)
-    audio = await TextToSpeech(tg_id=str(tg_id), prompt=check_text).get_speech()
-    with AudioConverter(audio) as ogg_file:
-        await bot.send_voice(
-            message.chat.id,
-            FSInputFile(ogg_file),
-            caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
-            parse_mode=ParseMode.HTML,
-            reply_markup=audio_markup)
+
+    await bot.send_voice(
+        message.chat.id,
+        FSInputFile(f"./files/check_{speaker.lower()}.ogg"),
+        caption=f'<span class="tg-spoiler">{check_text + "💬"}</span>',
+        parse_mode=ParseMode.HTML,
+        reply_markup=audio_markup)
     await bot.delete_message(message.chat.id, wait_message.message_id)
 
     await state.set_state(FormInitTalk.init_user_message)

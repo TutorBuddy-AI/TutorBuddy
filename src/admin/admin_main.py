@@ -312,7 +312,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
     ]
     ```
     """
-    query = select(Newsletter).where(func.date(Newsletter.created_at) == date.today())
+    query = select(Newsletter).where(func.date(Newsletter.updated_at) == date.today())
     print(query)
     result = await session.execute(query)
     newsletters = result.scalars().unique().all()
@@ -406,6 +406,36 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authent
     await NewsletterService.delete_newsletter(newsletter_id)
 
     return {"status": f"success delete newsletter with id: {newsletter_id}"}
+
+
+@app.post("/renew_newsletter/{newsletter_id}")
+async def renew_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+    """
+    Обновление рассылки по идентификатору newsletter_id.
+    Пример ответа:
+    ```json
+    {
+        "status": "success renew newsletter with id: 123"
+    }
+    ```
+    """
+    await NewsletterService.renew_newsletter(newsletter_id)
+    new_newsletter = await NewsletterService.get_newsletter(newsletter_id)
+
+    post_text = await NewsletterPublisher.formatting_post_text(new_newsletter)
+    cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
+
+    audio_files = await save_newsletter_audio(cleaned_post_text)
+    newsletter_audio = [
+        NewsletterAudio(
+            newsletter_id=new_newsletter.id,
+            speaker_id=audio_speaker,
+            file_path=audio_file
+        ) for audio_speaker, audio_file in audio_files.items()]
+    session.add_all(newsletter_audio)
+    await session.commit()
+
+    return {"status": f"success renewed newsletter with id: {newsletter_id}"}
 
 
 @app.get("/send_newsletter/{newsletter_id}")

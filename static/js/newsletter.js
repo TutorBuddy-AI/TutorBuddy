@@ -220,14 +220,15 @@ function displayNewsletter(newsletter) {
         openSendModal(newsletter.id);
     });
 
-    const tgIdElement = document.createElement('p');
-    tgIdElement.innerHTML = `tg_id: <div id="tg_id_send_input" contenteditable="true">222768891</div>`;
+//    const tgIdElement = document.createElement('p');
+//    tgIdElement.innerHTML = `tg_id: <div id="tg_id_send_input" contenteditable="true">222768891</div>`;
+
 
     const sendChatButton = document.createElement('button');
     sendChatButton.textContent = 'Send To tg_id';
     sendChatButton.className = 'send-chat-button';
     sendChatButton.addEventListener('click', () => {
-        openSendChatModal(newsletter.id, tgId);
+        openSendChatModal(newsletter.id, "222768891");
     });
 
 //    const send_datetimeButton = document.createElement('button');
@@ -245,12 +246,20 @@ function displayNewsletter(newsletter) {
         openDeleteModal(newsletter.id);
     });
 
+    const renewButton = document.createElement('button');
+    renewButton.textContent = 'Renew';
+    renewButton.className = 'renew-button';
+    renewButton.addEventListener('click', () => {
+        openRenewModal(newsletter.id);
+    });
+
     // порядок отображение
     NewsletterInfoBlock.appendChild(sendButton);
-    NewsletterInfoBlock.appendChild(tgIdElement);
+//    NewsletterInfoBlock.appendChild(tgIdElement);
     NewsletterInfoBlock.appendChild(sendChatButton);
 //    NewsletterInfoBlock.appendChild(send_datetimeButton);
     NewsletterInfoBlock.appendChild(deleteButton);
+    NewsletterInfoBlock.appendChild(renewButton);
     NewsletterInfoBlock.appendChild(messageIdElement);
 
     NewsletterInfoBlock.appendChild(createEditableElement(newsletter, 'topic', newsletter.topic));
@@ -334,6 +343,11 @@ function openDeleteModal(newsletterId) {
     document.getElementById('deleteConfirmationModal').style.display = 'block';
 }
 
+function openRenewModal(newsletterId) {
+    document.getElementById('renewModalNewsletterId').textContent = newsletterId;
+    document.getElementById('renewConfirmationModal').style.display = 'block';
+}
+
 function openSendModal(newsletterId) {
     document.getElementById('sendModalNewsletterId').textContent = newsletterId;
     document.getElementById('sendConfirmationModal').style.display = 'block';
@@ -377,7 +391,28 @@ function confirmDeletion() {
     });
 }
 
+function confirmRenewal() {
+    const newsletterId = document.getElementById('renewModalNewsletterId').textContent;
 
+    fetch(`./renew_newsletter/${newsletterId}`, {
+        method: 'POST'
+    })
+    .then((renew_newsletter_Response) => {
+        if (!renew_newsletter_Response.ok) {
+            throw new Error(`HTTP error! Status: ${renew_newsletter_Response.status}`);
+        }
+        return renew_newsletter_Response.json();
+    })
+    .then((result_renew_newsletter) => {
+        window.location.reload();
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        closeModal('renewConfirmationModal');
+    });
+}
 
 function confirmSend() {
     const newsletterId = document.getElementById('sendModalNewsletterId').textContent;
@@ -402,7 +437,7 @@ function confirmSend() {
 }
 
 function confirmSendChat() {
-    const newsletterId = document.getElementById('sendModalNewsletterId').textContent;
+    const newsletterId = document.getElementById('sendChatModalNewsletterId').textContent;
     const tgId = document.getElementById('sendChatModalTgId').textContent
     fetch(`./send_newsletter/${newsletterId}/${tgId}`, {
         method: 'GET'

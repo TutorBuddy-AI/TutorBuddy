@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 
 from src.commands.communication_handler import CommunicationHandler
@@ -28,8 +29,6 @@ from src.utils.stciker.sticker_pack import pack_map, sticker_text, sticker_text_
 
 from src.utils.user import UserService
 from src.texts.texts import get_translation_text
-from utils.audio_converter.audio_converter import AudioConverter
-from utils.transcriber.text_to_speech import TextToSpeech
 
 text_comm_router = Router(name=__name__)
 
@@ -163,6 +162,7 @@ async def handle_get_translation_standalone(query: CallbackQuery, state: FSMCont
     """
     Callback to translate standalone message caption, when user is not logged in
     """
+    logging.info("[FUNCTION] handle_get_translation_standalone [135]")
     state_data = await state.get_data()
     message = query.message
     if not message.caption.count(" Translated text:\n"):
