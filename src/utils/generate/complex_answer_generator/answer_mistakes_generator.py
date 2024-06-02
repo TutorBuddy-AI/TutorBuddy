@@ -97,7 +97,8 @@ class AnswerMistakesGenerator:
                        f"Don't send everything at once! Ask a question, wait for me to answer."
                        f"If I answer briefly, don't repeat the question, but ask a detailed and new question, or ask a clarification or a new question."
                        f"Always end with a question!"
-                       f"Add appropriate emoticons, as if we are communicating in a friendly way.\n"
+                       f"Add appropriate emoticons, as if we are communicating in a friendly way. "
+                       f"Write answers of no more than 100 characters\n"
             + answer_request["content"]
         }
         extended_history = [service_request]
