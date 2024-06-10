@@ -19,7 +19,8 @@ from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (app, templates, image_directory,
                                     generate_token_and_redirect, audio_directory)
 
-from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
+from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
+    SummaryFromParsing
 from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
 
 from src.database import session
@@ -56,17 +57,15 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
     return True
 
 
-async def is_authenticated(is_valid: bool = Depends(is_valid_token)):
+async def is_authenticated(request: Request, is_valid: bool = Depends(is_valid_token)):
     if not is_valid:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.get("/admin", response_model=str)
-async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def admin_page(request: Request, is_valid: bool = Depends(is_authenticated)):
     """html admin
     """
-    if not is_valid:
-        return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
@@ -86,30 +85,44 @@ async def admin_page_post(request: Request, is_valid: bool = Depends(is_authenti
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
-@app.get("/get_users")
-async def get_users(is_valid: bool = Depends(is_authenticated)):
-    """
-    Показывает начальную информацию о пользователях.
-    Пример успешного ответа:
+# @app.get("/get_users")
+# async def get_users():
 
-    ```json
-    [
-        {
-            "tg_id": "148912340",
-            "tg_firstName": "FirstName19",
-            "tg_lastName": "LastName19",
-            "tg_username": "username19",
-            "last_message": "2024-03-06 19:09:01"
-        }
-    ]
-    ```
-    """
+#     query = select(User)
+#     result = await session.execute(query)
+#     users = result.scalars().unique().all()
+
+#     users_with_last_message = []
+#     for user in users:
+#         query_info_message = (
+#             select(MessageHistory)
+#             .where(MessageHistory.tg_id == str(user.tg_id))
+#             .order_by(desc(MessageHistory.created_at))
+#             .limit(1)
+#         )
+#         result_info_message = await session.execute(query_info_message)
+#         user_last = result_info_message.scalars().first()
+
+#         if user_last:
+#             user_data = {
+#                 "tg_id": user.tg_id,
+#                 "tg_firstName": user.tg_firstName,
+#                 "tg_lastName": user.tg_lastName,
+#                 "tg_username": user.tg_username,
+#                 "last_message": datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
+#             }
+
+#             users_with_last_message.append(user_data)
+
+#     return JSONResponse(content=users_with_last_message)
+@app.get("/get_users")
+async def get_users():
     query = select(User)
     result = await session.execute(query)
     users = result.scalars().unique().all()
 
     users_with_last_message = []
-    for user in users:
+    for idx, user in enumerate(users):
         query_info_message = (
             select(MessageHistory)
             .where(MessageHistory.tg_id == str(user.tg_id))
@@ -119,24 +132,33 @@ async def get_users(is_valid: bool = Depends(is_authenticated)):
         result_info_message = await session.execute(query_info_message)
         user_last = result_info_message.scalars().first()
 
+        user_data = {
+            "id": idx + 1,
+            "tg_id": user.tg_id,
+            "name": None,
+            "status": "online",
+            "profile": "./static/dist/images/user_chat.png"
+        }
+        if user.tg_firstName and user.tg_lastName:
+            user_data["name"] = f"{user.tg_firstName} {user.tg_lastName}"
+        elif user.tg_firstName:
+            user_data["name"] = user.tg_firstName
+        elif user.tg_lastName:
+            user_data["name"] = user.tg_lastName
+
         if user_last:
-            user_data = {
-                "tg_id": user.tg_id,
-                "tg_firstName": user.tg_firstName,
-                "tg_lastName": user.tg_lastName,
-                "tg_username": user.tg_username,
-                "last_message": datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
-            }
+            user_data["last_message"] = datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
 
-            users_with_last_message.append(user_data)
+        users_with_last_message.append(user_data)
 
-    return JSONResponse(content=users_with_last_message)
+    response = {"users": users_with_last_message}
+    return JSONResponse(content=response)
 
 
 @app.post("/save-newsletter")
 async def save_newsletter(
-    newsletter_data: NewsletterData,
-    is_valid: bool = Depends(is_authenticated)
+        newsletter_data: NewsletterData,
+        is_valid: bool = Depends(is_authenticated)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -218,8 +240,8 @@ async def save_newsletter_audio(post_text: str):
 
 @app.post("/save-message")
 async def save_message(
-    message_data: MessageData,
-    is_valid: bool = Depends(is_authenticated)
+        message_data: MessageData,
+        is_valid: bool = Depends(is_authenticated)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -480,35 +502,28 @@ async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: boo
     return
 
 
+# @app.get("/get_message_history_user/{tg_id}")
+# async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+#     query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
+#     result = await session.execute(query)
+#     message_history = result.scalars().unique().all()
+
+#     if message_history:
+#         message_history_list = [
+#             {
+#                 "message": message.message,
+#                 "role": message.role,
+#                 "type": message.type,
+#                 "created_at": datetime.strftime(message.created_at, "%Y-%m-%d %H:%M:%S")
+#             }
+#             for message in message_history
+#         ]
+#         return JSONResponse(content=message_history_list)
+#     else:
+#         return {"status": "empty"}
+
 @app.get("/get_message_history_user/{tg_id}")
 async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
-    """
-    Получение истории сообщений для пользователя с указанным tg_id.
-    Пример успешного ответа:
-    ```json
-    [
-        {
-            "message": "Привет, как дела?",
-            "role": "user",
-            "type": "text",
-            "created_at": "2024-03-12 15:30:45"
-        },
-        {
-            "message": "Привет! Всё отлично, спасибо!",
-            "role": "admin",
-            "type": "text",
-            "created_at": "2024-03-12 15:35:12"
-        }
-    ]
-    ```
-
-    Пример ответа, если история пуста:
-    ```json
-    {
-        "status": "empty"
-    }
-    ```
-    """
     query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
     result = await session.execute(query)
     message_history = result.scalars().unique().all()
@@ -516,14 +531,18 @@ async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authentica
     if message_history:
         message_history_list = [
             {
-                "message": message.message,
-                "role": message.role,
-                "type": message.type,
-                "created_at": datetime.strftime(message.created_at, "%Y-%m-%d %H:%M:%S")
+                "id": idx + 1,
+                "from_id": 2 if message.role == "assistant" else 1,
+                "to_id": 1 if message.role == "assistant" else 2,
+                "msg": message.message,
+                "has_dropDown": True,
+                "datetime": datetime.strftime(message.created_at, "%I:%M %p"),
+                "isReplied": 2 if message.role == "assistant" else 1
             }
-            for message in message_history
+            for idx, message in enumerate(message_history)
         ]
-        return JSONResponse(content=message_history_list)
+        response = {"chats": message_history_list}
+        return JSONResponse(content=response)
     else:
         return {"status": "empty"}
 
@@ -637,7 +656,7 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
         "count_users": count_users,
         "count_messages": count_messages,
         "count_topic": count_topic_dict_filtered,
-        "count_choice_nastya":count_choice_nastya,
+        "count_choice_nastya": count_choice_nastya,
         "count_choice_bot": count_choice_bot
     }
 
@@ -683,6 +702,30 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
+@app.get("/change_password")
+async def change_page(request: Request):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("change_password.html", {"request": request})
+
+
+@app.get("/dialogs")
+async def dialogs_page(request: Request, is_valid: bool = Depends(is_authenticated)):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("dialogs.html", {"request": request})
+
+
+@app.get("/profile")
+async def profile_page(request: Request, is_valid: bool = Depends(is_authenticated)):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+
 @app.get("/1")
 async def login_page(request: Request):
     """
@@ -712,21 +755,30 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), request: Reque
 
 @app.post("/change_password")
 async def change_password(username: str = Form(...),
+                          old_password: str = Form(...),
                           new_password: str = Form(...),
-                          confirm_password: str = Form(...), request: Request = None):
+                          confirm_password: str = Form(...),
+                          request: Request = None):
     """
     Смена пароля.
     """
     query = select(Admin).where(Admin.username == username)
     result = await session.execute(query)
     admin = result.scalars().first()
-    if admin and new_password == confirm_password:
-        hashed_password = pwd_context.hash(new_password)
-        admin.password = hashed_password
-        await session.commit()
-        return await generate_token_and_redirect(username)
-    error_message_change_password = "Username or passwords do not match"
-    return templates.TemplateResponse("login.html", {"error_message": error_message_change_password, "request": request})
+
+    if admin and pwd_context.verify(old_password, admin.password):
+        if new_password == confirm_password:
+            hashed_password = pwd_context.hash(new_password)
+            admin.password = hashed_password
+            await session.commit()
+            return await generate_token_and_redirect(username)
+        else:
+            error_message_change_password = "New passwords do not match"
+    else:
+        error_message_change_password = "Username or old password do not match"
+
+    return templates.TemplateResponse("login.html",
+                                      {"error_message": error_message_change_password, "request": request})
 
 
 @app.get("/logout")
@@ -737,6 +789,33 @@ async def logout(request: Request):
     response = RedirectResponse(url="/")
     return response
 
+
+@app.post("/add_summary")
+async def add_summary(summary_data: SummaryFromParsing):
+    query = select(Newsletter).where(Newsletter.title == summary_data.title)
+    result = await session.execute(query)
+    existing_entry = result.scalars().first()
+
+    if existing_entry:
+        return {"message": "duplicate"}
+
+    newsletter_entry = Newsletter(
+        message=summary_data.message,
+        topic=summary_data.topic,
+        url=summary_data.url,
+        path_to_data=summary_data.path_to_data,
+        publisher=summary_data.publisher,
+        publication_date=summary_data.publication_date,
+        title=summary_data.title
+    )
+
+    session.add(newsletter_entry)
+    await session.commit()
+
+    return {"message": "Data saved successfully"}
+
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app="src.admin.admin_main:app", port=8001, reload=True)
