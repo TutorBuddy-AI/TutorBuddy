@@ -203,7 +203,7 @@ class Newsletter:
                 f"based on the main ideas from it, and in line 2, "
                 f"ask your interlocutor about his/her opinion about this article. "
                 f"Continue discussing this article with him/her, "
-                f"briefly respond to his/her messages and always ask a logical question to continue the dialogue."
+                f"briefly respond to his/her messages and always ask a logical question to continue the dialogue.Put the appropriate emoticons in the text"
         }
         logging.error(translate_request)
 
