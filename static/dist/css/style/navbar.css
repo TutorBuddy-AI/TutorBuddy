@@ -1,0 +1,29 @@
+.navbar-expand-lg .logo-name__button {
+     position: absolute;
+     right: 0;
+     background-color: transparent;
+     border: none;
+     cursor: pointer;
+}
+
+#side-bar.collapse {
+  width: 4rem;
+  display: block;
+}
+
+#side-bar.collapse .logo-name__button {
+  right: 0.0rem;
+}
+
+#side-bar.collapse .navbar-brand-image, #side-bar.collapse .navbar-nav {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navbar-expand-lg.navbar-vertical ~ .page-wrapper.extended {
+  margin-left: 4rem;
+}
+
+.rotate-icon {
+  transform: rotate(180deg);
+}

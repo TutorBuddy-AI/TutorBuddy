@@ -45,8 +45,8 @@ class NewsGallery:
             try:
                 await bot.send_message(
                     chat_id=int(user_news_summary.tg_id),
-                    text="Hey! I have brought some fresh news summaries on your favourite topics! \n"
-                         "Go check them out 🗞️",
+                    text="Hello! 🌟 Exciting news ahead! "
+                         "Dive into the fresh summaries and stay updated on the latest happenings! 📰🔍",
                     parse_mode=ParseMode.HTML)
                 await self.send_user_gallery(user_news_summary, gallery_preview)
             except Exception as e:

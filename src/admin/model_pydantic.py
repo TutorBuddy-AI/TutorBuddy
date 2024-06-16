@@ -23,4 +23,12 @@ class ChangeNewsletter(BaseModel):
     column: str
     changed_text: str
 
-
+#NEW
+class SummaryFromParsing(BaseModel):
+    message: str
+    topic: str
+    url: str
+    publisher: str
+    publication_date: str
+    path_to_data: str
+    title: str
