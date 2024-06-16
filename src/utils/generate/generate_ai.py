@@ -62,7 +62,7 @@ class GenerateAI:
                 elif content_type == self.TEXT_TO_SPEECH_TYPE:
                     return io.BytesIO(await response.read())
             else:
-                logging.info(f"Bad response [GenerateAI]: {response}")
+                logging.info(f"Bad response [GenerateAI]: {response.text}")
                 return None
 
     async def request_stt(self, audio_bytes: io.BytesIO, model: str) -> Any:
