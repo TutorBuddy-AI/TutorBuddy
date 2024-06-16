@@ -32,6 +32,11 @@ from utils.transcriber.text_to_speech import TextToSpeech
 """Docs /docs"""
 
 
+@app.exception_handler(403)
+async def custom_403_handler(request, exc):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
 async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
     """
     Проверка валидности JWT-токена.
@@ -57,64 +62,34 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
     return True
 
 
-async def is_authenticated(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def check_authentication(is_valid: bool = Depends(is_valid_token)):
     if not is_valid:
-        return templates.TemplateResponse("login.html", {"request": request})
+        raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+    else:
+        return True
 
 
 @app.get("/admin", response_model=str)
-async def admin_page(request: Request, is_valid: bool = Depends(is_authenticated)):
+async def admin_page(request: Request, deps: bool = Depends(check_authentication)):
     """html admin
     """
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
 @app.get("/admin1", response_model=str)
-async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def admin_page(request: Request, deps: bool = Depends(check_authentication)):
     """html admin
     """
-    if not is_valid:
-        return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin_old.html", {"request": request})
 
 
 @app.post("/admin")
-async def admin_page_post(request: Request, is_valid: bool = Depends(is_authenticated)):
+async def admin_page_post(request: Request, deps: bool = Depends(check_authentication)):
     """после login идет post запрос на admin
     """
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
-# @app.get("/get_users")
-# async def get_users():
-
-#     query = select(User)
-#     result = await session.execute(query)
-#     users = result.scalars().unique().all()
-
-#     users_with_last_message = []
-#     for user in users:
-#         query_info_message = (
-#             select(MessageHistory)
-#             .where(MessageHistory.tg_id == str(user.tg_id))
-#             .order_by(desc(MessageHistory.created_at))
-#             .limit(1)
-#         )
-#         result_info_message = await session.execute(query_info_message)
-#         user_last = result_info_message.scalars().first()
-
-#         if user_last:
-#             user_data = {
-#                 "tg_id": user.tg_id,
-#                 "tg_firstName": user.tg_firstName,
-#                 "tg_lastName": user.tg_lastName,
-#                 "tg_username": user.tg_username,
-#                 "last_message": datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
-#             }
-
-#             users_with_last_message.append(user_data)
-
-#     return JSONResponse(content=users_with_last_message)
 @app.get("/get_users")
 async def get_users():
     query = select(User)
@@ -158,7 +133,7 @@ async def get_users():
 @app.post("/save-newsletter")
 async def save_newsletter(
         newsletter_data: NewsletterData,
-        is_valid: bool = Depends(is_authenticated)
+        deps: bool = Depends(check_authentication)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -241,7 +216,7 @@ async def save_newsletter_audio(post_text: str):
 @app.post("/save-message")
 async def save_message(
         message_data: MessageData,
-        is_valid: bool = Depends(is_authenticated)
+        deps: bool = Depends(check_authentication)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -281,7 +256,7 @@ async def save_message(
 
 
 @app.get("/get_newsletters")
-async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
+async def get_newsletters(deps: bool = Depends(check_authentication)):
     """
     Возвращает информацию о всех рассылках пользователей.
     Пример успешного ответа:
@@ -318,7 +293,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
 
 
 @app.get("/get_fresh_newsletters")
-async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
+async def get_newsletters(deps: bool = Depends(check_authentication)):
     """
     Возвращает информацию о всех рассылках пользователей.
     Пример успешного ответа:
@@ -356,7 +331,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
 
 
 @app.get("/get_newsletter_info/{newsletter_id}")
-async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_newsletter_info(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Возвращает информацию о рассылке по её идентификатору.
     Пример успешного ответа:
@@ -390,7 +365,8 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_au
 
 
 @app.put("/change_newsletter_info")
-async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = Depends(is_authenticated)):
+async def change_newsletter_info(
+        newsletter: ChangeNewsletter, deps: bool = Depends(check_authentication)):
     """
     Изменение DailyNews.
     Пример запроса:
@@ -415,7 +391,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
 
 
 @app.delete("/del_newsletter/{newsletter_id}")
-async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def del_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Удаление рассылки по идентификатору newsletter_id.
     Пример ответа:
@@ -431,7 +407,7 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authent
 
 
 @app.post("/renew_newsletter/{newsletter_id}")
-async def renew_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def renew_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Обновление рассылки по идентификатору newsletter_id.
     Пример ответа:
@@ -461,7 +437,7 @@ async def renew_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authe
 
 
 @app.get("/send_newsletter/{newsletter_id}")
-async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def send_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Отправляет рассылку по newsletter_id
     """
@@ -471,7 +447,7 @@ async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authen
 
 
 @app.get("/send_newsletter/{newsletter_id}/{tg_id}")
-async def send_newsletter_in_chat(newsletter_id: int, tg_id: str, is_valid: bool = Depends(is_authenticated)):
+async def send_newsletter_in_chat(newsletter_id: int, tg_id: str, deps: bool = Depends(check_authentication)):
     """
     Отправляет рассылку по newsletter_id
     """
@@ -490,7 +466,8 @@ async def send_news_gallery():
 
 
 @app.post("/send_newsletter_datetime")
-async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: bool = Depends(is_authenticated)):
+async def send_newsletter(
+        newsletter_data: SendNewsletterDatetime, deps: bool = Depends(check_authentication)):
     """
     Отправляет рассылку по newsletter_id в дату datetime
     """
@@ -502,28 +479,8 @@ async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: boo
     return
 
 
-# @app.get("/get_message_history_user/{tg_id}")
-# async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
-#     query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
-#     result = await session.execute(query)
-#     message_history = result.scalars().unique().all()
-
-#     if message_history:
-#         message_history_list = [
-#             {
-#                 "message": message.message,
-#                 "role": message.role,
-#                 "type": message.type,
-#                 "created_at": datetime.strftime(message.created_at, "%Y-%m-%d %H:%M:%S")
-#             }
-#             for message in message_history
-#         ]
-#         return JSONResponse(content=message_history_list)
-#     else:
-#         return {"status": "empty"}
-
 @app.get("/get_message_history_user/{tg_id}")
-async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_message_history(tg_id: int, deps: bool = Depends(check_authentication)):
     query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
     result = await session.execute(query)
     message_history = result.scalars().unique().all()
@@ -548,7 +505,7 @@ async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authentica
 
 
 @app.get("/get_info_user/{tg_id}")
-async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_user_profile(tg_id: int, deps: bool = Depends(check_authentication)):
     """
     Получение информации о пользователе с указанным tg_id.
     Пример успешного ответа:
@@ -610,7 +567,7 @@ async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_authenticated
 
 
 @app.get("/get_statistic")
-async def get_statistic(is_valid: bool = Depends(is_authenticated)):
+async def get_statistic(deps: bool = Depends(check_authentication)):
     """
     Получение статистики по приложению.
     Пример успешного ответа:
@@ -664,7 +621,7 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
 
 
 @app.get("/get_message_hint_user/{tg_id}")
-async def get_message_hint_user(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_message_hint_user(tg_id: int, deps: bool = Depends(check_authentication)):
     """
     Получение информации о ошибках пользователя с указанным tg_id.
     Пример успешного ответа:
@@ -711,7 +668,7 @@ async def change_page(request: Request):
 
 
 @app.get("/dialogs")
-async def dialogs_page(request: Request, is_valid: bool = Depends(is_authenticated)):
+async def dialogs_page(request: Request, deps: bool = Depends(check_authentication)):
     """
     Отображение страницы входа.
     """
@@ -719,19 +676,11 @@ async def dialogs_page(request: Request, is_valid: bool = Depends(is_authenticat
 
 
 @app.get("/profile")
-async def profile_page(request: Request, is_valid: bool = Depends(is_authenticated)):
+async def profile_page(request: Request, deps: bool = Depends(check_authentication)):
     """
     Отображение страницы входа.
     """
     return templates.TemplateResponse("profile.html", {"request": request})
-
-
-@app.get("/1")
-async def login_page(request: Request):
-    """
-    Отображение страницы входа.
-    """
-    return templates.TemplateResponse("login_old.html", {"request": request})
 
 
 @app.post("/login")
