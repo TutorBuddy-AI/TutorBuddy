@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         };
 
         var chart_topic = new ApexCharts(document.querySelector("#all-topics-chart"), options_topic);
-        var chart_count_messages = new ApexCharts(document.querySelector("#all-messages-chart"), options_count_messages);
+        // var chart_count_messages = new ApexCharts(document.querySelector("#all-messages-chart"), options_count_messages);
         chart_topic.render();
         chart_count_messages.render();
         
