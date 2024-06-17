@@ -14,7 +14,7 @@ from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
 
 from config import config
 from database.models import NewsletterAudio
-from src.admin.newsletter_admin.newsletter_admin import Newsletter, NewsletterPublisher
+from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
 from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (app, templates, image_directory,
                                     generate_token_and_redirect, audio_directory)

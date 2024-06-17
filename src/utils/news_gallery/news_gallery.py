@@ -9,6 +9,8 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InputMediaPhoto, InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import bot
+from utils.answer import AnswerRenderer
+from utils.generator.news_greetings_generator.talk_initializer import NewsGreetingsGenerator
 from utils.newsletter.newsletter_service import NewsletterService
 from utils.newsletter.schema.newsletter import UserNewsSummary, NewsletterGaleryPreview
 
@@ -43,14 +45,20 @@ class NewsGallery:
         user_galleries = await NewsletterService.get_fresh_user_topics_and_preview(date.today())
         for user_news_summary, gallery_preview in user_galleries:
             try:
-                await bot.send_message(
-                    chat_id=int(user_news_summary.tg_id),
-                    text="Hello! 🌟 Exciting news ahead! "
-                         "Dive into the fresh summaries and stay updated on the latest happenings! 📰🔍",
-                    parse_mode=ParseMode.HTML)
+                await self.send_news_gallery_greetings(user_news_summary)
                 await self.send_user_gallery(user_news_summary, gallery_preview)
             except Exception as e:
                 traceback.print_exc()
+
+    async def send_news_gallery_greetings(self, user_news_summary: UserNewsSummary):
+        greetings_text = await NewsGreetingsGenerator().generate_message()
+
+        await bot.send_message(
+            chat_id=int(user_news_summary.tg_id),
+            text=greetings_text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=AnswerRenderer.get_markup_text_translation_standalone()
+        )
 
     async def send_user_gallery(self, user_news_summary: UserNewsSummary, gallery_preview: NewsletterGaleryPreview):
         if (user_news_summary is not None) and (user_news_summary.num_newsletters != 0):
@@ -68,9 +76,6 @@ class NewsGallery:
     async def send_data(
             chat_id: int, data_element: Optional[NewsletterGaleryPreview],
             keyboard: InlineKeyboardMarkup, message_id=None):
-        # if (data_element is None) and (message_id is not None):
-        #     await bot.send_message(chat_id=chat_id, text="I don't have any news for you", parse_mode=ParseMode.HTML)
-        # else:
         if message_id:
             if data_element is None:
                 await bot.edit_message_media(
@@ -104,7 +109,7 @@ class NewsGallery:
 
     @staticmethod
     def formatting_post_text(newsletter) -> str:
-        post_text = f"#{newsletter.topic}\n\n"
+        post_text = f"#dailysummaries\n#{newsletter.topic}\n\n"
         post_text += f"<b>{newsletter.title}</b>"
 
         if newsletter.publisher:

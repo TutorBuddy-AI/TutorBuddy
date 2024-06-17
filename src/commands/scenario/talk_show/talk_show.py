@@ -7,7 +7,7 @@ from src.config import dp, bot
 from src.states.scenario import TalkShowForm
 from aiogram import types, md
 from src.keyboards.scenario_keyboard import get_choose_job_menu_talk_show_scenario, get_end_menu_talk_show_scenario
-from src.utils.generate.communication import ScenarioTalkShowGenerate
+from src.utils.generator.communication import ScenarioTalkShowGenerate
 from src.commands.scenario.prompts import TalkShowPrompt
 
 
