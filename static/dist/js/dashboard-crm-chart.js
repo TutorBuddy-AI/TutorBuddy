@@ -1,12 +1,20 @@
+function getBaseUrl() {
+    const currentUrl = window.location.href;
+    return currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+}
+
+
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('https://admin.tutorbuddyai.tech/test/get_statistic');
+        const baseUrl = getBaseUrl();
+        const apiUrl = `${baseUrl}/get_statistic`;
+        const response = await fetch(apiUrl);
         if (!response.ok) {
             return;
         }
         const data = await response.json();
         const topics = data.count_topic;
-        
+
         const seriesData = Object.entries(topics).map(([topic, count]) => ({ name: topic, data: [count] }));
 
         var options_topic = {
@@ -53,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             yaxis: {
                 labels: {
                     formatter: function(e) {
-                        return e 
+                        return e
                     }
                 },
                 tickAmount: 4,
@@ -77,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     width: 10,
                     height: 10
                 }
-            }, 
+            },
             tooltip: {
                 theme: 'dark',
                 style: {
@@ -98,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             chart: {
                 height: 325,
                 type: "area",
-                toolbar: false 
+                toolbar: false
             },
             dataLabels: {
                 enabled: false
@@ -136,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         };
 
         var chart_topic = new ApexCharts(document.querySelector("#all-topics-chart"), options_topic);
-        // var chart_count_messages = new ApexCharts(document.querySelector("#all-messages-chart"), options_count_messages);
+        var chart_count_messages = new ApexCharts(document.querySelector("#all-messages-chart"), options_count_messages);
         chart_topic.render();
         chart_count_messages.render();
         

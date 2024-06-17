@@ -7,7 +7,9 @@ async function openSubDialog() {
     const pageBodyElement = document.querySelector('.page-content');
 
     try {
-        const response = await fetch('https://admin.tutorbuddyai.tech/test/get_users');
+        const baseUrl = getBaseUrl();
+        const apiUrl = `${baseUrl}/get_users`;
+        const response = await fetch(apiUrl);
         const responseData = await response.json();
         const users = responseData.users;
 
@@ -36,7 +38,7 @@ async function openSubDialog() {
                     </a>
                 `;
                 listItem.onclick = () => getMessageHistory(user);
-                
+
                 userList.appendChild(listItem);
 
                 // Execute updateUserDetails and getMessageHistory only for the first user
@@ -65,7 +67,7 @@ document.querySelector('.chat-user-list').addEventListener('click', function(eve
         }
         // Добавляем класс "active" к текущему элементу
         clickedListItem.classList.add('active');
-        
+
         const tgId = clickedListItem.dataset.tgId;
         const last_message = clickedListItem.dataset.last_message;
         const fullname = clickedListItem.dataset.name;
@@ -73,12 +75,14 @@ document.querySelector('.chat-user-list').addEventListener('click', function(eve
         getMessageHistory(tgId);
     }
 });
- 
+
 
 // ОТПРАВКА НА СЕРВЕР ЗАПРОСА ПОУЛЧЕНИЯ ИСТОРИИ СООБЩЕНИЙ ПО ТГ АЙДИ
 async function getMessageHistory(tg_id) {
    try {
-      const messageHistoryResponse = await fetch(`https://admin.tutorbuddyai.tech/test/get_message_history_user/${tg_id}`);
+      const baseUrl = getBaseUrl();
+      const apiUrl = `${baseUrl}/get_message_history_user/${tg_id}`;
+      const messageHistoryResponse = await fetch(apiUrl);
 
       if (!messageHistoryResponse.ok) {
          throw new Error(`HTTP error Status: ${messageHistoryResponse.status}`);

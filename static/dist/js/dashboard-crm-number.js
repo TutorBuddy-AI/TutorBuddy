@@ -1,6 +1,8 @@
 async function fetchStatistics() {
     try {
-        const response = await fetch('https://admin.tutorbuddyai.tech/test/get_statistic');
+        const baseUrl = getBaseUrl();
+        const apiUrl = `${baseUrl}/get_statistic`;
+        const response = await fetch(apiUrl);
         if (!response.ok) {
             throw new Error(`Ошибка HTTP: ${response.status}`);
         }
