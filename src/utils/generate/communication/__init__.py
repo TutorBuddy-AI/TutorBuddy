@@ -1,2 +1,0 @@
-from src.utils.generate.communication.communication import CommunicationGenerate
-from src.utils.generate.communication.scenario_talk_show import ScenarioTalkShowGenerate

@@ -2,7 +2,7 @@ from datetime import date
 
 from aiogram.filters import Command
 
-from admin.newsletter_admin.newsletter_admin import NewsletterPublisher
+from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
 from filters.is_not_register_filter import IsRegister
 
 from src.config import bot

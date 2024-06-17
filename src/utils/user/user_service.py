@@ -1,11 +1,9 @@
-import logging
-
 from database.models import Person
 from src.database.models import User, MessageHistory, Setting
 from src.database import Transactional, session
 from src.utils.user.schemas import GetUserInfo, UserInfo, GetUserPersonInfo, GetUserMessageHistory
-from src.utils.generate.question_history import SupportHistory
-from src.utils.generate.feedback_loop import FeedbackHistory
+from src.utils.generator.question_history import SupportHistory
+from utils.feedback_loop import FeedbackHistory
 
 from src.utils.message_history_mistakes import MessageMistakesService
 from sqlalchemy import select, update, delete, text

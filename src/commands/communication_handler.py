@@ -14,8 +14,8 @@ from src.utils.answer.answer import Answer
 from src.utils.answer.render import Render
 from src.utils.answer.render_helper import RenderHelper
 from src.utils.audio_converter.audio_converter import AudioConverter
-from src.utils.generate.communication import CommunicationGenerate
-from src.utils.generate.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
+from src.utils.generator.communication import CommunicationGenerate
+from src.utils.generator.complex_answer_generator.answer_mistakes_generator import AnswerMistakesGenerator
 from src.utils.message import MessageHelper
 from src.utils.transcriber import TextToSpeechEleven
 from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI

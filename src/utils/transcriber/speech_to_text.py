@@ -1,5 +1,5 @@
 from src.config import bot
-from src.utils.generate import GenerateAI
+from src.utils.generator import GenerateAI
 
 from io import BytesIO
 

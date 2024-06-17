@@ -17,7 +17,7 @@ from aiogram import types, F, Router
 from src.states.form import FormInitTalk
 from src.texts.texts import get_choice_is_done, get_start_talk, get_start_person_talk, get_check_text, \
     get_bot_waiting_message
-from src.utils.generate.talk_initializer.talk_initializer import TalkInitializer
+from src.utils.generator.talk_initializer.talk_initializer import TalkInitializer
 from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.user import UserCreateMessage
 
