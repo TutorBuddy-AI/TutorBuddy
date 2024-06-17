@@ -6,6 +6,7 @@ from src.utils.const import LANGUAGE_LEVEL_MAPPING
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
 from src.utils.generator import GenerateAI
+from src.config import config
 
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -56,8 +57,12 @@ class AnswerMistakesGenerator:
         return None
 
     async def get_combine_data(self) -> json:
+        if config.BOT_TYPE == "original":
+            model = "gpt-4o"
+        else:
+            model = "gpt-3.5-turbo"
         return {
-            "model": "gpt-3.5-turbo",
+            "model": model,
             "messages": await self.get_user_message_history_with_service_text_request_and_prompt(),
             "max_tokens": 400
         }

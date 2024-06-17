@@ -78,7 +78,7 @@ async function openSubAddNewsletter() {
                         image: imageBase64,
                     };
 
-                    const urls = ['https://admin.tutorbuddyai.tech/original/save-newsletter', 'https://admin.tutorbuddyai.tech/oksana/save-newsletter']
+                    const urls = ['https://admin.tutorbuddyai.tech/aa_lingua/save-newsletter','https://admin.tutorbuddyai.tech/original/save-newsletter', 'https://admin.tutorbuddyai.tech/oksana/save-newsletter']
                     for (const url of urls) {
                         try {
                             const response = await fetch(url, {
