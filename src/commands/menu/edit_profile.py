@@ -8,10 +8,12 @@ from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
-from src.states import FormName, FormNativeLanguage, FormEnglishLevel
+from src.states import FormName, FormNativeLanguage, FormEnglishLevel, FormCity
 from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
+from src.database.session import async_session_factory
+from src.database.models.user import UserLocation
 
 edit_profile_router = Router(name=__name__)
 
@@ -25,6 +27,8 @@ async def edit_profile_handler(message: types.Message):
     native_language = InlineKeyboardButton(text='Native language', callback_data='change_native_language')
     english_level = InlineKeyboardButton(text='English Level', callback_data='change_english_level')
 
+    city = InlineKeyboardButton(text='Change City', callback_data='change_city')
+
     user_topic = InlineKeyboardButton(text='Chosen topics', callback_data='get_user_topic')
     go_back = InlineKeyboardButton(text='Go back to chat 💬', callback_data='go_back')
 
@@ -32,6 +36,7 @@ async def edit_profile_handler(message: types.Message):
 
     edit_profile_kb = InlineKeyboardMarkup(inline_keyboard=[[name, topic],
                                                             [native_language, english_level],
+                                                            [city],
                                                             [user_topic, go_back],
                                                             [translate_button]])
 
@@ -49,6 +54,42 @@ async def edit_profile_handler(message: types.Message):
 
 
 # -#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+
+
+@edit_profile_router.callback_query(F.data == "change_city")
+async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
+    popular_cities = ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg"]
+
+    def get_city_keyboard():
+        keyboard = InlineKeyboardMarkup()
+        for city in popular_cities:
+            keyboard.add(InlineKeyboardButton(text=city, callback_data=f"city_{city}"))
+        return keyboard
+
+    await bot.send_message(
+        query.message.chat.id,
+        "Please select your city:",
+        reply_markup=get_city_keyboard()
+    )
+    await state.set_state(FormCity.new_city)
+
+
+@edit_profile_router.callback_query(F.startswith("city_"))
+async def select_city_callback(query: CallbackQuery, state: FSMContext):
+    city = query.data.split("_")[1]
+
+    async with async_session_factory() as session:
+        existing_location = await session.get(UserLocation, str(query.message.chat.id))
+        if existing_location:
+            existing_location.city_name = city
+            await session.commit()
+        else:
+            user_location = UserLocation(tg_id=str(query.message.chat.id), city_name=city)
+            session.add(user_location)
+            await session.commit()
+
+    await bot.send_message(query.message.chat.id, f"Your city has been successfully updated to: {city}")
+
 
 @edit_profile_router.callback_query(F.data == "change_name")
 async def change_name_query_handler(query: CallbackQuery, state: FSMContext):
