@@ -186,3 +186,29 @@ async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
     translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=True)
     keyboard_summary_markup = InlineKeyboardMarkup(inline_keyboard=[[translate_button], [accept, go_back_btn]])
     return keyboard_summary_markup
+
+
+async def get_choose_timezone_keyboard(is_caption=True) -> InlineKeyboardMarkup:
+    utc1_button = InlineKeyboardButton(text='Лондон (UTC+1)', callback_data='timezone_utc01')
+    utc2_button = InlineKeyboardButton(text='Калининград (UTC+2)', callback_data='timezone_utc02')
+    utc3_button = InlineKeyboardButton(text='Мск - Спб (UTC+3)', callback_data='timezone_utc03')
+    utc5_button = InlineKeyboardButton(text='Уфа (UTC+5)', callback_data='timezone_utc05')
+    utc7_button = InlineKeyboardButton(text='Красноярск (UTC+7)', callback_data='timezone_utc07')
+    utc10_button = InlineKeyboardButton(text='Владивосток (UTC+10)', callback_data='timezone_utc10')
+
+    other_timezone_button = InlineKeyboardButton(text='Other ✍️', callback_data='timezone_other')
+
+    if is_caption:
+        translate_button = AnswerRenderer.get_button_caption_translation_standalone()
+    else:
+        translate_button = AnswerRenderer.get_button_text_translation_standalone()
+
+    choose_timezone_inline_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [utc1_button, utc2_button],
+        [utc3_button, utc5_button],
+        [utc7_button, utc10_button],
+        [other_timezone_button],
+        [translate_button]
+    ])
+
+    return choose_timezone_inline_kb

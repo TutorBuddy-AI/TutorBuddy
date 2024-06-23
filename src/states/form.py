@@ -11,6 +11,8 @@ class Form(StatesGroup):
     english_level = State()
     topic = State()
     additional_topic = State()
+    city_timezone = State()
+    other_city_timezone = State()
 
 
 class NewValueUserInfo(StatesGroup):
@@ -43,13 +45,14 @@ class FormNativeLanguage(StatesGroup):
     new_other_native_language = State()
 
 
+class FormCityTimezone(StatesGroup):
+    city_timezone = State()
+    other_city_timezone = State()
+
+
 class FormEnglishLevel(StatesGroup):
     new_english_level = State()
 
 
 class FormInitTalk(StatesGroup):
     init_user_message = State()
-
-
-class FormCity(StatesGroup):
-    new_city = State()

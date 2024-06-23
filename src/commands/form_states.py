@@ -2,6 +2,7 @@ import asyncio
 
 from commands.choose_speaker import continue_dialogue_with_person
 from config import config
+from keyboards.form_keyboard.form_keyboard import get_choose_timezone_keyboard
 from src.database import session
 from sqlalchemy import select
 
@@ -181,34 +182,6 @@ async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
                          parse_mode=ParseMode.HTML)
 
 
-@form_router.message(Form.other_language, state="*")
-async def process_city_question(message: types.Message, state: FSMContext):
-    popular_cities = ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg"]
-
-    city_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-    city_keyboard.add(*(KeyboardButton(city) for city in popular_cities))
-
-    await bot.send_message(message.chat.id, "Which city are you from?", reply_markup=city_keyboard)
-    await state.set_state("city_question")
-
-
-@form_router.message(state="city_question")
-async def process_city_answer(message: types.Message, state: FSMContext):
-    city_name = message.text
-    async with session() as db_session:
-        existing_location = await db_session.get(UserLocation, str(message.chat.id))
-        if existing_location:
-            await bot.send_message(message.chat.id, "We already have your city information on record!")
-        else:
-            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city_name)
-            db_session.add(user_location)
-            await db_session.commit()
-            await bot.send_message(message.chat.id, "Thanks for letting me know!")
-
-    await process_other_language(message, state)
-
-
-
 @form_router.callback_query(Form.topic, F.data.startswith("topic"))
 async def process_topic_handler(callback_query: types.CallbackQuery):
     await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id,
@@ -232,7 +205,7 @@ async def process_done_command(query: types.CallbackQuery, state: FSMContext):
                     topics_num += 1
                     result_text += text[1] + " "
     if topics_num < 1:
-        await bot.answer_callback_query(query.id, get_chose_some_more_topics(), show_alert=True)
+        await bot.answer_callback_query(query.message.chat.id, get_chose_some_more_topics(), show_alert=True)
     else:
         await process_topics(query, state, result_text, was_other)
 
@@ -247,12 +220,46 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
                                reply_markup=markup, parse_mode=ParseMode.HTML)
     else:
         await state.update_data({"additional_topic": ""})
-        await create_user_setup_speaker_choice(query.message, state)
+        await send_timezone_city_question(query.message.chat.id, state)
 
 
 @form_router.message(Form.additional_topic, F.text)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     await state.update_data({"additional_topic": message.text})
+    await send_timezone_city_question(message.chat.id, state)
+
+
+async def send_timezone_city_question(tg_id: int, state: FSMContext):
+    await state.set_state(Form.timezone)
+    city_keyboard = await get_choose_timezone_keyboard(is_caption=True)
+    await bot.send_message(tg_id, "Which city are you from?", reply_markup=city_keyboard)
+
+
+@form_router.message(Form.timezone, F.text)
+async def process_city_answer(query: types.CallbackQuery, state: FSMContext):
+    timezone = query.data.split("_")[1]
+    if timezone == "other":
+        await state.update_data({"timezone": "utc03"})
+        await state.set_state(Form.other_city_timezone)
+        await bot.send_message(query.message.chat.id, "Please, send me the name of your city")
+    else:
+        await state.update_data({"timezone": timezone})
+        await create_user_setup_speaker_choice(query.message, state)
+
+
+@form_router.message(Form.other_city_timezone, F.text)
+async def process_city_answer(message: types.Message, state: FSMContext):
+    city_name = message.text
+    async with session() as db_session:
+        existing_location = await db_session.get(UserLocation, str(message.chat.id))
+        if existing_location:
+            await bot.send_message(message.chat.id, "We already have your city information on record!")
+        else:
+            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city_name)
+            db_session.add(user_location)
+            await db_session.commit()
+            await bot.send_message(message.chat.id, "Thanks for letting me know!")
+
     await create_user_setup_speaker_choice(message, state)
 
 

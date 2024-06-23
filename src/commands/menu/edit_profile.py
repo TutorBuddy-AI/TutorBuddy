@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.filters import Command
 
+from keyboards.form_keyboard.form_keyboard import get_choose_timezone_keyboard
 from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
@@ -58,18 +59,12 @@ async def edit_profile_handler(message: types.Message):
 
 @edit_profile_router.callback_query(F.data == "change_city")
 async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
-    popular_cities = ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg"]
-
-    def get_city_keyboard():
-        keyboard = InlineKeyboardMarkup()
-        for city in popular_cities:
-            keyboard.add(InlineKeyboardButton(text=city, callback_data=f"city_{city}"))
-        return keyboard
+    city_change_keyboard = await get_choose_timezone_keyboard(is_caption=False)
 
     await bot.send_message(
         query.message.chat.id,
         "Please select your city:",
-        reply_markup=get_city_keyboard()
+        reply_markup=city_change_keyboard
     )
     await state.set_state(FormCity.new_city)
 
