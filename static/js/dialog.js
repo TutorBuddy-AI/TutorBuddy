@@ -35,7 +35,7 @@ async function openSubDialogs() {
                 userBlock.className = 'user-block';
 
                 const avatarElement = document.createElement('img');
-                avatarElement.src = 'static/img/user_photo.webp';
+                avatarElement.src = './static/img/user_photo.webp';
                 avatarElement.alt = 'Avatar';
                 avatarElement.className = 'avatar';
                 userBlock.appendChild(avatarElement);

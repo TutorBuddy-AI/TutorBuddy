@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
+    data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+
+<head>
+
+    <meta charset="utf-8" />
+    <title>CRM | Velzon - Admin & Dashboard Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesbrand" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <!-- Bootstrap Css -->
+    <link href="./static/dist/css/style/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="./static/dist/css/style/fonts/remixicon.css" rel="stylesheet" type="text/css">
+    <link href="./static/dist/css/style/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- App Css-->
+    <link href="./static/dist/css/style/app.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+
+<body>
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+        <header id="page-topbar">
+            <div class="layout-width">
+                <div class="navbar-header">
+                    <div class="d-flex">
+                        <!-- LOGO -->
+                        <button type="button"
+                            class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger material-shadow-none"
+                            id="topnav-hamburger-icon">
+                            <span class="hamburger-icon">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </span>
+                        </button>
+                        <style>
+                            #topnav-hamburger-icon {
+                                display: none;
+                            }
+
+                            @media (max-width: 768px) {
+                                #topnav-hamburger-icon {
+                                    display: block;
+                                }
+                            }
+                        </style>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown ms-1 topbar-head-dropdown header-item">
+                            <img src="./static/dist/images/us.svg" alt="user-image" class="me-2 rounded" height="18">
+                        </div>
+
+
+
+
+                        <div class="ms-1 header-item d-none d-sm-flex">
+                            <button type="button"
+                                class="btn btn-icon btn-topbar material-shadow-none btn-ghost-secondary rounded-circle"
+                                data-toggle="fullscreen">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+                                    <path fill="currentColor"
+                                        d="M5 5h5V3H3v7h2zm5 14H5v-5H3v7h7zm11-5h-2v5h-5v2h7zm-2-4h2V3h-7v2h5z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="dropdown topbar-head-dropdown ms-1 header-item" id="notificationDropdown">
+                            <button type="button"
+                                class="btn btn-icon btn-topbar material-shadow-none btn-ghost-secondary rounded-circle"
+                                id="page-header-notifications-dropdown" data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24">
+                                    <path fill="currentColor"
+                                        d="M19 13.586V10c0-3.217-2.185-5.927-5.145-6.742C13.562 2.52 12.846 2 12 2s-1.562.52-1.855 1.258C7.185 4.074 5 6.783 5 10v3.586l-1.707 1.707A.996.996 0 0 0 3 16v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a.996.996 0 0 0-.293-.707zM19 17H5v-.586l1.707-1.707A.996.996 0 0 0 7 14v-4c0-2.757 2.243-5 5-5s5 2.243 5 5v4c0 .266.105.52.293.707L19 16.414zm-7 5a2.98 2.98 0 0 0 2.818-2H9.182A2.98 2.98 0 0 0 12 22" />
+                                </svg>
+                                <span
+                                    class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-danger">1<span
+                                        class="visually-hidden">unread messages</span></span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                                aria-labelledby="page-header-notifications-dropdown">
+
+                                <div class="dropdown-head bg-primary bg-pattern rounded-top">
+                                    <div class="p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h6 class="m-0 fs-16 fw-semibold text-white"> Notifications </h6>
+                                            </div>
+                                            <div class="col-auto dropdown-tabs">
+                                                <span class="badge bg-light text-body fs-13"> 1 New</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="px-2 pt-2">
+                                        <ul class="nav nav-tabs dropdown-tabs nav-tabs-custom" data-dropdown-tabs="true"
+                                            id="notificationItemsTab" role="tablist">
+                                            <li class="nav-item waves-effect waves-light">
+                                                <a class="nav-link active" data-bs-toggle="tab" href="#all-noti-tab"
+                                                    role="tab" aria-selected="true">
+                                                    Alerts (1)
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+                                <div class="tab-content position-relative" id="notificationItemsTabContent">
+                                    <div class="tab-pane fade show active py-2 ps-2" id="all-noti-tab" role="tabpanel">
+                                        <div data-simplebar style="max-height: 300px;" class="pe-2">
+                                            <div
+                                                class="text-reset notification-item d-block dropdown-item position-relative">
+                                                <div class="d-flex">
+                                                    <img src="./static/dist/images/tutorbuddy_welcome.png"
+                                                        class="me-3 rounded-circle avatar-xs flex-shrink-0"
+                                                        alt="user-pic">
+                                                    <div class="flex-grow-1">
+                                                        <a href="#!" class="stretched-link">
+                                                            <h6 class="mt-0 mb-1 fs-13 fw-semibold">TutorBuddy AI</h6>
+                                                        </a>
+                                                        <div class="fs-13 text-muted">
+                                                            <p class="mb-1">Developed an admin panel for our tutors! ❤️
+                                                            </p>
+                                                        </div>
+                                                        <p class="mb-0 fs-11 fw-medium text-uppercase text-muted">
+                                                            <span><i class="ri-time-line"></i>
+                                                                July 5, 2024</span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="px-2 fs-15">
+                                                        <div class="form-check notification-check">
+                                                            <input class="form-check-input" type="checkbox" value=""
+                                                                id="all-notification-check02">
+                                                            <label class="form-check-label"
+                                                                for="all-notification-check02"></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tab-pane fade p-4" id="alerts-tab" role="tabpanel"
+                                        aria-labelledby="alerts-tab"></div>
+
+                                    <div class="notification-actions" id="notification-actions">
+                                        <div class="d-flex text-muted justify-content-center">
+                                            Select <div id="select-content" class="text-body fw-semibold px-1">0</div>
+                                            Result <button type="button" class="btn btn-link link-danger p-0 ms-3"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#removeNotificationModal">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown ms-sm-3 header-item topbar-user">
+                            <button type="button" class="btn material-shadow-none" id="page-header-user-dropdown"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="d-flex align-items-center">
+                                    <img class="rounded-circle header-profile-user"
+                                        src="./static/dist/images/user_chat.png" alt="Header Avatar">
+                                    <span class="text-start ms-xl-2">
+                                        <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">TutorBuddy</span>
+                                        <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">AI</span>
+                                    </span>
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <!-- item-->
+                                <h6 class="dropdown-header">Welcome TutorBuddy!</h6>
+                                <a class="dropdown-item" href="./"><i class="ri-shield-user-line"></i> <span
+                                        class="align-middle">Profile (coming soon)</span></a>
+                                <a class="dropdown-item" href="./"><i class="ri-questionnaire-line"></i> <span
+                                        class="align-middle">Help (coming soon)</span></a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="./change_password"><i class="ri-lock-line"></i> <span
+                                        class="align-middle" data-key="change-password">Change password</span></a>
+                                <a class="dropdown-item" href="./"><i class="ri-logout-box-r-line"></i> <span
+                                        class="align-middle" data-key="t-logout">Logout</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- removeNotificationModal -->
+        <div id="removeNotificationModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                            id="NotificationModalbtn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mt-2 text-center">
+                            <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
+                                colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                            <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                                <h4>Are you sure ?</h4>
+                                <p class="text-muted mx-4 mb-0">Are you sure you want to remove this Notification ?</p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn w-sm btn-danger" id="delete-notification">Yes, Delete
+                                It!</button>
+                        </div>
+                    </div>
+
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        <!-- ========== App Menu ========== -->
+        <div class="app-menu navbar-menu">
+            <!-- LOGO -->
+            <div class="navbar-brand-box">
+                <!-- Light Logo -->
+                <a href="./admin" class="logo logo-light">
+                    <span class="logo-sm">
+                        <!-- <img src="./static/dist/images/logo-sm.png" alt="" height="22"> -->
+                        <span style="font-size: 16px; font-weight: bold; color: white;">TutorBuddy AI</span>
+                    </span>
+                    <span class="logo-lg">
+                        <!-- <img src="./static/dist/images/logo-light.png" alt="" height="17"> -->
+                        <span style="font-size: 20px; font-weight: bold; color: white;">TutorBuddy AI</span>
+                    </span>
+                </a>
+                <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
+                    id="vertical-hover">
+                    <i class="ri-record-circle-line"></i>
+                </button>
+            </div>
+
+            <div id="scrollbar">
+                <div class="container-fluid">
+
+
+                    <div id="two-column-menu">
+                    </div>
+                    <ul class="navbar-nav" id="navbar-nav">
+                        <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link" href="./admin" role="button">
+                                <i class="ri-dashboard-line"></i> Dashboards
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link" href="./dialogs" role="button">
+                                <i class="ri-chat-4-line"></i> Dialogs
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Sidebar -->
+            </div>
+
+            <div class="sidebar-background"></div>
+        </div>
+        <!-- Left Sidebar End -->
+        <!-- Vertical Overlay-->
+        <div class="vertical-overlay"></div>
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+                    <div class="chat-wrapper d-lg-flex gap-1 mx-n4 mt-n4 p-1">
+                        <div class="chat-leftsidebar minimal-border">
+                            <div class="px-4 pt-4 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-4">Chats</h5>
+                                    </div>
+                                </div>
+                                <div class="search-box" id="searchBoxDialog">
+                                    <input type="text" class="form-control bg-light border-light"
+                                        placeholder="Search here...">
+                                    <i class="ri-search-2-line search-icon"></i>
+                                </div>
+                            </div> <!-- .p-4 -->
+
+                            <ul class="nav nav-tabs nav-tabs-custom nav-success nav-justified" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#chats" role="tab">
+                                        Chats
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content text-muted">
+                                <div class="tab-pane active" id="chats" role="tabpanel">
+                                    <div class="chat-room-list pt-3" data-simplebar="init">
+                                        <div class="simplebar-wrapper" style="margin: -16px 0px 0px;">
+                                            <div class="simplebar-height-auto-observer-wrapper">
+                                                <div class="simplebar-height-auto-observer"></div>
+                                            </div>
+                                            <div class="simplebar-mask">
+                                                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                                    <div class="simplebar-content-wrapper" tabindex="0" role="region"
+                                                        aria-label="scrollable content"
+                                                        style="height: auto; overflow: hidden;">
+                                                        <div class="simplebar-content" style="padding: 16px 0px 0px;">
+                                                            <div class="d-flex align-items-center px-4 mb-2">
+                                                                <div class="flex-grow-1">
+                                                                    <h4 class="mb-0 fs-11 text-muted text-uppercase">
+                                                                        Direct Messages</h4>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="chat-message-list">
+
+                                                                <ul class="list-unstyled chat-list chat-user-list"
+                                                                    id="userList">
+
+                                                            </div>
+                                                            <!-- End chat-message-list -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="simplebar-placeholder" style="width: 300px; height: 650px;">
+                                            </div>
+                                        </div>
+                                        <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+                                            <div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+                                        </div>
+                                        <div class="simplebar-track simplebar-vertical" style="visibility: hidden;">
+                                            <div class="simplebar-scrollbar"
+                                                style="height: 0px; transform: translate3d(0px, 0px, 0px); display: none;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="contacts" role="tabpanel">
+                                    <div class="chat-room-list pt-3" data-simplebar="init">
+                                        <div class="simplebar-wrapper" style="margin: -16px 0px 0px;">
+                                            <div class="simplebar-height-auto-observer-wrapper">
+                                                <div class="simplebar-height-auto-observer"></div>
+                                            </div>
+                                            <div class="simplebar-mask">
+                                                <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                                    <div class="simplebar-content-wrapper" tabindex="0" role="region"
+                                                        aria-label="scrollable content"
+                                                        style="height: auto; overflow: hidden;">
+                                                        <div class="simplebar-content" style="padding: 16px 0px 0px;">
+                                                            <div class="sort-contact">
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="simplebar-placeholder" style="width: 0px; height: 0px;"></div>
+                                        </div>
+                                        <div class="simplebar-track simplebar-horizontal" style="visibility: hidden;">
+                                            <div class="simplebar-scrollbar" style="width: 0px; display: none;"></div>
+                                        </div>
+                                        <div class="simplebar-track simplebar-vertical" style="visibility: hidden;">
+                                            <div class="simplebar-scrollbar" style="height: 0px; display: none;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end tab contact -->
+                        </div>
+                        <!-- end chat leftsidebar -->
+                        <!-- Start User chat -->
+                        <div class="user-chat w-100 overflow-hidden minimal-border user-chat-show">
+
+                            <div class="chat-content d-lg-flex">
+                                <!-- start chat conversation section -->
+                                <div class="w-100 overflow-hidden position-relative">
+                                    <!-- conversation user -->
+                                    <div class="position-relative">
+
+
+                                        <div class="position-relative" id="users-chat" style="display: block;">
+                                            <div class="p-3 user-chat-topbar">
+                                                <div class="row align-items-center">
+                                                    <div class="col-sm-4 col-8">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="flex-shrink-0 d-block d-lg-none me-3">
+                                                                <a href="javascript: void(0);"
+                                                                    class="user-chat-remove fs-18 p-1"><i
+                                                                        class="ri-arrow-left-s-line align-bottom"></i></a>
+                                                            </div>
+                                                            <div class="flex-grow-1 overflow-hidden">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div
+                                                                        class="flex-shrink-0 chat-user-img online user-own-img align-self-center me-3 ms-0">
+                                                                        <span class="user-status"></span>
+                                                                    </div>
+                                                                    <div class="flex-grow-1 overflow-hidden">
+                                                                        <h5 class="text-truncate mb-0 fs-16"><a
+                                                                                class="text-reset username"
+                                                                                data-bs-toggle="offcanvas"
+                                                                                href="#userProfileCanvasExample"
+                                                                                aria-controls="userProfileCanvasExample"></a></h5>
+                                                                        <p
+                                                                            class="text-truncate text-muted fs-14 mb-0 userStatus">
+                                                                            <small></small></p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-8 col-4">
+                                                        <ul class="list-inline user-chat-nav text-end mb-0">
+                                                            <li class="list-inline-item m-0">
+                                                                <div class="dropdown">
+                                                                    <button
+                                                                        class="btn btn-ghost-secondary btn-icon material-shadow-none"
+                                                                        type="button" data-bs-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="24" height="24" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            class="feather feather-search icon-sm">
+                                                                            <circle cx="11" cy="11" r="8"></circle>
+                                                                            <line x1="21" y1="21" x2="16.65" y2="16.65">
+                                                                            </line>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div
+                                                                        class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+                                                                        <div class="p-2">
+                                                                            <div class="search-box">
+                                                                                <input type="text"
+                                                                                    class="form-control bg-light border-light"
+                                                                                    placeholder="Search here..."
+                                                                                    onkeyup="searchMessages()"
+                                                                                    id="searchMessage">
+                                                                                <i
+                                                                                    class="ri-search-2-line search-icon"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+
+                                                            <li class="list-inline-item d-none d-lg-inline-block m-0">
+                                                                <button type="button"
+                                                                    class="btn btn-ghost-secondary btn-icon material-shadow-none"
+                                                                    data-bs-toggle="offcanvas"
+                                                                    data-bs-target="#userProfileCanvasExample"
+                                                                    aria-controls="userProfileCanvasExample">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                                        class="feather feather-info icon-sm">
+                                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                                                    </svg>
+                                                                </button>
+                                                            </li>
+
+                                                            <li class="list-inline-item m-0">
+                                                                <div class="dropdown">
+                                                                    <button
+                                                                        class="btn btn-ghost-secondary btn-icon material-shadow-none"
+                                                                        type="button" data-bs-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="24" height="24" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            class="feather feather-more-vertical icon-sm">
+                                                                            <circle cx="12" cy="12" r="1"></circle>
+                                                                            <circle cx="12" cy="5" r="1"></circle>
+                                                                            <circle cx="12" cy="19" r="1"></circle>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                                        <a class="dropdown-item d-block d-lg-none user-profile-show"
+                                                                            href="#"><i
+                                                                                class="ri-user-2-fill align-bottom text-muted me-2"></i>
+                                                                            View Profile</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-inbox-archive-line align-bottom text-muted me-2"></i>
+                                                                            Archive</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-mic-off-line align-bottom text-muted me-2"></i>
+                                                                            Muted</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-delete-bin-5-line align-bottom text-muted me-2"></i>
+                                                                            Delete</a>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!-- end chat user head -->
+                                            <div class="chat-conversation p-3 p-lg-4" id="chat-conversation"
+                                                data-simplebar="init">
+                                                <div class="simplebar-wrapper" style="margin: -24px;">
+                                                    <div class="simplebar-height-auto-observer-wrapper">
+                                                        <div class="simplebar-height-auto-observer"></div>
+                                                    </div>
+                                                    <div class="simplebar-mask">
+                                                        <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                                            <div class="simplebar-content-wrapper" tabindex="0"
+                                                                role="region" aria-label="scrollable content"
+                                                                style="height: 100%; overflow: hidden;">
+                                                                <div class="simplebar-content" style="padding: 24px;">
+                                                                    <div id="elmLoader"></div>
+                                                                    <ul class="list-unstyled chat-conversation-list"
+                                                                        id="users-conversation">
+   
+                                                                    </ul>
+                                                                    <!-- end chat-conversation-list -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="simplebar-placeholder"
+                                                        style="width: 1571px; height: 622px;"></div>
+                                                </div>
+                                                <div class="simplebar-track simplebar-horizontal"
+                                                    style="visibility: hidden;">
+                                                    <div class="simplebar-scrollbar" style="width: 0px; display: none;">
+                                                    </div>
+                                                </div>
+                                                <div class="simplebar-track simplebar-vertical"
+                                                    style="visibility: hidden;">
+                                                    <div class="simplebar-scrollbar simplebar-visible"
+                                                        style="height: 0px; display: none; transform: translate3d(0px, 42px, 0px);">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-warning alert-dismissible copyclipboard-alert px-4 fade show "
+                                                id="copyClipBoard" role="alert">
+                                                Message copied
+                                            </div>
+                                        </div>
+
+                                        <div class="position-relative" id="channel-chat" style="display: none;">
+                                            <div class="p-3 user-chat-topbar">
+                                                <div class="row align-items-center">
+
+                                                    <div class="col-sm-8 col-4">
+                                                        <ul class="list-inline user-chat-nav text-end mb-0">
+                                                            <li class="list-inline-item m-0">
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-ghost-secondary btn-icon"
+                                                                        type="button" data-bs-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="24" height="24" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            class="feather feather-search icon-sm">
+                                                                            <circle cx="11" cy="11" r="8"></circle>
+                                                                            <line x1="21" y1="21" x2="16.65" y2="16.65">
+                                                                            </line>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div
+                                                                        class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+                                                                        <div class="p-2">
+                                                                            <div class="search-box">
+                                                                                <input type="text"
+                                                                                    class="form-control bg-light border-light"
+                                                                                    placeholder="Search here..."
+                                                                                    onkeyup="searchMessages()"
+                                                                                    id="searchMessage">
+                                                                                <i
+                                                                                    class="ri-search-2-line search-icon"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+
+                                                            <li class="list-inline-item d-none d-lg-inline-block m-0">
+                                                                <button type="button"
+                                                                    class="btn btn-ghost-secondary btn-icon"
+                                                                    data-bs-toggle="offcanvas"
+                                                                    data-bs-target="#userProfileCanvasExample"
+                                                                    aria-controls="userProfileCanvasExample">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round"
+                                                                        class="feather feather-info icon-sm">
+                                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                                                    </svg>
+                                                                </button>
+                                                            </li>
+
+                                                            <li class="list-inline-item m-0">
+                                                                <div class="dropdown">
+                                                                    <button class="btn btn-ghost-secondary btn-icon"
+                                                                        type="button" data-bs-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="24" height="24" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="2" stroke-linecap="round"
+                                                                            stroke-linejoin="round"
+                                                                            class="feather feather-more-vertical icon-sm">
+                                                                            <circle cx="12" cy="12" r="1"></circle>
+                                                                            <circle cx="12" cy="5" r="1"></circle>
+                                                                            <circle cx="12" cy="19" r="1"></circle>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                                        <a class="dropdown-item d-block d-lg-none user-profile-show"
+                                                                            href="#"><i
+                                                                                class="ri-user-2-fill align-bottom text-muted me-2"></i>
+                                                                            View Profile</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-inbox-archive-line align-bottom text-muted me-2"></i>
+                                                                            Archive</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-mic-off-line align-bottom text-muted me-2"></i>
+                                                                            Muted</a>
+                                                                        <a class="dropdown-item" href="#"><i
+                                                                                class="ri-delete-bin-5-line align-bottom text-muted me-2"></i>
+                                                                            Delete</a>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!-- end chat user head -->
+                                            <div class="chat-conversation p-3 p-lg-4" id="chat-conversation"
+                                                data-simplebar="init">
+                                                <div class="simplebar-wrapper" style="margin: -24px;">
+                                                    <div class="simplebar-height-auto-observer-wrapper">
+                                                        <div class="simplebar-height-auto-observer"></div>
+                                                    </div>
+                                                    <div class="simplebar-mask">
+                                                        <div class="simplebar-offset" style="right: 0px; bottom: 0px;">
+                                                            <div class="simplebar-content-wrapper" tabindex="0"
+                                                                role="region" aria-label="scrollable content"
+                                                                style="height: auto; overflow: hidden;">
+                                                                <div class="simplebar-content" style="padding: 24px;">
+                                                                    <ul class="list-unstyled chat-conversation-list"
+                                                                        id="channel-conversation">
+                                                                    </ul>
+                                                                    <!-- end chat-conversation-list -->
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="simplebar-placeholder" style="width: 0px; height: 0px;">
+                                                    </div>
+                                                </div>
+                                                <div class="simplebar-track simplebar-horizontal"
+                                                    style="visibility: hidden;">
+                                                    <div class="simplebar-scrollbar" style="width: 0px; display: none;">
+                                                    </div>
+                                                </div>
+                                                <div class="simplebar-track simplebar-vertical"
+                                                    style="visibility: hidden;">
+                                                    <div class="simplebar-scrollbar"
+                                                        style="height: 0px; display: none;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-warning alert-dismissible copyclipboard-alert px-4 fade show "
+                                                id="copyClipBoardChannel" role="alert">
+                                                Message copied
+                                            </div>
+                                        </div>
+
+                                        <!-- end chat-conversation -->
+
+                                        <div class="chat-input-section p-3 p-lg-4">
+
+                                            <form id="chatinput-form" enctype="multipart/form-data">
+                                                <div class="row g-0 align-items-center">
+                                                    <div class="col-auto">
+                                                        <div class="chat-input-links me-2">
+                                                            <div class="links-list-item">
+   
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="col">
+                                                        <div class="chat-input-feedback">
+                                                            Please Enter a Message
+                                                        </div>
+                                                        <input type="text"
+                                                            class="form-control chat-input bg-light border-light"
+                                                            id="chat-input"
+                                                            placeholder="Coming soon..."
+                                                            autocomplete="off"
+                                                            disabled>
+                                                    </div>
+                                                    
+                                                    <div class="col-auto">
+                                                        <div class="chat-input-links ms-2">
+                                                            <div class="links-list-item">
+                                                                <button type="submit"
+                                                                    class="btn btn-success chat-send waves-effect waves-light">
+                                                                    <i class="ri-send-plane-2-fill align-bottom"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="replyCard">
+                                            <div class="card mb-0">
+                                                <div class="card-body py-3">
+                                                    <div class="replymessage-block mb-0 d-flex align-items-start">
+                                                        <div class="flex-grow-1">
+                                                            <h5 class="conversation-name"></h5>
+                                                            <p class="mb-0"></p>
+                                                        </div>
+                                                        <div class="flex-shrink-0">
+                                                            <button type="button" id="close_toggle"
+                                                                class="btn btn-sm btn-link mt-n2 me-n3 fs-18">
+                                                                <i class="bx bx-x align-middle"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end chat-wrapper -->
+
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <script>document.write(new Date().getFullYear())</script>2024 © Velzon.
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end d-none d-sm-block">
+                                Design &amp; Develop by Themesbrand
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <!-- end main content-->
+
+    </div>
+    <!-- END layout-wrapper -->
+
+
+
+
+
+    <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="userProfileCanvasExample">
+        <!--end offcanvas-header-->
+        <div id="profileModelContent"></div>
+        <!--end offcanvas-body-->
+    </div>
+
+
+
+
+
+
+
+
+
+    <!--start back-to-top-->
+    <button onclick="topFunction()" class="btn btn-danger btn-icon" id="back-to-top">
+        <i class="ri-arrow-up-line"></i>
+    </button>
+    <!--end back-to-top-->
+
+    <!--preloader-->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner-border text-primary avatar-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="./static/dist/js/libs/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="./static/dist/js/libs/simplebar/simplebar.min.js"></script>
+    <script src="./static/dist/js/libs/node-waves/waves.min.js"></script>
+    <script src="./static/dist/js/libs/feather-icons/feather.min.js"></script>
+    <script src="./static/dist/js/libs/glightbox/glightbox.min.js"></script>
+    <script src="./static/dist/js/pages/plugins/lord-icon-2.1.0.js"></script>
+
+    <!-- apexcharts -->
+    <script src="./static/dist/js/libs/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Dashboard init -->
+    <script src="./static/dist/js/dashboard-crm-number.js?v=1.0"></script> <!-- NEW -->
+    <script src="./static/dist/js/dashboard-crm-chart.js?v=1.0"></script> <!-- NEW -->
+
+
+    <script src="./static/dist/js/dialog-crm.js?v=1.0"></script>
+    <script src="./static/dist/js/profile-crm.js?v=1.0"></script>
+
+    <script src="./static/dist/js/pages/chat.init.js?v=1.0"></script>
+
+    <!-- App js -->
+    <script src="./static/dist/js/app.js"></script>
+</body>
+
+</html>

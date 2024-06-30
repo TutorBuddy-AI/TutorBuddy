@@ -1,27 +1,40 @@
-from datetime import datetime
+import tempfile
+from datetime import datetime, date
 import base64
 import os
+from typing import Any
+
 from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
-from sqlalchemy import select, desc, text, delete
+from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
 
 from config import config
-from src.admin.newsletter_admin.newsletter_admin import Newsletter
+from database.models import NewsletterAudio
+from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
 from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (app, templates, image_directory,
-                                    generate_token_and_redirect)
+                                    generate_token_and_redirect, audio_directory)
 
-from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData
-from src.database.models import User, MessageHistory, DailyNews, MessageForUsers, MessageMistakes
+from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
+    SummaryFromParsing
+from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
 
 from src.database import session
-
+from utils.audio_converter.audio_converter_cache import AudioConverterCache
+from utils.news_gallery.news_gallery import NewsGallery
+from utils.newsletter.newsletter_service import NewsletterService
+from utils.transcriber.text_to_speech import TextToSpeech
 
 """Docs /docs"""
+
+
+@app.exception_handler(403)
+async def custom_403_handler(request, exc):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
@@ -49,60 +62,42 @@ async def is_valid_token(token: str = Cookie(None, alias="Authorization")):
     return True
 
 
-async def is_authenticated(is_valid: bool = Depends(is_valid_token)):
+async def check_authentication(is_valid: bool = Depends(is_valid_token)):
     if not is_valid:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+        raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+    else:
+        return True
 
 
 @app.get("/admin", response_model=str)
-async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def admin_page(request: Request, deps: bool = Depends(check_authentication)):
     """html admin
     """
-    if not is_valid:
-        return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
 @app.get("/admin1", response_model=str)
-async def admin_page(request: Request, is_valid: bool = Depends(is_valid_token)):
+async def admin_page(request: Request, deps: bool = Depends(check_authentication)):
     """html admin
     """
-    if not is_valid:
-        return templates.TemplateResponse("login.html", {"request": request})
     return templates.TemplateResponse("admin_old.html", {"request": request})
 
 
 @app.post("/admin")
-async def admin_page_post(request: Request, is_valid: bool = Depends(is_authenticated)):
+async def admin_page_post(request: Request, deps: bool = Depends(check_authentication)):
     """после login идет post запрос на admin
     """
     return templates.TemplateResponse("admin.html", {"request": request})
 
 
 @app.get("/get_users")
-async def get_users(is_valid: bool = Depends(is_authenticated)):
-    """
-    Показывает начальную информацию о пользователях.
-    Пример успешного ответа:
-
-    ```json
-    [
-        {
-            "tg_id": "148912340",
-            "tg_firstName": "FirstName19",
-            "tg_lastName": "LastName19",
-            "tg_username": "username19",
-            "last_message": "2024-03-06 19:09:01"
-        }
-    ]
-    ```
-    """
+async def get_users():
     query = select(User)
     result = await session.execute(query)
     users = result.scalars().unique().all()
 
     users_with_last_message = []
-    for user in users:
+    for idx, user in enumerate(users):
         query_info_message = (
             select(MessageHistory)
             .where(MessageHistory.tg_id == str(user.tg_id))
@@ -112,24 +107,33 @@ async def get_users(is_valid: bool = Depends(is_authenticated)):
         result_info_message = await session.execute(query_info_message)
         user_last = result_info_message.scalars().first()
 
+        user_data = {
+            "id": idx + 1,
+            "tg_id": user.tg_id,
+            "name": None,
+            "status": "online",
+            "profile": "./static/dist/images/user_chat.png"
+        }
+        if user.tg_firstName and user.tg_lastName:
+            user_data["name"] = f"{user.tg_firstName} {user.tg_lastName}"
+        elif user.tg_firstName:
+            user_data["name"] = user.tg_firstName
+        elif user.tg_lastName:
+            user_data["name"] = user.tg_lastName
+
         if user_last:
-            user_data = {
-                "tg_id": user.tg_id,
-                "tg_firstName": user.tg_firstName,
-                "tg_lastName": user.tg_lastName,
-                "tg_username": user.tg_username,
-                "last_message": datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
-            }
+            user_data["last_message"] = datetime.strftime(user_last.created_at, "%Y-%m-%d %H:%M:%S")
 
-            users_with_last_message.append(user_data)
+        users_with_last_message.append(user_data)
 
-    return JSONResponse(content=users_with_last_message)
+    response = {"users": users_with_last_message}
+    return JSONResponse(content=response)
 
 
 @app.post("/save-newsletter")
 async def save_newsletter(
-    newsletter_data: NewsletterData,
-    is_valid: bool = Depends(is_authenticated)
+        newsletter_data: NewsletterData,
+        deps: bool = Depends(check_authentication)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -161,7 +165,7 @@ async def save_newsletter(
         with open(image_path, "wb") as image_file:
             image_file.write(image_data_decoded)
 
-        new_newsletter = DailyNews(
+        new_newsletter = Newsletter(
             message=message,
             topic=topic,
             url=url,
@@ -174,15 +178,45 @@ async def save_newsletter(
         session.add(new_newsletter)
         await session.commit()
 
+        post_text = await NewsletterPublisher.formatting_post_text(new_newsletter)
+        cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
+
+        audio_files = await save_newsletter_audio(cleaned_post_text)
+        newsletter_audio = [
+            NewsletterAudio(
+                newsletter_id=new_newsletter.id,
+                speaker_id=audio_speaker,
+                file_path=audio_file
+            ) for audio_speaker, audio_file in audio_files.items()]
+        session.add_all(newsletter_audio)
+        await session.commit()
         return JSONResponse(content={"message": "Newsletter successfully saved"})
     except Exception as e:
         return JSONResponse(content={"error": f"Failed to save the newsletter. {str(e)}"}, status_code=500)
 
 
+async def save_newsletter_audio(post_text: str):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    if config.BOT_TYPE == "original":
+        audio = {
+            'Anastasia': await TextToSpeech.get_speech_by_voice('Anastasia', post_text),
+            'TutorBuddy': await TextToSpeech.get_speech_by_voice('TutorBuddy', post_text)
+        }
+    else:
+        audio = {
+            config.BOT_PERSON: await TextToSpeech.get_speech_by_voice(config.BOT_PERSON, post_text)
+        }
+    audio_output_files = {
+        key: os.path.join(audio_directory, f"newsletter_audio_{timestamp}_{key}.ogg") for key in audio.keys()}
+    print(audio_output_files)
+    AudioConverterCache(audio).convert_audio_to_ogg_fixed_files(audio_output_files)
+    return audio_output_files
+
+
 @app.post("/save-message")
 async def save_message(
-    message_data: MessageData,
-    is_valid: bool = Depends(is_authenticated)
+        message_data: MessageData,
+        deps: bool = Depends(check_authentication)
 ):
     """
     Сохранение рассылки в базу DailyNews.
@@ -222,7 +256,7 @@ async def save_message(
 
 
 @app.get("/get_newsletters")
-async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
+async def get_newsletters(deps: bool = Depends(check_authentication)):
     """
     Возвращает информацию о всех рассылках пользователей.
     Пример успешного ответа:
@@ -238,7 +272,7 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
     ]
     ```
     """
-    query = select(DailyNews)
+    query = select(Newsletter)
     result = await session.execute(query)
     newsletters = result.scalars().unique().all()
 
@@ -258,8 +292,46 @@ async def get_newsletters(is_valid: bool = Depends(is_authenticated)):
         return {"status": "empty"}
 
 
+@app.get("/get_fresh_newsletters")
+async def get_newsletters(deps: bool = Depends(check_authentication)):
+    """
+    Возвращает информацию о всех рассылках пользователей.
+    Пример успешного ответа:
+    ```json
+    [
+        {
+            "id": 7,
+            "message": "fdsfsdfsdfsdf",
+            "topic": "dfssdf",
+            "url": "http://127.0.0.1:8000/admin#",
+            "path_to_data": "static/img/img_newsletter/newsletter_image_20240311023457.jpg"
+        }
+    ]
+    ```
+    """
+    query = select(Newsletter).where(func.date(Newsletter.updated_at) == date.today())
+    print(query)
+    result = await session.execute(query)
+    newsletters = result.scalars().unique().all()
+
+    if newsletters:
+        newsletters_list = [
+            {
+                "id": newsletter.id,
+                "message": newsletter.message,
+                "topic": newsletter.topic,
+                "url": newsletter.url,
+                "path_to_data": newsletter.path_to_data,
+            }
+            for newsletter in newsletters
+        ]
+        return JSONResponse(content=newsletters_list)
+    else:
+        return JSONResponse(content=[])
+
+
 @app.get("/get_newsletter_info/{newsletter_id}")
-async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_newsletter_info(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Возвращает информацию о рассылке по её идентификатору.
     Пример успешного ответа:
@@ -274,7 +346,7 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_au
     }
     ```
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
+    query = select(Newsletter).where(Newsletter.id == newsletter_id)
     result = await session.execute(query)
     newsletter = result.scalars().first()
 
@@ -293,7 +365,8 @@ async def get_newsletter_info(newsletter_id: int, is_valid: bool = Depends(is_au
 
 
 @app.put("/change_newsletter_info")
-async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = Depends(is_authenticated)):
+async def change_newsletter_info(
+        newsletter: ChangeNewsletter, deps: bool = Depends(check_authentication)):
     """
     Изменение DailyNews.
     Пример запроса:
@@ -306,7 +379,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
     ```
     """
     try:
-        query = select(DailyNews).where(DailyNews.id == newsletter.newsletter_id)
+        query = select(Newsletter).where(Newsletter.id == newsletter.newsletter_id)
         result = await session.execute(query)
         newsletter_info = result.scalars().first()
         setattr(newsletter_info, newsletter.column, newsletter.changed_text)
@@ -318,7 +391,7 @@ async def change_newsletter_info(newsletter: ChangeNewsletter, is_valid: bool = 
 
 
 @app.delete("/del_newsletter/{newsletter_id}")
-async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def del_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Удаление рассылки по идентификатору newsletter_id.
     Пример ответа:
@@ -328,38 +401,77 @@ async def del_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authent
     }
     ```
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(query)
-    newsletter = result.scalars().first()
-
-    if os.path.exists(newsletter.path_to_data):
-        os.remove(newsletter.path_to_data)
-
-    delete_query = delete(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(delete_query)
-    await session.commit()
+    await NewsletterService.delete_newsletter(newsletter_id)
 
     return {"status": f"success delete newsletter with id: {newsletter_id}"}
 
 
+@app.post("/renew_newsletter/{newsletter_id}")
+async def renew_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
+    """
+    Обновление рассылки по идентификатору newsletter_id.
+    Пример ответа:
+    ```json
+    {
+        "status": "success renew newsletter with id: 123"
+    }
+    ```
+    """
+    await NewsletterService.renew_newsletter(newsletter_id)
+    new_newsletter = await NewsletterService.get_newsletter(newsletter_id)
+
+    post_text = await NewsletterPublisher.formatting_post_text(new_newsletter)
+    cleaned_post_text = await NewsletterPublisher.remove_html_tags(post_text)
+
+    audio_files = await save_newsletter_audio(cleaned_post_text)
+    newsletter_audio = [
+        NewsletterAudio(
+            newsletter_id=new_newsletter.id,
+            speaker_id=audio_speaker,
+            file_path=audio_file
+        ) for audio_speaker, audio_file in audio_files.items()]
+    session.add_all(newsletter_audio)
+    await session.commit()
+
+    return {"status": f"success renewed newsletter with id: {newsletter_id}"}
+
+
 @app.get("/send_newsletter/{newsletter_id}")
-async def send_newsletter(newsletter_id: int, is_valid: bool = Depends(is_authenticated)):
+async def send_newsletter(newsletter_id: int, deps: bool = Depends(check_authentication)):
     """
     Отправляет рассылку по newsletter_id
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_id)
-    result = await session.execute(query)
-    newsletter = result.scalars().first()
-    await Newsletter().send_newsletter(newsletter)
+    newsletter = await NewsletterService.get_newsletter(newsletter_id)
+    await NewsletterPublisher().send_newsletter(newsletter)
+    return {"message": "Рассылка успешно отправлена"}
+
+
+@app.get("/send_newsletter/{newsletter_id}/{tg_id}")
+async def send_newsletter_in_chat(newsletter_id: int, tg_id: str, deps: bool = Depends(check_authentication)):
+    """
+    Отправляет рассылку по newsletter_id
+    """
+    newsletter = await NewsletterService.get_newsletter(newsletter_id)
+    await NewsletterPublisher().send_newsletter_to_chat(newsletter, tg_id)
+    return {"message": "Рассылка успешно отправлена"}
+
+
+@app.get("/send_news_gallery")
+async def send_news_gallery():
+    """
+    Отправляет рассылку по newsletter_id
+    """
+    await NewsGallery().send_news_gallery()
     return {"message": "Рассылка успешно отправлена"}
 
 
 @app.post("/send_newsletter_datetime")
-async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: bool = Depends(is_authenticated)):
+async def send_newsletter(
+        newsletter_data: SendNewsletterDatetime, deps: bool = Depends(check_authentication)):
     """
     Отправляет рассылку по newsletter_id в дату datetime
     """
-    query = select(DailyNews).where(DailyNews.id == newsletter_data.newsletter_id)
+    query = select(Newsletter).where(Newsletter.id == newsletter_data.newsletter_id)
     result = await session.execute(query)
     newsletter = result.scalars().first()
 
@@ -368,34 +480,7 @@ async def send_newsletter(newsletter_data: SendNewsletterDatetime, is_valid: boo
 
 
 @app.get("/get_message_history_user/{tg_id}")
-async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authenticated)):
-    """
-    Получение истории сообщений для пользователя с указанным tg_id.
-    Пример успешного ответа:
-    ```json
-    [
-        {
-            "message": "Привет, как дела?",
-            "role": "user",
-            "type": "text",
-            "created_at": "2024-03-12 15:30:45"
-        },
-        {
-            "message": "Привет! Всё отлично, спасибо!",
-            "role": "admin",
-            "type": "text",
-            "created_at": "2024-03-12 15:35:12"
-        }
-    ]
-    ```
-
-    Пример ответа, если история пуста:
-    ```json
-    {
-        "status": "empty"
-    }
-    ```
-    """
+async def get_message_history(tg_id: int, deps: bool = Depends(check_authentication)):
     query = select(MessageHistory).where(MessageHistory.tg_id == str(tg_id))
     result = await session.execute(query)
     message_history = result.scalars().unique().all()
@@ -403,20 +488,24 @@ async def get_message_history(tg_id: int, is_valid: bool = Depends(is_authentica
     if message_history:
         message_history_list = [
             {
-                "message": message.message,
-                "role": message.role,
-                "type": message.type,
-                "created_at": datetime.strftime(message.created_at, "%Y-%m-%d %H:%M:%S")
+                "id": idx + 1,
+                "from_id": 2 if message.role == "assistant" else 1,
+                "to_id": 1 if message.role == "assistant" else 2,
+                "msg": message.message,
+                "has_dropDown": True,
+                "datetime": datetime.strftime(message.created_at, "%I:%M %p"),
+                "isReplied": 2 if message.role == "assistant" else 1
             }
-            for message in message_history
+            for idx, message in enumerate(message_history)
         ]
-        return JSONResponse(content=message_history_list)
+        response = {"chats": message_history_list}
+        return JSONResponse(content=response)
     else:
         return {"status": "empty"}
 
 
 @app.get("/get_info_user/{tg_id}")
-async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_user_profile(tg_id: int, deps: bool = Depends(check_authentication)):
     """
     Получение информации о пользователе с указанным tg_id.
     Пример успешного ответа:
@@ -478,7 +567,7 @@ async def get_user_profile(tg_id: int, is_valid: bool = Depends(is_authenticated
 
 
 @app.get("/get_statistic")
-async def get_statistic(is_valid: bool = Depends(is_authenticated)):
+async def get_statistic(deps: bool = Depends(check_authentication)):
     """
     Получение статистики по приложению.
     Пример успешного ответа:
@@ -524,7 +613,7 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
         "count_users": count_users,
         "count_messages": count_messages,
         "count_topic": count_topic_dict_filtered,
-        "count_choice_nastya":count_choice_nastya,
+        "count_choice_nastya": count_choice_nastya,
         "count_choice_bot": count_choice_bot
     }
 
@@ -532,7 +621,7 @@ async def get_statistic(is_valid: bool = Depends(is_authenticated)):
 
 
 @app.get("/get_message_hint_user/{tg_id}")
-async def get_message_hint_user(tg_id: int, is_valid: bool = Depends(is_authenticated)):
+async def get_message_hint_user(tg_id: int, deps: bool = Depends(check_authentication)):
     """
     Получение информации о ошибках пользователя с указанным tg_id.
     Пример успешного ответа:
@@ -570,12 +659,28 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@app.get("/1")
-async def login_page(request: Request):
+@app.get("/change_password")
+async def change_page(request: Request):
     """
     Отображение страницы входа.
     """
-    return templates.TemplateResponse("login_old.html", {"request": request})
+    return templates.TemplateResponse("change_password.html", {"request": request})
+
+
+@app.get("/dialogs")
+async def dialogs_page(request: Request, deps: bool = Depends(check_authentication)):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("dialogs.html", {"request": request})
+
+
+@app.get("/profile")
+async def profile_page(request: Request, deps: bool = Depends(check_authentication)):
+    """
+    Отображение страницы входа.
+    """
+    return templates.TemplateResponse("profile.html", {"request": request})
 
 
 @app.post("/login")
@@ -599,21 +704,30 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), request: Reque
 
 @app.post("/change_password")
 async def change_password(username: str = Form(...),
+                          old_password: str = Form(...),
                           new_password: str = Form(...),
-                          confirm_password: str = Form(...), request: Request = None):
+                          confirm_password: str = Form(...),
+                          request: Request = None):
     """
     Смена пароля.
     """
     query = select(Admin).where(Admin.username == username)
     result = await session.execute(query)
     admin = result.scalars().first()
-    if admin and new_password == confirm_password:
-        hashed_password = pwd_context.hash(new_password)
-        admin.password = hashed_password
-        await session.commit()
-        return await generate_token_and_redirect(username)
-    error_message_change_password = "Username or passwords do not match"
-    return templates.TemplateResponse("login.html", {"error_message": error_message_change_password, "request": request})
+
+    if admin and pwd_context.verify(old_password, admin.password):
+        if new_password == confirm_password:
+            hashed_password = pwd_context.hash(new_password)
+            admin.password = hashed_password
+            await session.commit()
+            return await generate_token_and_redirect(username)
+        else:
+            error_message_change_password = "New passwords do not match"
+    else:
+        error_message_change_password = "Username or old password do not match"
+
+    return templates.TemplateResponse("login.html",
+                                      {"error_message": error_message_change_password, "request": request})
 
 
 @app.get("/logout")
@@ -624,6 +738,33 @@ async def logout(request: Request):
     response = RedirectResponse(url="/")
     return response
 
+
+@app.post("/add_summary")
+async def add_summary(summary_data: SummaryFromParsing):
+    query = select(Newsletter).where(Newsletter.title == summary_data.title)
+    result = await session.execute(query)
+    existing_entry = result.scalars().first()
+
+    if existing_entry:
+        return {"message": "duplicate"}
+
+    newsletter_entry = Newsletter(
+        message=summary_data.message,
+        topic=summary_data.topic,
+        url=summary_data.url,
+        path_to_data=summary_data.path_to_data,
+        publisher=summary_data.publisher,
+        publication_date=summary_data.publication_date,
+        title=summary_data.title
+    )
+
+    session.add(newsletter_entry)
+    await session.commit()
+
+    return {"message": "Data saved successfully"}
+
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app="src.admin.admin_main:app", port=8001, reload=True)

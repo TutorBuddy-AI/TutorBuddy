@@ -3,16 +3,17 @@ from fastapi.responses import RedirectResponse
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-import os
 import jwt
 
 from config.config import config
 
 app = FastAPI()
+
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 image_directory = "static/img/img_newsletter"
+audio_directory = "static/audio/newsletter_audio"
 
 
 def create_jwt_token(data: dict):

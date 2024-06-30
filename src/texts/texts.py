@@ -1,6 +1,6 @@
 from aiogram import md
 from aiogram.utils.markdown import bold
-
+from emoji import emojize
 from src.utils.payments.tariff_plans import get_tariff_plans
 
 
@@ -122,15 +122,37 @@ def get_check_text():
         "Tell me, how is your day going?")
 
 
-def get_start_person_talk(person_name: str):
-    return (
-            f"My name is {person_name} and I'm a certified English teacher. "
-            "I specialize in teaching Business English to tech professionals, IT and digital experts and entrepreneurs."
-            "\n\n"
-            "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
-            "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
-            "and even have friendly debates! "
-            "This personal touch will truly level up your English fluency.")
+def get_start_person_talk(person_id: str, person_name: str):
+    match person_id:
+        case "Victoria":
+            persons_text = (
+                f"My name is Victoria. "
+                f"I’m an English teacher for adults. "
+                f"I hold a degree in English language and linguistics and utilize a variety of teaching approaches. "
+                f"I can help you with improving your pronunciation, speaking, "
+                f"and I can also be your perfect English friend and mentor, "
+                f"ensuring your English improves significantly!")
+        case "Katya":
+            persons_text = (
+                f"My name is Katya, and I'm here to help you excel in English. "
+                f"Whether you're preparing for interviews, gearing up for a move to an English-speaking country, "
+                f"or adjusting to a new environment, I've got you covered."
+                "\n\n"
+                "I'm not your average chatbot – you'll get to know me through visuals and voice interactions. "
+                "Think of me as your conversation partner, ready to engage in friendly debates! "
+                "This personal touch will truly enhance your English fluency "
+                "and give you the confidence you need to succeed.")
+        case _:
+            persons_text = (
+                f"My name is {person_name} and I'm a certified English teacher. "
+                "I specialize in teaching Business English to tech professionals, "
+                "IT and digital experts and entrepreneurs."
+                "\n\n"
+                "I'm not just another chatbot — you'll get to know me through visuals and voice interactions. "
+                "I'm here as your speaking partner, ready to discuss ideas, share opinions, "
+                "and even have friendly debates! "
+                "This personal touch will truly level up your English fluency.")
+    return persons_text
 
 
 def get_meet_bot_text():
@@ -171,11 +193,19 @@ def get_first_summary(name):
            f"Later on I will also share summaries of videos and podcasts 🎧 Are you interested? 😎"
 
 
-def get_pin_message(translate: bool):
+def get_pin_message(translate: bool = False):
     if translate:
-        return md.escape_md('Кстати, чтобы не потерять наш чат, предлагаю закрепить его в ленте 😉 Это можно сделать просто нажав на него в ленте чатов и выбрав "Закрепить" 📌')
+        return 'Кстати, чтобы не потерять наш чат, предлагаю закрепить его в ленте 😉 Это можно сделать просто нажав на него в ленте чатов и выбрав "Закрепить" 📌'
     else:
-        return md.escape_md("By the way, I'm afraid you can lose our chat and your opportunity to become a fluent speaker. Make me your first priority! All you need to do is to open your chat list, long press our chat and tap 'pin', so you will see it on top! 📌")
+        return "By the way, I'm afraid you can lose our chat and your opportunity to become a fluent speaker. Make me your first priority! All you need to do is to open your chat list, long press our chat and tap 'pin', so you will see it on top! 📌"
+
+
+def get_bot_waiting_message(speaker: str) -> str:
+    return f"⏳ {speaker} is thinking … Please wait"
+
+
+def get_translation_text(lang):
+    return f"\n\n{emojize(':' + lang + ':', language='alias')} Translated text:\n"
 
 # def get_models_text():
 #     return md.text(

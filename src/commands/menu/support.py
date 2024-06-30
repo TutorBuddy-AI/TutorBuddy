@@ -10,7 +10,7 @@ from src.filters.is_not_register_filter import IsRegister
 from src.keyboards import get_go_back_inline_keyboard
 from src.states import FormSupport
 from src.utils.answer import AnswerRenderer
-from src.utils.generate.question_history.question_history import SupportHistory
+from src.utils.generator.question_history.question_history import SupportHistory
 
 support_router = Router(name=__name__)
 

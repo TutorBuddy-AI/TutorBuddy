@@ -1,7 +1,7 @@
 from typing import Any
 
 from src.utils.user import UserService
-from src.utils.generate import GenerateAI
+from src.utils.generator import GenerateAI
 from src.config import config
 
 import ast

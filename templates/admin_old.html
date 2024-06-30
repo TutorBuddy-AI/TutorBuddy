@@ -59,6 +59,10 @@
         <img width="18" height="18" src="https://img.icons8.com/ios/50/add-property.png" alt="add-property"/>
             Add news
         </a>
+        <a href="#" onclick="openSubSendGallery()">
+        <img width="18" height="18" src="https://img.icons8.com/ios/50/play-property.png" alt="play-property"/>
+            Send gallery
+        </a>
 <!--        <a href="#" onclick="openSubNewsletter()">-->
 <!--        <img width="18" height="18" src="https://img.icons8.com/ios/50/send&#45;&#45;v1.png" alt="send&#45;&#45;v1"/>-->
 <!--            Отправить сообщение-->
@@ -85,6 +89,14 @@
     </div>
 </div>
 
+<div id="renewConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('renewConfirmationModal')">&times;</span>
+        <p>Are you sure you want to renew the newsletter with ID <span id="renewModalNewsletterId"></span>?</p>
+        <button class="confirm-button" onclick="confirmRenewal()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('renewConfirmationModal')">Cancel</button>
+    </div>
+</div>
 
 <div id="sendConfirmationModal" class="modal">
     <div class="modal-content">
@@ -95,7 +107,29 @@
     </div>
 </div>
 
+<div id="sendChatConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('sendChatConfirmationModal')">&times;</span>
+        <p>
+            Are you sure you want to send the newsletter with ID
+            <span id="sendChatModalNewsletterId"></span>
+            to chat with ID
+            <span id="sendChatModalTgId"></span>?
+        </p>
+        <button class="confirm-button" onclick="confirmSendChat()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('sendChatConfirmationModal')">Cancel</button>
+    </div>
+</div>
 
+
+<div id="sendGalleryConfirmationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('sendGalleryConfirmationModal')">&times;</span>
+        <p>Are you sure you want to send gallery with fresh news?</p>
+        <button class="confirm-button" onclick="confirmSendGallery()">Yes</button>
+        <button class="cancel-button" onclick="closeModal('sendGalleryConfirmationModal')">Cancel</button>
+    </div>
+</div>
 
 
 <div id="sendDatetimeConfirmationModal" class="modal">
