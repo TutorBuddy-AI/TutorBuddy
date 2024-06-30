@@ -111,7 +111,7 @@ async function openSubProfile(tgId) {
     await new Promise(resolve => setTimeout(resolve, 0));
 
     try {
-        const response = await fetch(`https://admin.tutorbuddyai.tech/test/get_info_user/${tgId}`);
+        const response = await fetch(`./get_info_user/${tgId}`);
         const data = await response.json();
 
         const firstName = data.tg_firstName || '';
