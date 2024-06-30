@@ -9,12 +9,13 @@ from src.config import bot
 from src.filters.is_not_register_filter import IsRegister, IsNotRegister
 from src.keyboards import get_cancel_keyboard_button, get_go_back_inline_keyboard
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_english_level_keyboard
-from src.states import FormName, FormNativeLanguage, FormEnglishLevel, FormCity
+from src.states import FormName, FormNativeLanguage, FormEnglishLevel
 from src.utils.answer import AnswerRenderer
 from src.utils.user import UserService
 from src.texts.texts import get_incorrect_native_language_question, get_other_native_language_question
 from src.database.session import async_session_factory
 from src.database.models.user import UserLocation
+from states.form import FormCityTimezone
 
 edit_profile_router = Router(name=__name__)
 
@@ -66,7 +67,7 @@ async def change_city_query_handler(query: CallbackQuery, state: FSMContext):
         "Please select your city:",
         reply_markup=city_change_keyboard
     )
-    await state.set_state(FormCity.new_city)
+    await state.set_state(FormCityTimezone.city_timezone)
 
 
 @edit_profile_router.callback_query(F.startswith("city_"))

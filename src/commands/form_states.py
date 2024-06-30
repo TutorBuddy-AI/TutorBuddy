@@ -7,7 +7,7 @@ from src.database import session
 from sqlalchemy import select
 
 from src.config import bot
-from src.states import Form, FormCity
+from src.states import Form
 from src.filters import IsNotRegister
 from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
@@ -235,7 +235,7 @@ async def send_timezone_city_question(tg_id: int, state: FSMContext):
     await bot.send_message(tg_id, "Which city are you from?", reply_markup=city_keyboard)
 
 
-@form_router.message(Form.timezone, F.text)
+@form_router.message(Form.city_timezone, F.text)
 async def process_city_answer(query: types.CallbackQuery, state: FSMContext):
     timezone = query.data.split("_")[1]
     if timezone == "other":
