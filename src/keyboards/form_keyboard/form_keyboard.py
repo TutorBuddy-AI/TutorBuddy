@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQu
 
 from src.keyboards import get_go_back_inline_keyboard
 from src.utils.answer import AnswerRenderer
+from utils.timezone.timezone_mapping import CITY_TIMEZONES
 
 
 async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -> InlineKeyboardMarkup:
@@ -173,12 +174,10 @@ async def get_keyboard_resume_news_subs() -> InlineKeyboardMarkup:
 
 
 async def get_choose_timezone_keyboard(is_caption=True) -> InlineKeyboardMarkup:
-    utc1_button = InlineKeyboardButton(text='Лондон (UTC+1)', callback_data='timezone_utc01')
-    utc2_button = InlineKeyboardButton(text='Калининград (UTC+2)', callback_data='timezone_utc02')
-    utc3_button = InlineKeyboardButton(text='Мск - Спб (UTC+3)', callback_data='timezone_utc03')
-    utc5_button = InlineKeyboardButton(text='Уфа (UTC+5)', callback_data='timezone_utc05')
-    utc7_button = InlineKeyboardButton(text='Красноярск (UTC+7)', callback_data='timezone_utc07')
-    utc10_button = InlineKeyboardButton(text='Владивосток (UTC+10)', callback_data='timezone_utc10')
+    city_buttons = [
+        InlineKeyboardButton(text=button_name, callback_data=f'timezone_{timezone}')
+        for button_name, _, timezone in CITY_TIMEZONES]
+    inline_keyboard_city_buttons = [city_buttons[i:i + 2] for i in range(0, len(city_buttons), 2)]
 
     other_timezone_button = InlineKeyboardButton(text='Other ✍️', callback_data='timezone_other')
 
@@ -188,9 +187,7 @@ async def get_choose_timezone_keyboard(is_caption=True) -> InlineKeyboardMarkup:
         translate_button = AnswerRenderer.get_button_text_translation_standalone()
 
     choose_timezone_inline_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [utc1_button, utc2_button],
-        [utc3_button, utc5_button],
-        [utc7_button, utc10_button],
+        *inline_keyboard_city_buttons,
         [other_timezone_button],
         [translate_button]
     ])

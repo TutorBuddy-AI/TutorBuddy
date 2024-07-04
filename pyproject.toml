@@ -31,6 +31,7 @@ aiogram = "3.4.1"
 pyjwt = "^2.8.0"
 bcrypt = "^4.1.2"
 pytz = "^2024.1"
+emoji = "^2.11.1"
 
 
 [build-system]

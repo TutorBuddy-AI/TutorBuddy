@@ -34,10 +34,13 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-from utils.user.schemas import UserInfo
+from utils.timezone.timezone_mapping import get_timezone_city_mapping
+from utils.user.schemas import UserInfo, StateUserInfo
 
 from src.database.models.user import UserLocation
 from src.database.session import session
+from utils.user.schemas.user import StateLocationInfo
+from utils.user.user_helper import UserLocationHelper
 
 form_router = Router(name=__name__)
 
@@ -238,43 +241,38 @@ async def process_other_topic_handler(message: types.Message, state: FSMContext)
 
 
 async def send_timezone_city_question(tg_id: int, state: FSMContext):
-    await state.set_state(Form.timezone)
+    await state.set_state(Form.city_timezone)
     city_keyboard = await get_choose_timezone_keyboard(is_caption=True)
     await bot.send_message(tg_id, "Which city are you from?", reply_markup=city_keyboard)
 
 
-@form_router.message(Form.city_timezone, F.text)
+@form_router.callback_query(Form.city_timezone, F.data.startswith("timezone"))
 async def process_city_answer(query: types.CallbackQuery, state: FSMContext):
     timezone = query.data.split("_")[1]
     if timezone == "other":
-        await state.update_data({"timezone": "utc03"})
         await state.set_state(Form.other_city_timezone)
         await bot.send_message(query.message.chat.id, "Please, send me the name of your city")
     else:
         await state.update_data({"timezone": timezone})
+        city_map = get_timezone_city_mapping()
+        await state.update_data({"city": city_map[timezone]})
         await create_user_setup_speaker_choice(query.message, state)
 
 
 @form_router.message(Form.other_city_timezone, F.text)
 async def process_city_answer(message: types.Message, state: FSMContext):
     city_name = message.text
-    async with session() as db_session:
-        existing_location = await db_session.get(UserLocation, str(message.chat.id))
-        if existing_location:
-            await bot.send_message(message.chat.id, "We already have your city information on record!")
-        else:
-            user_location = UserLocation(tg_id=str(message.chat.id), city_name=city_name)
-            db_session.add(user_location)
-            await db_session.commit()
-            await bot.send_message(message.chat.id, "Thanks for letting me know!")
+    await state.update_data({"other_city": city_name})
 
     await create_user_setup_speaker_choice(message, state)
 
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
     state_data = await state.get_data()
-    user_info: UserInfo = await UserHelper().group_user_info(state_user_info=state_data, message=message)
-    # user_location_info = await UserLocation().get_user_location_info(ip_address=state_data["ip_address"])
+    user_info: UserInfo = await UserHelper().group_user_info(
+        state_user_info=state_data, message=message)
+    user_location_info = await UserLocationHelper().group_user_info(
+        state_location_info=StateLocationInfo.model_validate(state_data))
     great_markup = AnswerRenderer.get_markup_text_translation_standalone()
 
     await UserService().create_user(user_info=user_info)  # Когда будет необходим ip, подставить
@@ -285,7 +283,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
         f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me.",
         parse_mode=ParseMode.HTML,
         reply_markup=great_markup)
-
+    await asyncio.sleep(1)
     if config.BOT_TYPE == "original":
         await choose_person(message, state, user_info)
     else:

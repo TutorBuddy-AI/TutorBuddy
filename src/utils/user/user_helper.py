@@ -1,6 +1,7 @@
 from aiogram.types import Message
 
 from src.utils.user.schemas import UserInfo, StateUserInfo
+from utils.user.schemas.user import StateLocationInfo, LocationInfo
 
 
 class UserHelper:
@@ -23,5 +24,18 @@ class UserHelper:
             "topic": state_user_info["topic"],
             "additional_topic": state_user_info["additional_topic"],
             "english_level": state_user_info["english_level"]
+        }
+        return user_info
+
+
+class UserLocationHelper:
+    def __init__(self):
+        ...
+
+    async def group_user_info(self, state_location_info: StateLocationInfo) -> LocationInfo:
+
+        user_info = {
+            "tg_id": message.chat.id,
+
         }
         return user_info

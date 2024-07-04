@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class GetUserInfo(BaseModel):
     name: str | None
     goal: str | None
@@ -7,6 +8,7 @@ class GetUserInfo(BaseModel):
     topic: str | None
     english_level: str | None
     speaker: str | None
+
 
 class GetUserPersonInfo(BaseModel):
     name: str | None
@@ -17,6 +19,7 @@ class GetUserPersonInfo(BaseModel):
     speaker_id: str | None
     speaker_short_name: str | None
     speaker_full_name: str | None
+
 
 class UserInfo(BaseModel):
     tg_id: str
@@ -56,3 +59,15 @@ class StateUserInfo(BaseModel):
     topic: str | None
     additional_topic: str | None
     source: str | None
+
+
+class StateLocationInfo(BaseModel):
+    city: str | None
+    timezone: str | None
+    other_city: str | None
+
+
+class LocationInfo(BaseModel):
+    city: str | None
+    timezone: str
+    other_city: str | None
