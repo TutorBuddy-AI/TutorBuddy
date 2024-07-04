@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const topics = data.count_topic;
         const goals = data.count_goal;
         const dailyMessages = data.count_messages_days
-        const maxCount = Math.max(data.count_messages_days.counts)
+        const maxCount = Math.max.apply(Math, data.count_messages_days.counts)
         
         const seriesTopics = Object.entries(topics).map(([topic, count]) => ({ name: topic, data: [count] }));
         const seriesGoals = Object.entries(goals).map(([goal, count]) => ({ name: goal, data: [count] }));

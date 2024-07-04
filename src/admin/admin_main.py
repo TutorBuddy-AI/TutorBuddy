@@ -609,7 +609,12 @@ async def get_statistic(deps: bool = Depends(check_authentication)):
     count_choice_bot = result_count_choice_bot.scalar()
 
     query_count_topic = text(
-        'SELECT unnest(string_to_array("topic", \' \')) AS topic, COUNT(*) AS topic_count FROM "user" GROUP BY topic;')
+        """select
+            topic, 
+            count(*) AS topic_count
+        from (SELECT unnest(string_to_array("topic", ' ')) AS topic FROM "user") as topics 
+        where length(topic) != 0 
+        group by topic;""")
     result_count_topic = await session.execute(query_count_topic)
     count_topic_rows = result_count_topic.fetchall()
     count_topic_dict = dict(count_topic_rows)
@@ -625,8 +630,8 @@ async def get_statistic(deps: bool = Depends(check_authentication)):
     start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     query_count_messages_by_day = text(f"""
         SELECT
-            to_char(day, 'dd-mm-yyyy') as day,
-            count
+             to_char(day, 'dd-mm-yyyy') as day,
+             count
         FROM (
             SELECT
                 date_trunc('day', mh.created_at) as day,
@@ -635,7 +640,7 @@ async def get_statistic(deps: bool = Depends(check_authentication)):
             WHERE (mh.created_at>='{start_date}') and (mh.role='user')
             GROUP BY day
             ORDER BY day
-        )
+        ) AS daily_stats
     """)
     result_count_messages_by_day = await session.execute(query_count_messages_by_day)
     count_messages_rows = result_count_messages_by_day.fetchall()
