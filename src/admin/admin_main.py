@@ -1,5 +1,5 @@
 import tempfile
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import base64
 import os
 from typing import Any
@@ -493,7 +493,8 @@ async def get_message_history(tg_id: int, deps: bool = Depends(check_authenticat
                 "to_id": 1 if message.role == "assistant" else 2,
                 "msg": message.message,
                 "has_dropDown": True,
-                "datetime": datetime.strftime(message.created_at, "%I:%M %p"),
+                "date": datetime.strftime(message.created_at, "%d-%m-%Y"),
+                "time": datetime.strftime(message.created_at, "%I:%M %p"),
                 "isReplied": 2 if message.role == "assistant" else 1
             }
             for idx, message in enumerate(message_history)
@@ -590,9 +591,14 @@ async def get_statistic(deps: bool = Depends(check_authentication)):
     result_count_users = await session.execute(query_count_users)
     count_users = result_count_users.scalar()
 
-    query_count_messages = text('SELECT COUNT(*) AS count_messages FROM "message_history"')
+    query_count_messages = text(
+        "SELECT COUNT(*) AS count_messages FROM message_history WHERE role = 'user'")
     result_count_messages = await session.execute(query_count_messages)
     count_messages = result_count_messages.scalar()
+
+    query_count_mistakes = text('SELECT COUNT(*) AS count_messages FROM "message_mistakes"')
+    result_count_mistakes = await session.execute(query_count_mistakes)
+    count_mistakes = result_count_mistakes.scalar()
 
     query_count_user_choice_nastya = text('SELECT COUNT(*) FROM "user" WHERE "user"."speaker" = :speaker')
     result_count_choice_nastya = await session.execute(query_count_user_choice_nastya, {"speaker": "Anastasia"})
@@ -609,12 +615,44 @@ async def get_statistic(deps: bool = Depends(check_authentication)):
     count_topic_dict = dict(count_topic_rows)
     count_topic_dict_filtered = {key: value for key, value in count_topic_dict.items() if key != ''}
 
+    query_count_goal = text(
+        'SELECT goal, COUNT(*) AS goal_count FROM "user" GROUP BY goal;')
+    result_count_goal = await session.execute(query_count_goal)
+    count_goal_rows = result_count_goal.fetchall()
+    count_goal_dict = dict(count_goal_rows)
+    count_goal_dict_filtered = {key: value for key, value in count_goal_dict.items() if key != ''}
+
+    start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    query_count_messages_by_day = text(f"""
+        SELECT
+            to_char(day, 'dd-mm-yyyy') as day,
+            count
+        FROM (
+            SELECT
+                date_trunc('day', mh.created_at) as day,
+                COUNT(*) as count
+            FROM message_history mh
+            WHERE (mh.created_at>='{start_date}') and (mh.role='user')
+            GROUP BY day
+            ORDER BY day
+        )
+    """)
+    result_count_messages_by_day = await session.execute(query_count_messages_by_day)
+    count_messages_rows = result_count_messages_by_day.fetchall()
+    count_messages_days = dict(count_messages_rows)
+    days = [(datetime.now() + timedelta(days=depth)).strftime("%d-%m-%Y") for depth in range(-30, 0)]
+    count_messages_days_filled = [count_messages_days.get(day, 0) for day in days]
+    daily_message_counts = {"days": days, "counts": count_messages_days_filled}
+
     statistic = {
         "count_users": count_users,
         "count_messages": count_messages,
+        "count_mistakes": count_mistakes,
         "count_topic": count_topic_dict_filtered,
+        "count_goal": count_goal_dict_filtered,
         "count_choice_nastya": count_choice_nastya,
-        "count_choice_bot": count_choice_bot
+        "count_choice_bot": count_choice_bot,
+        "count_messages_days": daily_message_counts
     }
 
     return JSONResponse(content=statistic)

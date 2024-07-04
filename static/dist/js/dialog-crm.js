@@ -7,7 +7,7 @@ async function openSubDialog() {
     const pageBodyElement = document.querySelector('.page-content');
 
     try {
-        const response = await fetch('https://admin.tutorbuddyai.tech/test/get_users');
+        const response = await fetch('./get_users');
         const responseData = await response.json();
         const users = responseData.users;
 
@@ -35,7 +35,7 @@ async function openSubDialog() {
                         </div>
                     </a>
                 `;
-                listItem.onclick = () => getMessageHistory(user);
+                listItem.onclick = () => getMessageHistory(user.tg_id);
                 
                 userList.appendChild(listItem);
 
@@ -78,7 +78,7 @@ document.querySelector('.chat-user-list').addEventListener('click', function(eve
 // ОТПРАВКА НА СЕРВЕР ЗАПРОСА ПОУЛЧЕНИЯ ИСТОРИИ СООБЩЕНИЙ ПО ТГ АЙДИ
 async function getMessageHistory(tg_id) {
    try {
-      const messageHistoryResponse = await fetch(`https://admin.tutorbuddyai.tech/test/get_message_history_user/${tg_id}`);
+      const messageHistoryResponse = await fetch(`./get_message_history_user/${tg_id}`);
 
       if (!messageHistoryResponse.ok) {
          throw new Error(`HTTP error Status: ${messageHistoryResponse.status}`);
@@ -95,6 +95,7 @@ async function getMessageHistory(tg_id) {
 function displayDialog(chatData) {
     const conversationList = document.getElementById('users-conversation');
     conversationList.innerHTML = '';
+    var currDate = null;
 
     chatData.chats.forEach(chat => {
         const chatListItem = document.createElement('li');
@@ -103,6 +104,28 @@ function displayDialog(chatData) {
 
         const conversationListContent = document.createElement('div');
         conversationListContent.classList.add('conversation-list');
+
+        if (currDate != chat.date) {
+            const chatListDate = document.createElement('li');
+            chatListDate.classList.add('chat-list')
+            // Добавление времени к сообщению
+            const bubbleDate = document.createElement('div');
+            bubbleDate.setAttribute("class", "bubble-date");
+
+            const bubbleDateContent = document.createElement('div');
+            bubbleDateContent.setAttribute("class", "bubble-date-content");
+
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = chat.date;
+
+            bubbleDateContent.appendChild(dateSpan);
+            bubbleDate.appendChild(bubbleDateContent);
+
+            chatListDate.appendChild(bubbleDate)
+            conversationList.appendChild(chatListDate);
+            console.log(chat.date);
+            currDate = chat.date;
+        }
 
         // Создание аватара
         const chatAvatar = document.createElement('div');
@@ -131,7 +154,8 @@ function displayDialog(chatData) {
         // Добавление времени к сообщению
         const messageTime = document.createElement('small');
         messageTime.classList.add('text-muted', 'time');
-        messageTime.textContent = chat.datetime;
+        messageTime.textContent = chat.time;
+        console.log(chat.time);
         userChatContent.appendChild(messageTime);
 
         conversationListContent.appendChild(userChatContent);
