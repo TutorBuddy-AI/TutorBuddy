@@ -90,6 +90,21 @@ async function getMessageHistory(tg_id) {
 
    }
 }
+
+function scrollToBottom(id) {
+    setTimeout(function () {
+        var simpleBar = (document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper")) ?
+            document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper") : ''
+
+        var offsetHeight = document.getElementsByClassName("chat-conversation-list")[0] ?
+            document.getElementById(id).getElementsByClassName("chat-conversation-list")[0].scrollHeight - window.innerHeight + 335 : 0;
+        if (offsetHeight)
+            simpleBar.scrollTo({
+                top: offsetHeight,
+                behavior: "smooth"
+            });
+    }, 100);
+}
  
 // ДИНАМИЧЕСКИ СОБИРАЕМ ДИАЛОГ
 function displayDialog(chatData) {
@@ -163,13 +178,10 @@ function displayDialog(chatData) {
         // Добавление элемента списка сообщений в диалог
         chatListItem.appendChild(conversationListContent);
         conversationList.appendChild(chatListItem);
+        scrollToBottom(chatListItem.id);
     });
-
+    scrollToBottom("users-chat");
 }
-
-// СКРОЛ БАР
-var scrollEl = new SimpleBar(document.getElementById("chat-conversation"));
-scrollEl.getScrollElement().scrollTop = document.getElementById("users-conversation").scrollHeight;
 
 
 // ПОИСК ПО ИМЕНИ 
@@ -226,5 +238,3 @@ function updateUserDetails(fullname, lastMessage, tgId) {
         userImgDiv.appendChild(userAvatarImg);
     }
 }
-
-
