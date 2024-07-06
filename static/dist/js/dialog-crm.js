@@ -96,8 +96,7 @@ function scrollToBottom(id) {
         var simpleBar = (document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper")) ?
             document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper") : ''
 
-        var offsetHeight = document.getElementsByClassName("chat-conversation-list")[0] ?
-            document.getElementById(id).getElementsByClassName("chat-conversation-list")[0].scrollHeight - window.innerHeight + 335 : 0;
+        var offsetHeight = window.innerHeight + 335;
         if (offsetHeight)
             simpleBar.scrollTo({
                 top: offsetHeight,
@@ -238,3 +237,7 @@ function updateUserDetails(fullname, lastMessage, tgId) {
         userImgDiv.appendChild(userAvatarImg);
     }
 }
+
+// СКРОЛ БАР
+var scrollEl = new SimpleBar(document.getElementById("chat-conversation"));
+scrollEl.getScrollElement().scrollTop = document.getElementById("users-conversation").scrollHeight;
