@@ -238,7 +238,3 @@ function updateUserDetails(fullname, lastMessage, tgId) {
         userImgDiv.appendChild(userAvatarImg);
     }
 }
-
-// СКРОЛ БАР
-var scrollEl = new SimpleBar(document.getElementById("chat-conversation"));
-scrollEl.getScrollElement().scrollTop = document.getElementById("users-conversation").scrollHeight;
