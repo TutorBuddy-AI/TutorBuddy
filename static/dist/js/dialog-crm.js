@@ -96,7 +96,8 @@ function scrollToBottom(id) {
         var simpleBar = (document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper")) ?
             document.getElementById(id).querySelector("#chat-conversation .simplebar-content-wrapper") : ''
 
-        var offsetHeight = window.innerHeight + 335;
+        var offsetHeight = document.getElementsByClassName("chat-conversation-list")[0] ?
+        document.getElementById(id).getElementsByClassName("chat-conversation-list")[0].scrollHeight - window.innerHeight + 335 : 0;
         if (offsetHeight)
             simpleBar.scrollTo({
                 top: offsetHeight,
@@ -137,7 +138,6 @@ function displayDialog(chatData) {
 
             chatListDate.appendChild(bubbleDate)
             conversationList.appendChild(chatListDate);
-            console.log(chat.date);
             currDate = chat.date;
         }
 
@@ -169,7 +169,6 @@ function displayDialog(chatData) {
         const messageTime = document.createElement('small');
         messageTime.classList.add('text-muted', 'time');
         messageTime.textContent = chat.time;
-        console.log(chat.time);
         userChatContent.appendChild(messageTime);
 
         conversationListContent.appendChild(userChatContent);
@@ -177,7 +176,6 @@ function displayDialog(chatData) {
         // Добавление элемента списка сообщений в диалог
         chatListItem.appendChild(conversationListContent);
         conversationList.appendChild(chatListItem);
-        scrollToBottom(chatListItem.id);
     });
     scrollToBottom("users-chat");
 }
