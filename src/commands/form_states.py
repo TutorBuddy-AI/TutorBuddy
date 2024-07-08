@@ -231,40 +231,41 @@ async def process_topics(query: types.CallbackQuery, state: FSMContext, result_t
                                reply_markup=markup, parse_mode=ParseMode.HTML)
     else:
         await state.update_data({"additional_topic": ""})
-        await send_timezone_city_question(query.message.chat.id, state)
+        await create_user_setup_speaker_choice(query.message, state)
 
 
 @form_router.message(Form.additional_topic, F.text)
 async def process_other_topic_handler(message: types.Message, state: FSMContext):
     await state.update_data({"additional_topic": message.text})
-    await send_timezone_city_question(message.chat.id, state)
-
-
-async def send_timezone_city_question(tg_id: int, state: FSMContext):
-    await state.set_state(Form.city_timezone)
-    city_keyboard = await get_choose_timezone_keyboard(is_caption=True)
-    await bot.send_message(tg_id, "Which city are you from?", reply_markup=city_keyboard)
-
-
-@form_router.callback_query(Form.city_timezone, F.data.startswith("timezone"))
-async def process_city_answer(query: types.CallbackQuery, state: FSMContext):
-    timezone = query.data.split("_")[1]
-    if timezone == "other":
-        await state.set_state(Form.other_city_timezone)
-        await bot.send_message(query.message.chat.id, "Please, send me the name of your city")
-    else:
-        await state.update_data({"timezone": timezone})
-        city_map = get_timezone_city_mapping()
-        await state.update_data({"city": city_map[timezone]})
-        await create_user_setup_speaker_choice(query.message, state)
-
-
-@form_router.message(Form.other_city_timezone, F.text)
-async def process_city_answer(message: types.Message, state: FSMContext):
-    city_name = message.text
-    await state.update_data({"other_city": city_name})
-
     await create_user_setup_speaker_choice(message, state)
+    # await send_timezone_city_question(message.chat.id, state)
+
+
+# async def send_timezone_city_question(tg_id: int, state: FSMContext):
+#     await state.set_state(Form.city_timezone)
+#     city_keyboard = await get_choose_timezone_keyboard(is_caption=True)
+#     await bot.send_message(tg_id, "Which city are you from?", reply_markup=city_keyboard)
+
+
+# @form_router.callback_query(Form.city_timezone, F.data.startswith("timezone"))
+# async def process_city_answer(query: types.CallbackQuery, state: FSMContext):
+#     timezone = query.data.split("_")[1]
+#     if timezone == "other":
+#         await state.set_state(Form.other_city_timezone)
+#         await bot.send_message(query.message.chat.id, "Please, send me the name of your city")
+#     else:
+#         await state.update_data({"timezone": timezone})
+#         city_map = get_timezone_city_mapping()
+#         await state.update_data({"city": city_map[timezone]})
+#         await create_user_setup_speaker_choice(query.message, state)
+
+
+# @form_router.message(Form.other_city_timezone, F.text)
+# async def process_city_answer(message: types.Message, state: FSMContext):
+#     city_name = message.text
+#     await state.update_data({"other_city": city_name})
+#
+#     await create_user_setup_speaker_choice(message, state)
 
 
 async def create_user_setup_speaker_choice(message: types.Message, state: FSMContext):
