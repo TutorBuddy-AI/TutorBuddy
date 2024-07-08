@@ -1,6 +1,8 @@
 import asyncio
 import logging
 
+from transliterate import translit
+
 from aiogram.exceptions import TelegramBadRequest
 
 from commands.choose_speaker import continue_dialogue_with_person
@@ -11,7 +13,8 @@ from sqlalchemy import select
 from src.config import bot
 from src.states import Form
 from src.filters import IsNotRegister
-from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, get_incorrect_native_language_question, \
+from src.texts.texts import get_meet_nastya_text, get_meet_bot_text, get_other_native_language_question, \
+    get_incorrect_native_language_question, \
     get_chose_some_topics, get_other_goal, get_other_topics, get_chose_some_more_topics, get_meet_bot_message, \
     get_meet_nastya_message, get_bot_waiting_message
 from src.keyboards.form_keyboard import get_choose_native_language_keyboard, get_choose_goal_keyboard, \
@@ -45,15 +48,16 @@ async def clean_messages(chat_id: str, message_id: str):
 
 async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
+    name: str = translit(message.from_user.first_name, 'ru', reversed=True)
     await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/choose_name.png'),
         caption=f"Let's get to know each other first. "
-                f"Is it okay if I call you '{message.from_user.first_name}'?\n"
+                f"Is it okay if I call you '{name}'?\n"
                 f"<i>Make sure your name is in English.</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=f"{message.from_user.first_name} - is just fine 👋🏻", callback_data="name_ok")],
+            [InlineKeyboardButton(text=f"{name} - is just fine 👋🏻", callback_data="name_ok")],
             [InlineKeyboardButton(text="No, you'd better call me...", callback_data="not_me")],
             [AnswerRenderer.get_button_caption_translation_standalone()]
         ])
