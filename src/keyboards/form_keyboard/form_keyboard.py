@@ -23,7 +23,8 @@ async def get_choose_native_language_keyboard(for_user=False, is_caption=True) -
         translate_button = AnswerRenderer.get_button_text_translation_standalone(for_user=for_user)
 
     choose_native_language_inline_kb = InlineKeyboardMarkup(inline_keyboard=
-                         [[rus, hindi], [persian, spanish], [chinese, german], [french, other], [translate_button]])
+                                                            [[rus, hindi], [persian, spanish], [chinese, german],
+                                                             [french, other], [translate_button]])
 
     return choose_native_language_inline_kb
 
@@ -126,10 +127,19 @@ async def get_choose_topic_keyboard(callback_query: CallbackQuery = None,
     return choose_topic_inline_kb
 
 
-async def get_choose_bot_keyboard(is_caption=True) -> InlineKeyboardMarkup:
-    anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='continue_nastya')
+async def get_choose_bot_keyboard(is_caption=True, bot_message: int | None = None,
+                                  nastya_message: int | None = None) -> InlineKeyboardMarkup:
+    if nastya_message:
+        anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia',
+                                         callback_data=f'continue_nastya_{bot_message}_{nastya_message}')
+    else:
+        anastasia = InlineKeyboardButton(text='💁🏻‍♀️ Anastasia', callback_data='continue_nastya')
 
-    tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='continue_bot')
+    if bot_message:
+        tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy',
+                                           callback_data=f'continue_bot_{bot_message}_{nastya_message}')
+    else:
+        tutor_buddy = InlineKeyboardButton(text='🤖 TutorBuddy', callback_data='continue_bot')
 
     if is_caption:
         translate_button = AnswerRenderer.get_button_caption_translation_standalone()

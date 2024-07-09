@@ -254,8 +254,6 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
 
 async def choose_person(message: Message, state: FSMContext, user_info: UserInfo):
     await asyncio.sleep(1)
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
 
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message("TutorBuddy"),
                                           parse_mode=ParseMode.HTML)
@@ -264,7 +262,7 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
     meet_bot_text = get_meet_bot_text()
     audio = await TextToSpeech.get_speech_by_voice(voice="TutorBuddy", text=meet_bot_text)
 
-    await bot.send_photo(
+    bot_message = await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/meet_bot.png'),
         caption=get_meet_bot_message(),
@@ -281,15 +279,12 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
 
     await StickerSender(bot, message.chat.id, "TutorBuddy").send_fabulous()
 
-    # wait_message = await bot.send_message(message.chat.id, f"⏳ TutorBuddy is thinking … Please wait",
-    #                                       parse_mode=ParseMode.HTML)
-
     wait_message = await bot.send_message(message.chat.id, get_bot_waiting_message("TutorBuddy"),
                                           parse_mode=ParseMode.HTML)
 
     meet_nastya_text = get_meet_nastya_text(user_info["call_name"])
     audio = await TextToSpeech.get_speech_by_voice(voice="Anastasia", text=meet_nastya_text)
-    await bot.send_photo(
+    nastya_message = await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/meet_nastya.png'),
         caption=get_meet_nastya_message(user_info["call_name"]),
@@ -304,8 +299,8 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
 
     await bot.send_message(
         message.chat.id, text="Who would you like to talk to?", parse_mode=ParseMode.HTML,
-        reply_markup=await get_choose_bot_keyboard(is_caption=False))
-
+        reply_markup=await get_choose_bot_keyboard(is_caption=False, bot_message=bot_message.message_id,
+                                                   nastya_message=nastya_message.message_id))
     await bot.delete_message(message.chat.id, wait_message.message_id)
     await state.clear()
 
