@@ -47,12 +47,15 @@ class GenerateAI:
             async with lock:
                 await event.wait()
                 event.clear()  # event is needed to implement timeout between requests
-                response = await session.post(url=self.request_url, json=payload,
-                                              headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                try:
+                    response = await session.post(url=self.request_url, json=payload,
+                                                  headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                except:
+                    response = None
                 waiting_task = asyncio.create_task(self.wait(event, GPT3_DELAY))
                 await asyncio.sleep(0)  # it's needed to execute waiting task
 
-            if response.status == 200:
+            if response and (response.status == 200):
                 logging.info(f"Good response [GenerateAI]: {response}")
                 content_type = response.headers.get("content-type").split("/")[1]
 
