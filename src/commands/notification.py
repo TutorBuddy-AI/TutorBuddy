@@ -39,11 +39,11 @@ async def send_pin_message(bot, chat_id, speaker, message_history):
                                                    [InlineKeyboardButton(text='📖 Translate',
                                                                          callback_data='pin_message_translate')]]
                                            ))
-
-        if bot_message.chat.type == 'private':
+        try:
             await bot.pin_chat_message(chat_id=chat_id,
                                        message_id=bot_message.message_id)
-
+        except Exception as ex:
+            print("Something wrong", ex)
         await bot.send_voice(chat_id, FSInputFile(file_path_voice))
     else:
         pass

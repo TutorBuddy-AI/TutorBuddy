@@ -37,9 +37,12 @@ async def pin_message_origin(chat_id: int, bot_message: str, nastya_message: str
 
 @choose_speaker_router.callback_query(F.data.startswith("continue_bot"))
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
-    bot_message, nastya_message = query.data.split('_')[-2:]
+    try:
+        bot_message, nastya_message = query.data.split('_')[-2:]
+        await pin_message_origin(query.message.chat.id, bot_message, nastya_message, "TutorBuddy")
+    except Exception as ex:
+        print("Something wrong", ex)
     tg_id = query.message.chat.id
-    await pin_message_origin(query.message.chat.id, bot_message, nastya_message, "TutorBuddy")
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
 
@@ -121,10 +124,11 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
         reply_markup=audio_markup
     )
 
-    if message.chat.type == 'private':
+    try:
         await bot.pin_chat_message(chat_id=message.chat.id,
-                                   message_id=bot_message.message_id)
-
+                               message_id=bot_message.message_id)
+    except Exception as ex:
+        print("Something wrong", ex)
     await bot.send_voice(
         message.chat.id,
         FSInputFile(f"./files/meet_{speaker.lower()}.ogg"),

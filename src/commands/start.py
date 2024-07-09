@@ -44,9 +44,11 @@ async def process_start_register_user(message: types.Message, state: FSMContext)
             parse_mode=ParseMode.HTML,
             reply_markup=caption_markup
         )
-        if message.chat.type == 'private':
+        try:
             await bot.pin_chat_message(chat_id=message.chat.id,
                                        message_id=bot_message.message_id)
+        except Exception as ex:
+            print("Something bad", ex)
         await asyncio.sleep(2)
         await process_start_acquaintance(message, state)
 
@@ -68,8 +70,10 @@ async def process_start_register_user_person(message: types.Message, state: FSMC
             parse_mode=ParseMode.HTML,
             reply_markup=caption_markup
         )
-        if message.chat.type == 'private':
+        try:
             await bot.pin_chat_message(chat_id=message.chat.id,
                                        message_id=bot_message.message_id)
+        except Exception as ex:
+            print("Something bad", ex)
         await asyncio.sleep(2)
         await process_start_acquaintance(message, state)
