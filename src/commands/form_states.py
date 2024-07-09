@@ -48,7 +48,11 @@ async def clean_messages(chat_id: str, message_id: str):
 
 async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await state.set_state(Form.name)
-    name: str = translit(message.from_user.first_name, 'ru', reversed=True)
+    try:
+        name: str = translit(message.from_user.first_name, 'ru', reversed=True)
+    except Exception as ex:
+        name = message.from_user.first_name
+        print("Translit raised exception", ex)
     await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/choose_name.png'),
