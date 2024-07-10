@@ -9,7 +9,7 @@ from utils.transcriber.text_to_speech import TextToSpeech
 
 async def send_pin_message(bot, chat_id, speaker, message_history):
     """after 7 messages from user send post_message"""
-    if message_history == 7:
+    if message_history == 1:
         match speaker:
             case "Anastasia":
                 file_path_img = "./files/pin_message_nastya.jpg"
@@ -30,15 +30,20 @@ async def send_pin_message(bot, chat_id, speaker, message_history):
                 file_path_img = "./files/pin_message_bot.jpg"
                 file_path_voice = "./files/pin_message_bot.opus"
 
-        await bot.send_photo(chat_id,
-                             photo=FSInputFile(file_path_img),
-                             caption=get_pin_message(),
-                             parse_mode=ParseMode.HTML,
-                             reply_markup=InlineKeyboardMarkup(
-                                 inline_keyboard=[
-                                     [InlineKeyboardButton(text='📖 Translate', callback_data='pin_message_translate')]]
-                             ))
-
+        bot_message = await bot.send_photo(chat_id,
+                                           photo=FSInputFile(file_path_img),
+                                           caption=get_pin_message(),
+                                           parse_mode=ParseMode.HTML,
+                                           reply_markup=InlineKeyboardMarkup(
+                                               inline_keyboard=[
+                                                   [InlineKeyboardButton(text='📖 Translate',
+                                                                         callback_data='pin_message_translate')]]
+                                           ))
+        try:
+            await bot.pin_chat_message(chat_id=chat_id,
+                                       message_id=bot_message.message_id)
+        except Exception as ex:
+            print("Something wrong", ex)
         await bot.send_voice(chat_id, FSInputFile(file_path_voice))
     else:
         pass

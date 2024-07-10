@@ -24,8 +24,24 @@ from src.utils.user import UserCreateMessage
 choose_speaker_router = Router(name=__name__)
 
 
-@choose_speaker_router.callback_query(F.data == "continue_bot")
+async def pin_message_origin(chat_id: int, bot_message: str, nastya_message: str, person: str):
+    if bot_message.isdigit() and nastya_message.isdigit():
+        match person:
+            case "TutorBuddy":
+                await bot.unpin_chat_message(chat_id=chat_id, message_id=int(nastya_message))
+                await bot.pin_chat_message(chat_id=chat_id, message_id=int(bot_message))
+            case "Anastasia":
+                await bot.unpin_chat_message(chat_id=chat_id, message_id=int(bot_message))
+                await bot.pin_chat_message(chat_id=chat_id, message_id=int(nastya_message))
+
+
+@choose_speaker_router.callback_query(F.data.startswith("continue_bot"))
 async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMContext):
+    try:
+        bot_message, nastya_message = query.data.split('_')[-2:]
+        await pin_message_origin(query.message.chat.id, bot_message, nastya_message, "TutorBuddy")
+    except Exception as ex:
+        print("Something wrong", ex)
     tg_id = query.message.chat.id
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="TutorBuddy")
@@ -54,9 +70,11 @@ async def continue_dialogue_with_bot(query: types.CallbackQuery, state: FSMConte
     await state.set_state(FormInitTalk.init_user_message)
 
 
-@choose_speaker_router.callback_query(F.data == "continue_nastya")
+@choose_speaker_router.callback_query(F.data.startswith("continue_nastya"))
 async def continue_dialogue_with_nastya(query: types.CallbackQuery, state: FSMContext):
+    bot_message, nastya_message = query.data.split('_')[-2:]
     tg_id = query.message.chat.id
+    await pin_message_origin(query.message.chat.id, bot_message, nastya_message, "Anastasia")
     user_service = UserService()
     await user_service.change_speaker(tg_id=str(tg_id), new_speaker="Anastasia")
 
@@ -98,7 +116,7 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
     welcome_text = get_start_person_talk(speaker, speaker_short_name)
     audio_markup = AnswerRenderer.get_markup_caption_translation_standalone()
     logging.info(f"./files/meet_{config.BOT_PERSON.lower()}.jpg")
-    await bot.send_photo(
+    bot_message = await bot.send_photo(
         message.chat.id,
         caption=welcome_text,
         photo=FSInputFile(f"./files/meet_{config.BOT_PERSON.lower()}.jpg"),
@@ -106,6 +124,11 @@ async def continue_dialogue_with_person(message: Message, state: FSMContext):
         reply_markup=audio_markup
     )
 
+    try:
+        await bot.pin_chat_message(chat_id=message.chat.id,
+                               message_id=bot_message.message_id)
+    except Exception as ex:
+        print("Something wrong", ex)
     await bot.send_voice(
         message.chat.id,
         FSInputFile(f"./files/meet_{speaker.lower()}.ogg"),
