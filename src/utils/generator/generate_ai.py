@@ -88,8 +88,11 @@ class GenerateAI:
             async with lock:
                 await event.wait()
                 event.clear()
-                response = await session.post(url=self.request_url, data=form_data,
-                                              headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                try:
+                    response = await session.post(url=self.request_url, data=form_data,
+                                                  headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                except:
+                    response = None
                 waiting_task = asyncio.create_task(self.wait(event, STT_DELAY))  # creation of background task
                 await asyncio.sleep(0)  # it's needed to execute waiting task
 
@@ -112,8 +115,11 @@ class GenerateAI:
             async with lock:
                 await event.wait()
                 event.clear()
-                response = await session.post(url=self.request_url, json=payload,
-                                              headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                try:
+                    response = await session.post(url=self.request_url, json=payload,
+                                                  headers=self.headers, proxy=proxy[0], proxy_auth=proxy_auth)
+                except:
+                    response = None
                 waiting_task = asyncio.create_task(self.wait(event, TTS_DELAY))  # creation of background task
                 await asyncio.sleep(0)  # it's needed to execute waiting task
 
