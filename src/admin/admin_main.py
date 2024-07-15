@@ -1,9 +1,9 @@
+import json
 import tempfile
 from datetime import datetime, date, timedelta
 import base64
 import os
 from typing import Any
-
 from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,7 +11,6 @@ from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
 from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
-
 from config import config
 from database.models import NewsletterAudio
 from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
@@ -22,14 +21,21 @@ from src.admin.config_admin import (app, templates, image_directory,
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
     SummaryFromParsing
 from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
-
+import logging
 from src.database import session
 from utils.audio_converter.audio_converter_cache import AudioConverterCache
 from utils.news_gallery.news_gallery import NewsGallery
 from utils.newsletter.newsletter_service import NewsletterService
 from utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.payments.payments import PaymentHandler
 
 """Docs /docs"""
+
+logging.basicConfig(
+    filename="payment.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 
 @app.exception_handler(403)
@@ -805,6 +811,34 @@ async def add_summary(summary_data: SummaryFromParsing):
     await session.commit()
 
     return {"message": "Data saved successfully"}
+
+
+# new
+@app.post("/payment_info")
+async def payment_info(request: Request):
+    try:
+        data = await request.json()
+        event_type = data.get('event')
+        payment_id = data['object']['id']
+        description = data['object']['description']
+        parts = description.split('_')
+        tg_id = parts[0]
+        count_month = parts[1]
+    except json.JSONDecodeError:
+        logging.error("Invalid JSON received", exc_info=True)
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    except KeyError as e:
+        logging.error(f"Missing key in JSON data: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Missing key in JSON")
+
+    logging.info(data)
+
+    logging.info(
+        f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}")
+
+    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month)
+
+    return {"message": "Successfully"}
 
 
 if __name__ == "__main__":

@@ -23,7 +23,8 @@ APP_PORT: str = os.environ.get('APP_PORT', 8000)
 SECRET_KEY_ADMIN = os.environ.get("SECRET_KEY_ADMIN")
 ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN")
-
+PAYMENT_ID = os.environ.get("PAYMENT_ID")
+PAYMENT_KEY = os.environ.get("PAYMENT_KEY")
 
 class Config(BaseModel):
     SKIP_UPDATES: bool = True
@@ -47,6 +48,8 @@ class Config(BaseModel):
     SECRET_KEY_ADMIN: str = SECRET_KEY_ADMIN
     ALGORITHM: str = ALGORITHM
     ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN: int = int(ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN)
+    PAYMENT_ID: str = PAYMENT_ID
+    PAYMENT_KEY: str = PAYMENT_KEY
 
 
 config = Config()
