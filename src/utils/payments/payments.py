@@ -5,8 +5,10 @@ from src.config import bot, dp
 import logging
 from aiogram.enums import ParseMode
 from aiogram.types import Message, CallbackQuery, ContentType, FSInputFile,InlineKeyboardButton, InlineKeyboardMarkup
-
-
+from src.database import session
+from src.database.models.payment import Subscription
+from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
+from datetime import datetime, timedelta
 
 logging.basicConfig(
     filename="payment.log",
@@ -79,10 +81,22 @@ class PaymentHandler:
         Payment.capture(payment_id)
 
     @staticmethod
-    async def yookassa_handler(event_type: str, payment_id: str, tg_id: str, count_month: str):
+    async def yookassa_handler(event_type: str, payment_id: str, tg_id: str, count_month: str, created_at:str):
         try:
             if "succeeded" in event_type:
-                await bot.send_message(tg_id, f"tg_id: {tg_id}, count_month: {count_month}",parse_mode=ParseMode.HTML,)
+                start_date = datetime.strptime(created_at, '%Y-%m-%dT%H:%M:%S.%fZ')
+                end_date = start_date + timedelta(days=int(count_month) * 30)
+
+                new_subscription = Subscription(
+                    tg_id=tg_id,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
+                session.add(new_subscription)
+                await session.commit()
+
+                formatted_date = end_date.strftime('%d-%m-%Y')
+                await bot.send_message(tg_id, f"Вы успешно оплатили подписку. Следующий платёж {formatted_date}, tg_id: {tg_id}, count_month: {count_month}", parse_mode=ParseMode.HTML)
                 # await PaymentHandler.send_payment_message(int(tg_id)) # Вызов сообщения ссылками на оплату
         except Exception as e:
             logging.error(f"Ошибка в yookassa_handler: {str(e)}")

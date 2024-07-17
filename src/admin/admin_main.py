@@ -824,6 +824,7 @@ async def payment_info(request: Request):
         parts = description.split('_')
         tg_id = parts[0]
         count_month = parts[1]
+        created_at = datetime.strptime(data['object']['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     except json.JSONDecodeError:
         logging.error("Invalid JSON received", exc_info=True)
         raise HTTPException(status_code=400, detail="Invalid JSON")
@@ -833,10 +834,9 @@ async def payment_info(request: Request):
 
     logging.info(data)
 
-    logging.info(
-        f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}")
+    logging.info(f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}, Created At: {created_at}")
 
-    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month)
+    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month,created_at)
 
     return {"message": "Successfully"}
 
