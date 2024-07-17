@@ -82,8 +82,8 @@ class PaymentHandler:
     async def yookassa_handler(event_type: str, payment_id: str, tg_id: str, count_month: str):
         try:
             if "succeeded" in event_type:
-                await bot.send_message(tg_id, f"Cool {tg_id}, count_month {count_month}",parse_mode=ParseMode.HTML,)
-                # await PaymentHandler.send_payment_message(int(tg_id))
+                await bot.send_message(tg_id, f"tg_id: {tg_id}, count_month: {count_month}",parse_mode=ParseMode.HTML,)
+                # await PaymentHandler.send_payment_message(int(tg_id)) # Вызов сообщения ссылками на оплату
         except Exception as e:
             logging.error(f"Ошибка в yookassa_handler: {str(e)}")
 
