@@ -19,7 +19,7 @@ from src.admin.config_admin import (app, templates, image_directory,
                                     generate_token_and_redirect, audio_directory)
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
-    SummaryFromParsing
+    SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, UserForMessage
 from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
 import logging
 from src.database import session
@@ -28,6 +28,9 @@ from utils.news_gallery.news_gallery import NewsGallery
 from utils.newsletter.newsletter_service import NewsletterService
 from utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.payments.payments import PaymentHandler
+from src.config import bot, dp
+from typing import List
+from aiogram.enums import ParseMode
 
 """Docs /docs"""
 
@@ -788,6 +791,7 @@ async def logout(request: Request):
     return response
 
 
+# new
 @app.post("/add_summary")
 async def add_summary(summary_data: SummaryFromParsing):
     query = select(Newsletter).where(Newsletter.title == summary_data.title)
@@ -814,6 +818,44 @@ async def add_summary(summary_data: SummaryFromParsing):
 
 
 # new
+@app.get("/info_all_user")
+async def info_all_user(request: Request) -> List[dict]:
+    query = select(User)
+    result = await session.execute(query)
+    all_users = result.scalars().unique().all()
+    # 5300582214 ANNA
+    # exclude_ids = {"5300582214","351433879","222768891","6637365896"}
+    exclude_ids = {"5300582214"}
+
+    users_info = [
+        {"tg_id": user.tg_id, "tg_firstName": user.call_name}
+        for user in all_users
+        if user.tg_id not in exclude_ids
+    ]
+
+    return users_info
+
+
+@app.post("/send_message_to_selected_users")
+async def send_message_to_selected_users(data: MessageToSelected):
+    message = data.message
+    for tg_id in data.tg_ids:
+        await bot.send_message(tg_id, message)
+    return {"message": f"Successfully sent message: {message} to tg_ids: {data.tg_ids}"}
+
+
+@app.post("/send_message_to_one_user")
+async def send_message_to_one_user(data: MessageToAOne):
+    tg_id = data.tg_id
+    message = data.message
+    try:
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML, )
+        return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
+    except Exception as e:
+        return {"error": f"Failed to send message to {tg_id}: {e}"}
+
+
+# new
 @app.post("/payment_info")
 async def payment_info(request: Request):
     try:
@@ -834,9 +876,10 @@ async def payment_info(request: Request):
 
     logging.info(data)
 
-    logging.info(f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}, Created At: {created_at}")
+    logging.info(
+        f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}, Created At: {created_at}")
 
-    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month,created_at)
+    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month, created_at)
 
     return {"message": "Successfully"}
 
