@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class NewsletterData(BaseModel):
     topic: str
@@ -32,3 +33,18 @@ class SummaryFromParsing(BaseModel):
     publication_date: str
     path_to_data: str
     title: str
+
+class MessageToSelected(BaseModel):
+    tg_ids: List[str]
+    message: str
+
+class MessageToAll(BaseModel):
+    message: str
+
+class MessageToAOne(BaseModel):
+    tg_id: str
+    message: str
+
+class UserForMessage(BaseModel):
+    tg_id: str
+    tg_firstName: str
