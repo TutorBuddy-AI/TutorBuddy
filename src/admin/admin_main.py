@@ -849,7 +849,15 @@ async def send_message_to_one_user(data: MessageToAOne):
     tg_id = data.tg_id
     message = data.message
     try:
-        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML, )
+        notification_message = MessageHistory(
+            tg_id=tg_id,
+            message=message,
+            role='assistant',
+            type='text'
+        )
+        session.add(notification_message)
+        await session.commit()
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML)
         return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
     except Exception as e:
         return {"error": f"Failed to send message to {tg_id}: {e}"}
