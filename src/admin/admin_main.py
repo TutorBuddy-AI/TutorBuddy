@@ -21,7 +21,6 @@ from src.admin.config_admin import (app, templates, image_directory,
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
     SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, UserForMessage
 from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
-import logging
 from src.database import session
 from utils.audio_converter.audio_converter_cache import AudioConverterCache
 from utils.news_gallery.news_gallery import NewsGallery
@@ -33,13 +32,6 @@ from typing import List
 from aiogram.enums import ParseMode
 
 """Docs /docs"""
-
-logging.basicConfig(
-    filename="payment.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-
 
 @app.exception_handler(403)
 async def custom_403_handler(request, exc):
@@ -823,14 +815,10 @@ async def info_all_user(request: Request) -> List[dict]:
     query = select(User)
     result = await session.execute(query)
     all_users = result.scalars().unique().all()
-    # 5300582214 ANNA
-    # exclude_ids = {"5300582214","351433879","222768891","6637365896"}
-    exclude_ids = {"5300582214"}
 
     users_info = [
         {"tg_id": user.tg_id, "tg_firstName": user.call_name}
         for user in all_users
-        if user.tg_id not in exclude_ids
     ]
 
     return users_info
@@ -876,16 +864,9 @@ async def payment_info(request: Request):
         count_month = parts[1]
         created_at = datetime.strptime(data['object']['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     except json.JSONDecodeError:
-        logging.error("Invalid JSON received", exc_info=True)
         raise HTTPException(status_code=400, detail="Invalid JSON")
     except KeyError as e:
-        logging.error(f"Missing key in JSON data: {e}", exc_info=True)
         raise HTTPException(status_code=400, detail="Missing key in JSON")
-
-    logging.info(data)
-
-    logging.info(
-        f"Received payment info: Event type: {event_type}, Payment ID: {payment_id}, TG ID: {tg_id}, Months: {count_month}, Created At: {created_at}")
 
     await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month, created_at)
 
