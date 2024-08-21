@@ -24,7 +24,6 @@ class ChangeNewsletter(BaseModel):
     column: str
     changed_text: str
 
-#NEW
 class SummaryFromParsing(BaseModel):
     message: str
     topic: str

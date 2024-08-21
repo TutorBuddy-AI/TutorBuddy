@@ -809,7 +809,6 @@ async def add_summary(summary_data: SummaryFromParsing):
     return {"message": "Data saved successfully"}
 
 
-# new
 @app.get("/info_all_user")
 async def info_all_user(request: Request) -> List[dict]:
     query = select(User)
@@ -851,7 +850,6 @@ async def send_message_to_one_user(data: MessageToAOne):
         return {"error": f"Failed to send message to {tg_id}: {e}"}
 
 
-# new
 @app.post("/payment_info")
 async def payment_info(request: Request):
     try:
