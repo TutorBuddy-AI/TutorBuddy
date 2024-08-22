@@ -1,55 +1,132 @@
 import uuid
-from yookassa import Payment
-from src.database.models import User
+from yookassa import Configuration, Payment
+# from config.config import config
+from src.config import bot, dp
+import logging
+from aiogram.enums import ParseMode
+from aiogram.types import Message, CallbackQuery, ContentType, FSInputFile,InlineKeyboardButton, InlineKeyboardMarkup
+from src.database import session
+from src.database.models.payment import Subscription
+from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
+from datetime import datetime, timedelta
 
+logging.basicConfig(
+    filename="payment.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
-def get_payment_url(amount, payload, desc, user: User) -> str:
-    """
-    Get youkassa payment url
+class PaymentHandler:
+    @staticmethod
+    async def create_payment_url(tg_id: str, month: int):
+        try:
+            value = "0.00"
+            if month == 1:
+                value = "10.00"
+            elif month == 6:
+                value = "16.00"
 
-    :param int amount: Price
-    :param str payload: Payment object name (for subscription detect)
-    :param str desc: Payment description
-    :param User user: User object
-    :return: payment url str
-    """
+            month_text = "month" if month == 1 else "months"
 
-    idempotence_key = str(uuid.uuid4())
-    payment = Payment.create({
-        "amount": {
-            "value": amount,
-            "currency": "RUB"
-        },
-        "metadata": {
-            "user_id": user.id,
-            "payload": payload,
-            "chat_id": user.history[-1].chat_id
-        },
-        "receipt": {
-            "customer": {
-                "full_name": user.get_full_name,
-                "email": user.email
-            },
-            "items": [
-                {
-                    "description": desc,
-                    "quantity": "1.00",
-                    "amount": {
-                        "value": amount,
-                        "currency": "RUB"
+            Configuration.account_id = PAYMENT_ID
+            Configuration.secret_key = PAYMENT_KEY
+
+            idempotence_key = str(uuid.uuid4())
+
+            payment_data = {
+                "amount": {
+                    "value": value,
+                    "currency": "RUB"
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": "https://t.me/testpaymentkassaru_bot/"
+                },
+                "description": f"{tg_id}",
+                "receipt": {
+                    "customer": {
+                        "email": "customer@example.com"
                     },
-                    "vat_code": "1",
-                    "payment_mode": "full_payment",
-                    "payment_subject": "service"
+                    "items": [
+                        {
+                            "description": f"Subscription for {month} {month_text}",
+                            "quantity": "1.00",
+                            "amount": {
+                                "value": value,
+                                "currency": "RUB"
+                            },
+                            "vat_code": "1"
+                        }
+                    ]
                 }
-            ]
-        },
-        "confirmation": {
-            "type": "redirect",
-            "return_url": "https://glimmerai.tech"
-        },
-        "capture": True,
-        "description": desc
-    }, idempotence_key)
+            }
 
-    return payment.confirmation.confirmation_url
+            payment = Payment.create(payment_data, idempotence_key)
+            confirmation_url = payment.confirmation.confirmation_url
+            return confirmation_url
+        except Exception as e:
+            logging.error(f"Ошибка в create_payment_url: {str(e)}")
+
+    @staticmethod
+    async def payment_check(payment_id: str):
+        Configuration.account_id = PAYMENT_ID
+        Configuration.secret_key = PAYMENT_KEY
+        payment = Payment.find_one(payment_id)
+        return payment.status
+
+    @staticmethod
+    async def payment_capture(payment_id: str):
+        Configuration.account_id = PAYMENT_ID
+        Configuration.secret_key = PAYMENT_KEY
+        Payment.capture(payment_id)
+
+    @staticmethod
+    async def yookassa_handler(event_type: str, payment_id: str, tg_id: str, count_month: str, created_at:str):
+        try:
+            if "succeeded" in event_type:
+                start_date = datetime.strptime(created_at, '%Y-%m-%dT%H:%M:%S.%fZ')
+                end_date = start_date + timedelta(days=int(count_month) * 30)
+
+                new_subscription = Subscription(
+                    tg_id=tg_id,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
+                session.add(new_subscription)
+                await session.commit()
+
+                formatted_date = end_date.strftime('%d-%m-%Y')
+                await bot.send_message(tg_id, f"Вы успешно оплатили подписку. Следующий платёж {formatted_date}, tg_id: {tg_id}, count_month: {count_month}", parse_mode=ParseMode.HTML)
+                # await PaymentHandler.send_payment_message(int(tg_id)) # Вызов сообщения ссылками на оплату
+        except Exception as e:
+            logging.error(f"Ошибка в yookassa_handler: {str(e)}")
+
+    @staticmethod
+    async def send_payment_message(tg_id: str):
+        try:
+            url_1_month = await PaymentHandler.create_payment_url(tg_id=tg_id, month=1)
+            url_6_month = await PaymentHandler.create_payment_url(tg_id=tg_id, month=6)
+            await bot.send_photo(
+                tg_id,
+                caption="You chatted enough today😓\n\n"
+                        "I want to keep talking 🤗\n\n"
+                        "Upgrade for more chat time! It's cheap, like just a few cups of coffee a month ☕️ ☕️ 😉\n\n"
+                        "⚡️ 1 month - 990₽\n"
+                        "🔥 6 month - 4900₽\n\n"
+                        "Subscribe 👇",
+                photo=FSInputFile('./files/payment.png'),
+                parse_mode=ParseMode.HTML,
+                reply_markup=PaymentHandler.keyboard_payment(url_1_month, url_6_month)
+            )
+        except Exception as e:
+            logging.error(f"Ошибка в send_payment_message: {str(e)}")
+
+    @staticmethod
+    def keyboard_payment(url_1_month: str, url_6_month: str):
+        button_url_payment_1 = InlineKeyboardButton(text="⚡ 1 month - 990₽", url=url_1_month)
+        button_url_payment_6 = InlineKeyboardButton(text="🔥 6 month - 4900₽", url=url_6_month)
+
+        keyboard_payment = InlineKeyboardMarkup(inline_keyboard=[
+            [button_url_payment_1, button_url_payment_6]
+        ])
+        return keyboard_payment

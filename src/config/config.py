@@ -24,7 +24,6 @@ SECRET_KEY_ADMIN = os.environ.get("SECRET_KEY_ADMIN")
 ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN = os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES_ADMIN")
 
-
 class Config(BaseModel):
     SKIP_UPDATES: bool = True
     APP_HOST: str = APP_HOST

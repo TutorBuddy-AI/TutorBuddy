@@ -1,9 +1,9 @@
+import json
 import tempfile
 from datetime import datetime, date, timedelta
 import base64
 import os
 from typing import Any
-
 from fastapi import Form
 from fastapi import Request, Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,7 +11,6 @@ from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
 from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
-
 from config import config
 from database.models import NewsletterAudio
 from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
@@ -20,17 +19,19 @@ from src.admin.config_admin import (app, templates, image_directory,
                                     generate_token_and_redirect, audio_directory)
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
-    SummaryFromParsing
+    SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, UserForMessage
 from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
-
 from src.database import session
 from utils.audio_converter.audio_converter_cache import AudioConverterCache
 from utils.news_gallery.news_gallery import NewsGallery
 from utils.newsletter.newsletter_service import NewsletterService
 from utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.payments.payments import PaymentHandler
+from src.config import bot, dp
+from typing import List
+from aiogram.enums import ParseMode
 
 """Docs /docs"""
-
 
 @app.exception_handler(403)
 async def custom_403_handler(request, exc):
@@ -782,6 +783,7 @@ async def logout(request: Request):
     return response
 
 
+# new
 @app.post("/add_summary")
 async def add_summary(summary_data: SummaryFromParsing):
     query = select(Newsletter).where(Newsletter.title == summary_data.title)
@@ -805,6 +807,68 @@ async def add_summary(summary_data: SummaryFromParsing):
     await session.commit()
 
     return {"message": "Data saved successfully"}
+
+
+@app.get("/info_all_user")
+async def info_all_user(request: Request) -> List[dict]:
+    query = select(User)
+    result = await session.execute(query)
+    all_users = result.scalars().unique().all()
+
+    users_info = [
+        {"tg_id": user.tg_id, "tg_firstName": user.call_name}
+        for user in all_users
+    ]
+
+    return users_info
+
+
+@app.post("/send_message_to_selected_users")
+async def send_message_to_selected_users(data: MessageToSelected):
+    message = data.message
+    for tg_id in data.tg_ids:
+        await bot.send_message(tg_id, message)
+    return {"message": f"Successfully sent message: {message} to tg_ids: {data.tg_ids}"}
+
+
+@app.post("/send_message_to_one_user")
+async def send_message_to_one_user(data: MessageToAOne):
+    tg_id = data.tg_id
+    message = data.message
+    try:
+        notification_message = MessageHistory(
+            tg_id=tg_id,
+            message=message,
+            role='assistant',
+            type='text'
+        )
+        session.add(notification_message)
+        await session.commit()
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML)
+        return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
+    except Exception as e:
+        return {"error": f"Failed to send message to {tg_id}: {e}"}
+
+
+@app.post("/payment_info")
+async def payment_info(request: Request):
+    try:
+        data = await request.json()
+        event_type = data.get('event')
+        payment_id = data['object']['id']
+        description = data['object']['description']
+        parts = description.split('_')
+        tg_id = parts[0]
+        count_month = parts[1]
+        created_at = datetime.strptime(data['object']['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail="Missing key in JSON")
+
+    await PaymentHandler.yookassa_handler(event_type, payment_id, tg_id, count_month, created_at)
+
+    return {"message": "Successfully"}
 
 
 if __name__ == "__main__":
