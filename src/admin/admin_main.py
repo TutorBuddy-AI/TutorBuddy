@@ -30,6 +30,7 @@ from src.utils.payments.payments import PaymentHandler
 from src.config import bot, dp
 from typing import List
 from aiogram.enums import ParseMode
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 """Docs /docs"""
 
@@ -783,7 +784,6 @@ async def logout(request: Request):
     return response
 
 
-# new
 @app.post("/add_summary")
 async def add_summary(summary_data: SummaryFromParsing):
     query = select(Newsletter).where(Newsletter.title == summary_data.title)
@@ -830,7 +830,6 @@ async def send_message_to_selected_users(data: MessageToSelected):
         await bot.send_message(tg_id, message)
     return {"message": f"Successfully sent message: {message} to tg_ids: {data.tg_ids}"}
 
-
 @app.post("/send_message_to_one_user")
 async def send_message_to_one_user(data: MessageToAOne):
     tg_id = data.tg_id
@@ -844,7 +843,12 @@ async def send_message_to_one_user(data: MessageToAOne):
         )
         session.add(notification_message)
         await session.commit()
-        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML)
+
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML,reply_markup=InlineKeyboardMarkup(
+                                 inline_keyboard=[
+                                     [InlineKeyboardButton(text='📖 Translate', callback_data='request_text_translation_standalone_for_user')]]
+                             ))
+
         return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
     except Exception as e:
         return {"error": f"Failed to send message to {tg_id}: {e}"}
