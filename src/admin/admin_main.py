@@ -20,7 +20,7 @@ from src.admin.config_admin import (app, templates, image_directory,
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
     SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, UserForMessage
-from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
+from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes, Setting
 from src.database import session
 from utils.audio_converter.audio_converter_cache import AudioConverterCache
 from utils.news_gallery.news_gallery import NewsGallery
@@ -811,14 +811,37 @@ async def add_summary(summary_data: SummaryFromParsing):
 
 @app.get("/info_all_user")
 async def info_all_user(request: Request) -> List[dict]:
-    query = select(User)
-    result = await session.execute(query)
-    all_users = result.scalars().unique().all()
+    query_user = select(User)
+    result_user = await session.execute(query_user)
+    all_users = result_user.scalars().unique().all()
 
-    users_info = [
-        {"tg_id": user.tg_id, "tg_firstName": user.call_name}
-        for user in all_users
-    ]
+    query_setting = select(Setting)
+    result_setting = await session.execute(query_setting)
+    all_settings = result_setting.scalars().unique().all()
+
+    users_info = []
+
+    for user in all_users:
+        user_setting = next((setting for setting in all_settings if setting.tg_id == user.tg_id), None)
+
+        if user_setting:
+            if not (
+                    user_setting.newsletter_good_morning or user_setting.newsletter_daily_plans or user_setting.newsletter_good_evening):
+                continue
+
+            user_info = {
+                "tg_id": user.tg_id,
+                "tg_firstName": user.call_name
+            }
+
+            if not user_setting.newsletter_good_morning:
+                user_info["newsletter_good_morning"] = False
+            if not user_setting.newsletter_daily_plans:
+                user_info["newsletter_daily_plans"] = False
+            if not user_setting.newsletter_good_evening:
+                user_info["newsletter_good_evening"] = False
+
+            users_info.append(user_info)
 
     return users_info
 

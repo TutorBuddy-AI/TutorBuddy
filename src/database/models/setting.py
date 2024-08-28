@@ -18,3 +18,6 @@ class Setting(Base, TimestampMixin):
     tg_id = Column(String, ForeignKey('user.tg_id'))
     summary_on = Column(Boolean, default=True)
     summary_answered = Column(Boolean, default=False)
+    newsletter_good_morning= Column(Boolean, default=True)
+    newsletter_daily_plans = Column(Boolean, default=True)
+    newsletter_good_evening = Column(Boolean, default=True)
