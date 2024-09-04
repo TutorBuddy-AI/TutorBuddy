@@ -826,22 +826,29 @@ async def info_all_user(request: Request) -> List[dict]:
 
         if user_setting:
             if not (
-                    user_setting.newsletter_good_morning or user_setting.newsletter_daily_plans or user_setting.newsletter_good_evening):
+                    user_setting.subscription_good_morning or user_setting.subscription_daily_plans or user_setting.subscription_good_evening):
                 continue
+        else:
+            user_setting = Setting(
+                tg_id=user.tg_id,
+                subscription_good_morning=True,
+                subscription_daily_plans=True,
+                subscription_good_evening=True
+            )
 
-            user_info = {
-                "tg_id": user.tg_id,
-                "tg_firstName": user.call_name
-            }
+        user_info = {
+            "tg_id": user.tg_id,
+            "tg_firstName": user.call_name
+        }
 
-            if not user_setting.newsletter_good_morning:
-                user_info["newsletter_good_morning"] = False
-            if not user_setting.newsletter_daily_plans:
-                user_info["newsletter_daily_plans"] = False
-            if not user_setting.newsletter_good_evening:
-                user_info["newsletter_good_evening"] = False
+        if not user_setting.subscription_good_morning:
+            user_info["subscription_good_morning"] = False
+        if not user_setting.subscription_daily_plans:
+            user_info["subscription_daily_plans"] = False
+        if not user_setting.subscription_good_evening:
+            user_info["subscription_good_evening"] = False
 
-            users_info.append(user_info)
+        users_info.append(user_info)
 
     return users_info
 

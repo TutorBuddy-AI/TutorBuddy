@@ -27,7 +27,7 @@ from src.commands.menu.restart import restart_router
 from src.commands.menu.support import support_router
 from src.commands.menu.feedback import feedback_router
 from src.commands.menu.summaries import summaries_router
-from src.commands.menu.newsletter import newsletter_router
+from src.commands.menu.subscriptions import subscriptions_router
 from src.commands.cacncel_state import cancel_router
 # from src.commands.scenario.scenario import sc
 from src.commands.menu.edit_profile import edit_profile_router
@@ -42,13 +42,13 @@ if config.BOT_TYPE == "original":
     routers = [go_back_router, error_router, form_router, news_gallery_router,
                choose_speaker_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-               summaries_router, newsletter_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
+               summaries_router, subscriptions_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
                audio_comm_router, start_router]
 else:
     routers = [go_back_router, error_router, form_router, news_gallery_router, edit_speaker_router,
                edit_topic_router, mistakes_router, restart_router, support_router, feedback_router,
-               summaries_router, newsletter_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
-               audio_comm_router, start_router_person, newsletter_router]
+               summaries_router, subscriptions_router, cancel_router, scenario_router, edit_profile_router, text_comm_router,
+               audio_comm_router, start_router_person]
 
 
 dp.include_routers(*routers)
@@ -74,7 +74,7 @@ async def on_startup():
         BotCommand(command="/scenario", description="🎬 Choose a scenario (soon)"),
         BotCommand(command="/changetopic", description="🔁 Change topic"),
         BotCommand(command="/editprofile", description="✏ Edit profile"),
-        BotCommand(command="/newsletter", description="📣 Newsletter"),
+        BotCommand(command="/subscriptions", description="📣 Subscriptions"),
     ]
     bot_commands_2 = [
         BotCommand(command="/newsletter", description="📣 Newsletter"),
