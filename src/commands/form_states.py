@@ -33,7 +33,7 @@ from aiogram import types, Router, F
 from aiogram.types import FSInputFile, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums.parse_mode import ParseMode
-
+from utils.find_timezone.timezone import UtcUser
 from utils.user.schemas import UserInfo
 
 form_router = Router(name=__name__)
@@ -180,6 +180,42 @@ async def process_other_goal_handler(message: types.Message, state: FSMContext):
 @form_router.callback_query(Form.english_level, F.data.startswith("level"))
 async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
     await state.update_data({"english_level": query.data.split("_")[1]})
+
+    await bot.send_photo(query.message.chat.id, photo=types.InputFile('./files/geopos.png'),
+                         caption=md.escape_md(
+                             f"What {'city'} are you in? \n It's important for me to know so we can determine your time zone and not bother you at inconvenient times 😉"),
+                         reply_markup=await get_choose_timezone())
+    await state.set_state(Form.time_zone)
+
+
+@dp.callback_query_handler(lambda query: query.data.startswith("utc"), state=Form.time_zone)
+async def process_timezone(query: types.CallbackQuery, state: FSMContext):
+    async with state.proxy() as data:
+        data["time_zone"] = query.data.split("_")[1]
+    await state.set_state(Form.english_level)
+
+
+@dp.callback_query_handler(lambda query: query.data == "timezone_other", state=Form.time_zone)
+async def process_other_timezone(query: types.CallbackQuery, state: FSMContext):
+    await bot.send_message(query.message.chat.id, "Please enter the name of your city:")
+
+    await state.set_state(Form.other_city_timezone)
+
+
+@dp.message_handler(state=Form.other_city_timezone)
+async def process_other_city_timezone(message: types.Message, state: FSMContext):
+    city_name = message.text.strip()
+    utc_user = UtcUser()
+    time_zone = await utc_user.get_timezone(message, city_name)
+    async with state.proxy() as data:
+        data["time_zone"] = time_zone
+
+    await state.set_state(Form.english_level)
+    # await bot.send_message(message.chat.id, "Thank you😉 Now let's continue.")
+
+
+@dp.callback_query_handler(state=Form.english_level)
+async def process_level_handler(query: types.CallbackQuery, state: FSMContext):
 
     await state.set_state(Form.topic)
 

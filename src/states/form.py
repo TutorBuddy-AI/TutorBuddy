@@ -8,6 +8,8 @@ class Form(StatesGroup):
     other_language = State()
     goal = State()
     other_goal = State()
+    time_zone = State()
+    other_city_timezone = State()
     english_level = State()
     topic = State()
     additional_topic = State()
