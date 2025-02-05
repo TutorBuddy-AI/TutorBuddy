@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import date, timedelta
 
 from aiogram.filters import Command
 
 from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
-from filters.is_not_register_filter import IsRegister
+from src.filters.is_not_register_filter import IsRegister
 
 from src.config import bot
 
@@ -11,17 +11,18 @@ from aiogram.fsm.context import FSMContext
 from aiogram import types
 from aiogram.enums.parse_mode import ParseMode
 
-from utils.news_gallery.news_gallery import NewsGallery, GalleryButtonClickData, NewsletterChoiceData, topics_decode
-from utils.newsletter.newsletter_service import NewsletterService
+from src.utils.news_gallery.news_gallery import NewsGallery, GalleryButtonClickData, NewsletterChoiceData, topics_decode
+from src.utils.newsletter.newsletter_service import NewsletterService
 from aiogram import Router
 
 news_gallery_router = Router(name=__name__)
 
 
-@news_gallery_router.message(IsRegister(), Command("news_gallery"))
+@news_gallery_router.message(IsRegister(), Command("newsgallery"))
 async def get_news_gallery(message: types.Message, state: FSMContext):
     user_news_summary = await NewsletterService.get_fresh_user_topics_for_one_in_date(
         tg_id=str(message.chat.id),
+#        target_date=date.today() - timedelta(days=1)
         target_date=date.today()
     )
     if (user_news_summary is None) or (user_news_summary.num_newsletters == 0):
@@ -31,14 +32,16 @@ async def get_news_gallery(message: types.Message, state: FSMContext):
     else:
         current_index = 0
         curr_newsletter_preivew = await NewsletterService.get_topics_newsletter_preview_on_date(
+#            user_news_summary.topics, date.today() - timedelta(days=1), current_index)
             user_news_summary.topics, date.today(), current_index)
 
         await NewsGallery.send_data(
             message.chat.id, curr_newsletter_preivew,
             NewsGallery.create_inline_keyboard(
+#                user_news_summary.topics, date.today() - timedelta(days=1),
                 user_news_summary.topics, date.today(),
-                current_index, user_news_summary.num_newsletters, curr_newsletter_preivew.id
-            ))
+                current_index, user_news_summary.num_newsletters, curr_newsletter_preivew.id)
+            )
 
 
 @news_gallery_router.callback_query(GalleryButtonClickData.filter())

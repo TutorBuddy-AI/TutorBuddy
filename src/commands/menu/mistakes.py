@@ -9,12 +9,19 @@ from src.filters import IsNotRegister
 from src.filters.is_not_register_filter import IsRegister
 from src.utils.answer import AnswerRenderer
 from src.utils.message_history_mistakes import MessageMistakesService
+from src.utils.payments import PaymentHandler
 
 mistakes_router = Router(name=__name__)
 
 
 @mistakes_router.message(IsRegister(), Command("all_mistakes"))
 async def get_mistakes(message: types.Message, state: FSMContext):
+    tg_id = str(message.chat.id)
+    await PaymentHandler.update_payments(tg_id)
+    result = await PaymentHandler.check_subscription(tg_id, flag_mist=True)
+    if result == None:
+        await PaymentHandler.send_payment_message(tg_id)
+        return
 
     data = await MessageMistakesService().get_user_message_history_mistakes(tg_id=str(message.chat.id))
 

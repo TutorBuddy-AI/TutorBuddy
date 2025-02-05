@@ -12,15 +12,15 @@ from src.filters.is_not_register_filter import IsRegister
 from src.utils.answer.answer_renderer import TranslationData, MistakesData, AnswerRenderer, StickerTranslate
 from src.utils.message import MessageHelper
 from src.utils.message.message_service import MessageService
-from utils.generator.hint_generator.message_hint_creator import MessageHintCreator
+from src.utils.generator.hint_generator.message_hint_creator import MessageHintCreator
 from src.utils.message_history_mistakes import MessageMistakesService, MessageMistakesHelper
 from src.utils.message_hint.message_hint_service import MessageHintService
-from utils.generator.mistakes_checker.message_mistakes_creator import MessageMistakesCreator
+from src.utils.generator.mistakes_checker.message_mistakes_creator import MessageMistakesCreator
 from src.utils.message_translation import MessageTranslationService
-from utils.generator.translator.message_translation_creator import MessageTranslationCreator
+from src.utils.generator.translator.message_translation_creator import MessageTranslationCreator
 from src.utils.paraphrasing import MessageParaphraseService
 from aiogram import types, Router, F
-from utils.generator.paraphraser.message_paraphrase_creator import MessageParaphraseCreator
+from src.utils.generator.paraphraser.message_paraphrase_creator import MessageParaphraseCreator
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.message.message_validator import get_text_size_valid, \
     get_caption_size_valid

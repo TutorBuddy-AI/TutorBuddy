@@ -22,8 +22,9 @@ from src.utils.transcriber.text_to_speech_openia import TextToSpeechOpenAI
 from src.utils.stciker.sticker_sender import StickerSender
 from src.utils.transcriber import SpeechToText
 from src.utils.user import UserCreateMessage, UserService
-from utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.texts.texts import get_bot_waiting_message
+from src.utils.payments import PaymentHandler
 
 
 class CommunicationHandler:
@@ -47,6 +48,14 @@ class CommunicationHandler:
         self.sticker_sender = StickerSender(self.bot, self.chat_id, self.speaker)
 
     async def handle_audio_message(self):
+        tg_id = str(self.chat_id)
+        await PaymentHandler.update_payments(tg_id)
+        result = await PaymentHandler.check_subscription(tg_id, flag_msg=True)
+        if result == None:
+            await self.sticker_sender.send_problem_sticker(self.message.message_id)
+            await PaymentHandler.send_payment_message(tg_id)
+            return
+
         # wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker} is thinking … Please wait",
         #                                            parse_mode=ParseMode.HTML)
 
@@ -72,6 +81,14 @@ class CommunicationHandler:
         await self.save_render_in_context(render)
 
     async def handle_text_message(self):
+        tg_id = str(self.chat_id)
+        await PaymentHandler.update_payments(tg_id)
+        result = await PaymentHandler.check_subscription(tg_id, flag_msg=True)
+        if result == None:
+            await self.sticker_sender.send_problem_sticker(self.message.message_id)
+            await PaymentHandler.send_payment_message(tg_id)
+            return
+
         # wait_message = await self.bot.send_message(self.chat_id, f"⏳ {self.speaker}  is thinking … Please wait",
         #                                            parse_mode=ParseMode.HTML)
 

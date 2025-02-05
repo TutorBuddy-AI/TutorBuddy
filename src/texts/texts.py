@@ -16,11 +16,10 @@ def get_welcome_text_before_start():
 
 def get_welcome_text():
     return (
-        f"Hi! I'm TutorBuddy, your personal English language practice tutor 💭\n\n"
-        "I know how difficult it is to speak English without practice and a native speaker around.\n\n"
-        "In order to feel confident in dialogues in a foreign language you need to get between 600 and 1,000 hours of "
-        "practice. Talking to me every day will make it fun and rewarding.\n\n"
-        "Let's get started! 🏄🏽‍♀️")
+        f"Привет! Я TutorBuddy AI, твой цифровой тьютор для практики английского 😊\n\n"
+        "Знаю, что свободно говорить сложно, для этого нужно много времени (600 - 1000+ часов! 😱).\n\n" 
+	"Хочу общаться с тобой на интересные темы и быть твоим умным другом, который учит и корректирует 24/7.\n\n" 
+	"Давай знакомиться! 🏄🏽‍♀️")
 
 
 def get_person_welcome_text():
@@ -67,9 +66,10 @@ def get_other_goal():
 
 def get_chose_some_topics():
     return (
-        "Choose some appealing topics, so we will:\n"
-        "⚡️ have engaging conversations\n"
-        "⚡️ discuss relevant news summaries"
+        "Выбери несколько интересных тебе тем и мы сможем:\n"
+	"⚡️ вести реально интересные беседы\n"
+	"⚡️ обсуждать свежие новости мировых сми"
+
     )
 
 
@@ -99,7 +99,7 @@ def get_choose_buddy_text():
 
 
 def get_choice_is_done():
-    return ("Great! Whenever you want to switch between personas, go to Menu and choose the one!")
+    return ("Отлично! Когда захочешь переключиться между персонами, зайдите в Меню и выберите нужную!")
 
 
 def get_greeting_anastasia():
@@ -164,20 +164,17 @@ def get_meet_bot_text():
 
 def get_meet_bot_message():
     return (
-        "I am TutorBuddy, that one English-speaking friend, "
-        "who is always there to help you sharpen your language skills. "
-        "My range of interest is quite wide and I hope we’ll find a lot in common 😉\n\n"
-        "By the way, meet Anastasia, a digital twin of the TutorBuddy's founder! 💁🏻‍♀️"
+        "Я - TutorBuddy AI, тот самый англоговорящий друг, который всегда готов помочь практиковать английский )\n" 
+	"Надеюсь, что мы найдем много общего 😉\n\n" 
+	"Кстати, познакомься с  Анастасией, DigitalTwin основательницы TutorBuddy! 💁🏻‍♀️"
     )
 
 
 def get_meet_nastya_text(name):
-    return (f"Hello {name}, my name is Anastasia Andrizh and I am a tech entrepreneur. "
-            f"I have been doing business since I was 19. "
-            f"Now I am building this startup, TutorBuddy AI, and practicing English along with you."
-            f"I can also be your speaking partner, so you will get to know me through voice and visuals. "
-            f"Most of all, I like the topics of innovation, startups and fashion. "
-            f"I would be happy to share opinions with you and debate on various topics ")
+    return (f"Привет, {name}, меня зовут Anastasia Andrizh, ИТ-предприниматель и продакт."
+	    f"Я занимаюсь бизнесом с 19 лет. Сейчас создаю этот стартап, CoPilot TutorBuddy AI, и практикую английский вместе со всеми пользователями."
+	    f"Я также могу общаться с тобой на разные темы, можно узнать меня через голос и визуал. Больше всего мне нравятся темы инноваций, стартапов и моды."
+	    f"Я буду рада поделиться своим мнением, услышать твое и подискутировать вместе по разным топикам ")
 
 
 def get_meet_nastya_message(name):

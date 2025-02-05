@@ -44,6 +44,11 @@ class MessageToAOne(BaseModel):
     tg_id: str
     message: str
 
+class MessageDayToAOne(BaseModel):
+    tg_id: str
+    msg_type: str
+    message: str
+
 class UserForMessage(BaseModel):
     tg_id: str
     tg_firstName: str

@@ -2,13 +2,13 @@ import os
 from datetime import date, datetime
 from typing import List, Optional, Tuple
 
-from database.models import Newsletter, User
-from database.models import NewsletterAudio
+from src.database.models import Newsletter, User
+from src.database.models import NewsletterAudio
 from src.database import session
-from sqlalchemy import select, delete, update
-from sqlalchemy.sql import func
+from sqlalchemy import select, delete, update, desc, func
+#from sqlalchemy.sql import func
 
-from utils.newsletter.schema.newsletter import NewsletterGaleryPreview, UserNewsSummary
+from src.utils.newsletter.schema.newsletter import NewsletterGaleryPreview, UserNewsSummary
 
 
 class NewsletterService:
@@ -55,13 +55,15 @@ class NewsletterService:
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
             .distinct(User.tg_id)
-            .filter(func.date(Newsletter.updated_at) == target_date)
+#            .filter(func.date(Newsletter.updated_at) >= target_date)
+            .filter(func.date(Newsletter.shown_at) >= target_date)
         )
         result = await session.execute(query)
 
         user_topics = [
             UserNewsSummary(tg_id=row.tg_id, topics=row.topics, num_newsletters=row.num_newsletters)
             for row in result.all()]
+
         return user_topics
 
     @staticmethod
@@ -76,29 +78,30 @@ class NewsletterService:
                 func.count(Newsletter.id).over(partition_by=User.tg_id).label("num_newsletters"),
                 func.first_value(Newsletter.id).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("id"),
+                    order_by=desc(Newsletter.id)).label("id"),
                 func.first_value(Newsletter.topic).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("topic"),
+                    order_by=desc(Newsletter.id)).label("topic"),
                 func.first_value(Newsletter.title).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("title"),
+                    order_by=desc(Newsletter.id)).label("title"),
                 func.first_value(Newsletter.publisher).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("publisher"),
+                    order_by=desc(Newsletter.id)).label("publisher"),
                 func.first_value(Newsletter.publication_date).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("publication_date"),
+                    order_by=desc(Newsletter.id)).label("publication_date"),
                 func.first_value(Newsletter.message).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("message"),
+                    order_by=desc(Newsletter.id)).label("message"),
                 func.first_value(Newsletter.path_to_data).over(
                     partition_by=User.tg_id,
-                    order_by=Newsletter.id).label("path_to_data")
+                    order_by=desc(Newsletter.id)).label("path_to_data")
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
             .distinct(User.tg_id)
-            .filter(func.date(Newsletter.updated_at) == target_date)
+#            .filter(func.date(Newsletter.updated_at) >= target_date)
+            .filter(func.date(Newsletter.shown_at) >= target_date)
         )
         result = await session.execute(query)
 
@@ -135,7 +138,8 @@ class NewsletterService:
             )
             .join(Newsletter, onclause=func.position(Newsletter.topic.op('IN')(func.lower(User.topic))) != 0)
             .distinct(User.tg_id)
-            .filter(func.date(Newsletter.updated_at) == target_date)
+#            .filter(func.date(Newsletter.updated_at) >= target_date)
+            .filter(func.date(Newsletter.shown_at) >= target_date)
             .filter(User.tg_id == tg_id)
         )
         result = await session.execute(query)
@@ -180,9 +184,11 @@ class NewsletterService:
                 Newsletter.publication_date,
                 Newsletter.path_to_data
             )
-            .filter(func.date(Newsletter.updated_at) == target_date)
+#            .filter(func.date(Newsletter.updated_at) >= target_date)
+            .filter(func.date(Newsletter.shown_at) >= target_date)
             .filter(Newsletter.topic.in_(topics))
-            .order_by(Newsletter.id)
+            .order_by(desc(Newsletter.id))
+#            .order_by(desc(Newsletter.created_at))
         )
         result = await session.execute(query)
         all_news = result.all()

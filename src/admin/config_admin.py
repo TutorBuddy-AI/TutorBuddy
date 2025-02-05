@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import jwt
 
-from config.config import config
+from src.config.config import config
 
 app = FastAPI()
 

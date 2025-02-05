@@ -7,7 +7,8 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     Table,
-    Unicode
+    Unicode,
+    DateTime
 )
 
 
@@ -18,3 +19,8 @@ class Setting(Base, TimestampMixin):
     tg_id = Column(String, ForeignKey('user.tg_id'))
     summary_on = Column(Boolean, default=True)
     summary_answered = Column(Boolean, default=False)
+    subscription_good_morning= Column(Boolean, default=True)
+    subscription_daily_plans = Column(Boolean, default=True)
+    subscription_good_evening = Column(Boolean, default=True)
+    subscription_sent_counter = Column(Integer, nullable=True)
+    subscription_sent_at = Column(DateTime(timezone=True), nullable=True)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Unicode, Boolean
+from sqlalchemy import Column, Integer, String, Unicode, Boolean, DateTime
 from src.database import Base
 from src.database.mixins import TimestampMixin
 
@@ -14,3 +14,4 @@ class Newsletter(Base, TimestampMixin):
     publisher = Column(String, nullable=True)
     publication_date = Column(String, nullable=True)
     title = Column(String, nullable=False)
+    shown_at = Column(DateTime(timezone=True), nullable=True)

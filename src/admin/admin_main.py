@@ -1,6 +1,6 @@
 import json
 import tempfile
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timezone, timedelta
 import base64
 import os
 from typing import Any
@@ -10,26 +10,28 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse, JSONResponse
 import jwt
 from jwt.exceptions import DecodeError, ExpiredSignatureError
-from sqlalchemy import select, desc, text, delete, Row, RowMapping, func
-from config import config
-from database.models import NewsletterAudio
+from sqlalchemy import select, update, desc, text, delete, Row, RowMapping, func
+from src.config import config
+from src.database.models import NewsletterAudio
 from src.utils.newsletter.newsletter_publisher import NewsletterPublisher
 from src.database.models.admin import Admin, pwd_context
 from src.admin.config_admin import (app, templates, image_directory,
                                     generate_token_and_redirect, audio_directory)
 
 from src.admin.model_pydantic import NewsletterData, ChangeNewsletter, SendNewsletterDatetime, MessageData, \
-    SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, UserForMessage
-from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes
+    SummaryFromParsing, MessageToSelected, MessageToAll, MessageToAOne, MessageDayToAOne, UserForMessage
+from src.database.models import User, MessageHistory, Newsletter, MessageForUsers, MessageMistakes, Setting
 from src.database import session
-from utils.audio_converter.audio_converter_cache import AudioConverterCache
-from utils.news_gallery.news_gallery import NewsGallery
-from utils.newsletter.newsletter_service import NewsletterService
-from utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.audio_converter.audio_converter_cache import AudioConverterCache
+from src.utils.news_gallery.news_gallery import NewsGallery
+from src.utils.newsletter.newsletter_service import NewsletterService
+from src.utils.transcriber.text_to_speech import TextToSpeech
 from src.utils.payments.payments import PaymentHandler
 from src.config import bot, dp
+from src.utils.answer import AnswerRenderer
 from typing import List
 from aiogram.enums import ParseMode
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 """Docs /docs"""
 
@@ -783,7 +785,6 @@ async def logout(request: Request):
     return response
 
 
-# new
 @app.post("/add_summary")
 async def add_summary(summary_data: SummaryFromParsing):
     query = select(Newsletter).where(Newsletter.title == summary_data.title)
@@ -809,16 +810,93 @@ async def add_summary(summary_data: SummaryFromParsing):
     return {"message": "Data saved successfully"}
 
 
+@app.get("/find_summaries")
+async def find_summaries():
+    query = select(Newsletter).where(func.date(Newsletter.shown_at) == date.today())
+    result = await session.execute(query)
+    existing_entries = result.scalars().all()
+
+    if existing_entries:
+#        seen_topics = set()
+#        topics = []
+
+#        for entry in existing_entries:
+#            if entry.topic and entry.topic not in seen_topics:
+#                seen_topics.add(entry.topic)
+#                topics.append(entry.topic)
+        topics = [entry.topic for entry in existing_entries if entry.topic]
+#        topics = [entry.topic for entry in existing_entries if entry.topic and entry.topic not in seen_topics and not seen_topics.add(entry.topic)]
+        return {"message": "summaries found", "topics": topics}
+    else:
+        query_all_topics = select(Newsletter.topic).distinct().where(Newsletter.shown_at.is_(None), Newsletter.path_to_data.like('https://bot.%'))
+        topics_result = await session.execute(query_all_topics)
+        unique_topics = [row[0] for row in topics_result if row[0]]
+
+#        unique_topics = set()
+        current_time = datetime.now()
+
+        for topic in unique_topics:
+            query_latest = (
+                select(Newsletter)
+                .where(Newsletter.topic == topic, Newsletter.shown_at.is_(None), Newsletter.path_to_data.like('https://bot.%'))
+                .order_by(desc(Newsletter.created_at))
+                .limit(1)
+            )
+            latest_result = await session.execute(query_latest)
+            latest_news = latest_result.scalar_one_or_none()
+
+            if latest_news:
+                update_query = (
+                    update(Newsletter)
+                    .where(Newsletter.id == latest_news.id)
+                    .values(shown_at=current_time)
+                )
+                await session.execute(update_query)
+
+        await session.commit()
+
+        return {"message": "summaries selected", "topics": unique_topics}
+
+
 @app.get("/info_all_user")
 async def info_all_user(request: Request) -> List[dict]:
-    query = select(User)
-    result = await session.execute(query)
-    all_users = result.scalars().unique().all()
+    query_user = select(User)
+    result_user = await session.execute(query_user)
+    all_users = result_user.scalars().unique().all()
 
-    users_info = [
-        {"tg_id": user.tg_id, "tg_firstName": user.call_name}
-        for user in all_users
-    ]
+    query_setting = select(Setting)
+    result_setting = await session.execute(query_setting)
+    all_settings = result_setting.scalars().unique().all()
+
+    users_info = []
+
+    for user in all_users:
+        user_setting = next((setting for setting in all_settings if setting.tg_id == user.tg_id), None)
+        
+        if user_setting:
+            if not (user_setting.subscription_good_morning or user_setting.subscription_daily_plans or user_setting.subscription_good_evening):
+                continue
+        else:
+            user_setting = Setting(
+                tg_id=user.tg_id,
+                subscription_good_morning=True,
+                subscription_daily_plans=True,
+                subscription_good_evening=True
+            )
+
+        user_info = {
+            "tg_id": user.tg_id,
+            "tg_firstName": user.call_name
+        }
+        
+        if not user_setting.subscription_good_morning:
+            user_info["subscription_good_morning"] = False
+        if not user_setting.subscription_daily_plans:
+            user_info["subscription_daily_plans"] = False
+        if not user_setting.subscription_good_evening:
+            user_info["subscription_good_evening"] = False
+
+        users_info.append(user_info)
 
     return users_info
 
@@ -844,7 +922,100 @@ async def send_message_to_one_user(data: MessageToAOne):
         )
         session.add(notification_message)
         await session.commit()
-        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML)
+
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(
+                                 inline_keyboard=[
+                                     [InlineKeyboardButton(text='📖 Translate', callback_data='request_text_translation_standalone_for_user')]]
+                             ))
+
+        return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
+    except Exception as e:
+        return {"error": f"Failed to send message to {tg_id}: {e}"}
+
+
+@app.post("/send_message_daily_to_one_user")
+async def send_message_daily_to_one_user(data: MessageDayToAOne):
+    tg_id = data.tg_id
+    msg_type = data.msg_type
+    message = data.message
+
+    query = select(Setting).where(Setting.tg_id == tg_id)
+    result = await session.execute(query)
+    settings = result.scalars().first()
+
+    if not settings:
+        settings = Setting(
+            tg_id=tg_id,
+            subscription_good_morning=True,
+            subscription_daily_plans=True,
+            subscription_good_evening=True
+        )
+        session.add(settings)
+        await session.commit()
+
+    current_time = datetime.now().astimezone(timezone.utc)
+    if settings.subscription_sent_counter != None:
+        if (settings.subscription_sent_counter == 0) and (msg_type == 'good_morning') and (settings.subscription_good_morning == False):
+             return {"message": f"Good Morning message blocked: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter == 0) and (msg_type == 'daily_plans') and (settings.subscription_daily_plans == False):
+             return {"message": f"Daily Plans message blocked: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter == 0) and (msg_type == 'good_evening') and (settings.subscription_good_evening == False):
+             return {"message": f"Good Evening message blocked: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter >= 4) and (msg_type == 'good_morning') and ((settings.subscription_sent_at + timedelta(days=6, hours=12)) > current_time): # days=6, hours=12 ## minutes=4
+             return {"message": f"Too little time has passed: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter == 3) and (msg_type == 'good_morning') and ((settings.subscription_sent_at + timedelta(days=3, hours=12)) > current_time): # days=3, hours=12 ## minutes=3
+             return {"message": f"Too little time has passed: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter == 2) and (msg_type == 'good_morning') and ((settings.subscription_sent_at + timedelta(days=1, hours=12)) > current_time): # days=1, hours=12 ## minutes=2
+             return {"message": f"Too little time has passed: {message} to tg_id: {tg_id}"}
+        elif (msg_type == 'daily_plans') and ((settings.subscription_sent_at + timedelta(days=1)) < current_time): # days=1 ## minutes=1
+             return {"message": f"Too much time has passed: {message} to tg_id: {tg_id}"}
+        elif (msg_type == 'good_evening') and ((settings.subscription_sent_at + timedelta(days=1)) < current_time): # days=1 ## minutes=1
+             return {"message": f"Too much time has passed: {message} to tg_id: {tg_id}"}
+        elif (settings.subscription_sent_counter > 0) and (msg_type == 'good_morning'):
+             settings.subscription_sent_counter += 1
+             settings.subscription_sent_at = datetime.now()
+             await session.commit()
+        elif (settings.subscription_sent_counter == 0) and (msg_type == 'good_morning'):
+             settings.subscription_sent_at = datetime.now()
+             await session.commit()
+    elif msg_type == 'good_morning':
+        settings.subscription_sent_counter = 1
+        settings.subscription_sent_at = datetime.now()
+        await session.commit()
+    else:
+        return {"message": f"Good Morning message should be first: {message} to tg_id: {tg_id}"}
+#    settings.subscription_sent_at = datetime.now()
+#    await session.commit()
+
+    try:
+        notification_message = MessageHistory(
+            tg_id=tg_id,
+            message=message,
+            role='assistant',
+            type='text'
+        )
+        session.add(notification_message)
+        await session.commit()
+
+        await bot.send_message(tg_id, message, parse_mode=ParseMode.HTML, reply_markup=InlineKeyboardMarkup(
+                                 inline_keyboard=[
+                                     [InlineKeyboardButton(text='📖 Translate', callback_data='request_text_translation_standalone_for_user')]]
+                             ))
+#        if (settings.subscription_sent_counter > 0) and (msg_type == 'good_morning'):
+        if (settings.subscription_sent_counter > 0) and (msg_type == 'daily_plans'):
+            keyboard_daily_question = InlineKeyboardMarkup(inline_keyboard=[[AnswerRenderer.get_button_text_translation_standalone(for_user=True)],
+                [InlineKeyboardButton(text='OK 👍', callback_data='daily_question_ok'), InlineKeyboardButton(text='Nope 👎', callback_data='daily_question_nope')]])
+
+            await bot.send_message(tg_id,
+#                                    "Могу утром желать тебе отличного дня и спрашивать о планах?\n"
+#                                    "Вечером обсудим результаты 😉\n\n"
+#                                    "<tg-spoiler>Can I wish you a great day in the morning and ask you about your plans?\n"
+#                                    "In the evening we'll discuss the results 😉</tg-spoiler>",
+                                    "Могу утром желать тебе отличного дня и спрашивать о планах?\n"
+                                    "Вечером обсудим результаты 😉\n\n",
+                                    parse_mode=ParseMode.HTML,
+                                    reply_markup=keyboard_daily_question)                         
+
         return {"message": f"Successfully sent message: {message} to tg_id: {tg_id}"}
     except Exception as e:
         return {"error": f"Failed to send message to {tg_id}: {e}"}

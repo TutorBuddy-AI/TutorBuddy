@@ -10,7 +10,7 @@ from src.filters.is_not_register_filter import IsRegister
 from src.keyboards import get_go_back_inline_keyboard
 from src.states import FormFeedback
 from src.utils.answer import AnswerRenderer
-from utils.feedback_loop import FeedbackHistory
+from src.utils.feedback_loop import FeedbackHistory
 
 feedback_router = Router(name=__name__)
 

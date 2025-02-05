@@ -5,8 +5,8 @@ from transliterate import translit
 
 from aiogram.exceptions import TelegramBadRequest
 
-from commands.choose_speaker import continue_dialogue_with_person
-from config import config
+from src.commands.choose_speaker import continue_dialogue_with_person
+from src.config import config
 from src.database import session
 from sqlalchemy import select
 
@@ -34,7 +34,7 @@ from aiogram.types import FSInputFile, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums.parse_mode import ParseMode
 
-from utils.user.schemas import UserInfo
+from src.utils.user.schemas import UserInfo
 
 form_router = Router(name=__name__)
 
@@ -56,9 +56,7 @@ async def process_start_acquaintance(message: types.Message, state: FSMContext):
     await bot.send_photo(
         message.chat.id,
         photo=FSInputFile('./files/choose_name.png'),
-        caption=f"Let's get to know each other first. "
-                f"Is it okay if I call you '{name}'?\n"
-                f"<i>Make sure your name is in English.</i>",
+        caption=f"Окей, если буду тебя называть '{name}'? 🤔",
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=f"{name} - is just fine 👋🏻", callback_data="name_ok")],
@@ -81,7 +79,7 @@ async def process_name_ok(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Form.native_language)
     await bot.send_photo(
         query.message.chat.id, photo=FSInputFile('./files/native_lang.png'),
-        caption="What is your native language?",
+        caption="Какой твой родной язык?",
         parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_native_language_keyboard())
 
@@ -110,7 +108,7 @@ async def process_get_name(message: types.Message, state: FSMContext):
     await state.set_state(Form.native_language)
     await bot.send_photo(
         message.chat.id, photo=FSInputFile('./files/native_lang.png'),
-        caption="What is your native language?",
+        caption="Какой твой родной язык?",
         parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_native_language_keyboard())
 
@@ -122,7 +120,7 @@ async def process_native_handler(query: types.CallbackQuery, state: FSMContext):
 
     await bot.send_photo(
         query.message.chat.id, photo=FSInputFile('./files/goal.png'),
-        caption="Why are you practicing English?\nWhat's your goal🎯?",
+        caption="С какой целью учишь и практикуешь английский? 🎯",
         parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_goal_keyboard())
 
@@ -142,7 +140,7 @@ async def process_other_language(message: types.Message, state: FSMContext):
     else:
         await state.update_data({"native_language": message.text})
         await bot.send_photo(message.chat.id, photo=FSInputFile('./files/goal.png'),
-                             caption="Why are you practicing English?\nWhat's your goal 🎯 ?",
+                             caption="С какой целью учишь и практикуешь английский? 🎯",
                              parse_mode=ParseMode.HTML,
                              reply_markup=await get_choose_goal_keyboard())
         await state.set_state(Form.goal)
@@ -153,7 +151,7 @@ async def process_goal_handler(query: types.CallbackQuery, state: FSMContext):
     await state.update_data({"goal": query.data.split("_")[1]})
 
     await bot.send_photo(query.message.chat.id, photo=FSInputFile('./files/eng_level.png'),
-                         caption=f"What is your English level 📶 ?",
+                         caption=f"Какой примерно у тебя уровень английского 📶 ?",
                          parse_mode=ParseMode.HTML,
                          reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
@@ -171,7 +169,7 @@ async def start_process_other_goal_handler(query: types.CallbackQuery, state: FS
 async def process_other_goal_handler(message: types.Message, state: FSMContext):
     await state.update_data({"goal": message.text})
     await bot.send_photo(message.chat.id, photo=FSInputFile('./files/eng_level.png'),
-                         caption=f"What is your English level 📶 ?",
+                         caption=f"Какой примерно у тебя уровень английского 📶 ?",
                          parse_mode=ParseMode.HTML,
                          reply_markup=await get_choose_english_level_keyboard())
     await state.set_state(Form.english_level)
@@ -250,7 +248,7 @@ async def create_user_setup_speaker_choice(message: types.Message, state: FSMCon
     name = user_info["call_name"]
     await bot.send_message(
         message.chat.id,
-        f"Great! Nice getting to know you, {name}! I guess it’s my turn to tell you about me.",
+        f"Здорово! Приятно было познакомиться с тобой, {name}! Думаю, теперь моя очередь рассказать о себе ;)",
         parse_mode=ParseMode.HTML,
         reply_markup=great_markup)
 
@@ -311,7 +309,7 @@ async def choose_person(message: Message, state: FSMContext, user_info: UserInfo
         )
 
     await bot.send_message(
-        message.chat.id, text="Who would you like to talk to?", parse_mode=ParseMode.HTML,
+        message.chat.id, text="С кем ты хочешь общаться?", parse_mode=ParseMode.HTML,
         reply_markup=await get_choose_bot_keyboard(is_caption=False))
 
     await bot.delete_message(message.chat.id, wait_message.message_id)

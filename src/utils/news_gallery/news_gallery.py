@@ -8,11 +8,11 @@ from aiogram.enums import ParseMode
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InputMediaPhoto, InlineKeyboardMarkup, InlineKeyboardButton
 
-from config import bot
-from utils.answer import AnswerRenderer
-from utils.generator.news_greetings_generator.talk_initializer import NewsGreetingsGenerator
-from utils.newsletter.newsletter_service import NewsletterService
-from utils.newsletter.schema.newsletter import UserNewsSummary, NewsletterGaleryPreview
+from src.config import bot
+from src.utils.answer import AnswerRenderer
+from src.utils.generator.news_greetings_generator.talk_initializer import NewsGreetingsGenerator
+from src.utils.newsletter.newsletter_service import NewsletterService
+from src.utils.newsletter.schema.newsletter import UserNewsSummary, NewsletterGaleryPreview
 
 
 class GalleryButtonClickData(CallbackData, prefix="gallery_scroll"):
@@ -91,7 +91,8 @@ class NewsGallery:
             else:
                 await bot.edit_message_media(
                     media=InputMediaPhoto(
-                        media=types.FSInputFile(data_element.img),
+#                        media=types.FSInputFile(data_element.img),
+                        media=data_element.img,
                         caption=NewsGallery.formatting_post_text(data_element),
                         parse_mode=ParseMode.HTML
                     ),
@@ -100,9 +101,11 @@ class NewsGallery:
                     reply_markup=keyboard,
                 )
         else:
+#            print(f"*** data_element.img: {data_element.img}")
             await bot.send_photo(
                 chat_id=chat_id,
-                photo=types.FSInputFile(data_element.img),
+#                photo=types.FSInputFile(data_element.img),
+                photo=data_element.img,
                 caption=NewsGallery.formatting_post_text(data_element),
                 parse_mode=ParseMode.HTML,
                 reply_markup=keyboard)

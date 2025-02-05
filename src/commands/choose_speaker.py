@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.types import FSInputFile, Message
 
-from config import config
+from src.config import config
 from src.config import bot
 from src.utils.answer import AnswerRenderer
 from src.utils.audio_converter.audio_converter import AudioConverter

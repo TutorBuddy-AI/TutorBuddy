@@ -1,4 +1,4 @@
-from config import config
+from src.config import config
 from src.database import Base
 from src.database.mixins import TimestampMixin
 from sqlalchemy import (

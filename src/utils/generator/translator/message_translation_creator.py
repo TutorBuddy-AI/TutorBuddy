@@ -1,8 +1,8 @@
 
 from src.utils.user import UserService
 from src.utils.user.schemas import GetUserMessageHistory
-from utils.generator.translator.context_translator.context_translator import TranslateGenerate
-from utils.generator.translator.standalone_translator.standalone_translator import StandaloneTranslator
+from src.utils.generator.translator.context_translator.context_translator import TranslateGenerate
+from src.utils.generator.translator.standalone_translator.standalone_translator import StandaloneTranslator
 
 
 class MessageTranslationCreator:

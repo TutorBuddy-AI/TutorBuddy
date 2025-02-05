@@ -13,7 +13,7 @@ from aiogram import types, md, Router
 from src.filters import IsNotRegister
 from src.texts import get_welcome_text
 from src.utils.answer import AnswerRenderer
-from texts.texts import get_person_welcome_text
+from src.texts.texts import get_person_welcome_text
 
 start_router = Router(name=__name__)
 start_router_person = Router(name=__name__ + "_person")

@@ -3,8 +3,8 @@ from aiogram.enums.parse_mode import ParseMode
 from src.texts.texts import get_pin_message
 from aiogram import types
 
-from utils.audio_converter.audio_converter import AudioConverter
-from utils.transcriber.text_to_speech import TextToSpeech
+from src.utils.audio_converter.audio_converter import AudioConverter
+from src.utils.transcriber.text_to_speech import TextToSpeech
 
 
 async def send_pin_message(bot, chat_id, speaker, message_history):

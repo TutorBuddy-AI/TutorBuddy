@@ -21,7 +21,7 @@ from src.utils.user.user_service import UserService
 import html
 import re
 
-from utils.newsletter.newsletter_service import NewsletterService
+from src.utils.newsletter.newsletter_service import NewsletterService
 
 
 class NewsletterPublisher:
@@ -60,10 +60,10 @@ class NewsletterPublisher:
         newsletter_message = await NewsletterPublisher.send_newsletter_text_to_chat(newsletter, tg_id)
 
         voice = await self.get_voice(tg_id)
+#!!!
+#        file_path = post_audio_files[voice]
 
-        file_path = post_audio_files[voice]
-
-        await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
+#        await bot.send_voice(int(tg_id), types.FSInputFile(file_path))
         return newsletter_message
 
     @staticmethod
@@ -86,7 +86,8 @@ class NewsletterPublisher:
             bot_message_id=newsletter_message_hist.id, user_message_id="")
         newsletter_message = await bot.send_photo(
             chat_id=int(tg_id),
-            photo=types.FSInputFile(path_img),
+#            photo=types.FSInputFile(path_img),
+            photo=path_img,
             caption=post_text,
             parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
